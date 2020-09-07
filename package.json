@@ -5,13 +5,14 @@
   "description": "TypeScript template action",
   "main": "lib/main.js",
   "scripts": {
+    "all": "yarn clean && yarn build && yarn format && yarn lint && yarn package && yarn test",
     "build": "tsc",
+    "clean": "rm -rf lib node_modules/.cache",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src __tests__",
+    "lint": "eslint src",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

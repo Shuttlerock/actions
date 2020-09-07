@@ -11,6 +11,7 @@
     "sourceMap": true,
     "outDir": "lib",
     "baseUrl": "src",
+    "rootDir": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
@@ -35,5 +36,5 @@
       "@t/*": ["types/*"]
     }
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": ["src/**/*"],
 }

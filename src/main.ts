@@ -20,4 +20,5 @@ async function run(): Promise<void> {
   }
 }
 
-await run().catch(err => core.error(err))
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+run().catch(err => core.error(err))
