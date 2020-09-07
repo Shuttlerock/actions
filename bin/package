@@ -1,0 +1,6 @@
+#!/bin/sh
+
+for path in src/actions/*/; do
+  dir=`basename $path`
+  ncc build src/actions/${dir}/index.ts --out dist/actions/${dir}/ --source-map --license licenses.txt
+done

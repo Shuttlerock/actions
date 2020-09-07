@@ -11,7 +11,7 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint --config .eslintrc.js src",
-    "package": "ncc build src/actions/test-action/index.ts --out dist/actions/test-action/ --source-map --license licenses.txt",
+    "package": "./bin/package",
     "test": "jest"
   },
   "repository": {
