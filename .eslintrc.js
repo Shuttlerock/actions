@@ -72,10 +72,7 @@ module.exports = {
     'import/resolver': {
       alias: {
         map: [
-          ['@commands', './src/commands'],
-          ['@exceptions', './src/exceptions'],
-          ['@services', './src/services'],
-          ['@t', './src/types'],
+          ['@sr-actions', './src/actions'],
         ],
         extensions: ['.ts', '.js', '.json'],
       },
