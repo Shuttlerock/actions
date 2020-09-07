@@ -22,7 +22,7 @@ test('test runs', () => {
   process.env.INPUT_MILLISECONDS = '500'
   const ip = path.join(
     process.cwd(),
-    'lib',
+    'build',
     'actions',
     'test-action',
     'index.js'

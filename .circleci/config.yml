@@ -54,7 +54,7 @@ jobs:
           name: "Save build cache"
           key: v1-build-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - ~/actions/lib
+            - ~/actions/build
 
   jest:
     <<: *defaults

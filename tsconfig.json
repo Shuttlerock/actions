@@ -9,7 +9,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
-    "outDir": "lib",
+    "outDir": "build",
     "baseUrl": "src",
     "rootDir": "./src",
     "experimentalDecorators": true,
