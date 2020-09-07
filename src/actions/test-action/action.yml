@@ -1,0 +1,11 @@
+name: 'Test Action'
+description: 'Test action for Shuttlerock automation'
+author: 'Shuttlerock'
+inputs:
+  milliseconds:
+    required: true
+    description: 'The number of milliseconds to wait'
+    default:     '1000'
+runs:
+  using: 'node12'
+  main: 'index.js'

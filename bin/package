@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for path in src/actions/*/; do
+  dir=`basename $path`
+  ncc build src/actions/${dir}/index.ts --out actions/${dir}/ --source-map --license licenses.txt
+  cp src/actions/${dir}/action.yml actions/${dir}/
+done

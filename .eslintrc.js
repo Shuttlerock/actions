@@ -38,6 +38,7 @@ module.exports = {
     'jsdoc/require-param-type': 'off',
     'jsdoc/require-returns-type': 'off',
     'no-console': ['error', { allow: ['error'] }],
+    'no-underscore-dangle': 'off',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-imports-ts': 'error',
     '@typescript-eslint/await-thenable': 'off',
@@ -72,10 +73,7 @@ module.exports = {
     'import/resolver': {
       alias: {
         map: [
-          ['@commands', './src/commands'],
-          ['@exceptions', './src/exceptions'],
-          ['@services', './src/services'],
-          ['@t', './src/types'],
+          ['@sr-actions', './src/actions'],
         ],
         extensions: ['.ts', '.js', '.json'],
       },
