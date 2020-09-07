@@ -1,6 +1,10 @@
 import * as core from '@actions/core'
+
 import {wait} from './wait'
 
+/**
+ *
+ */
 async function run(): Promise<void> {
   try {
     const ms: string = core.getInput('milliseconds')
@@ -16,4 +20,5 @@ async function run(): Promise<void> {
   }
 }
 
-run()
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+run().catch(err => core.error(err))
