@@ -33,7 +33,8 @@
     "paths": {
       "*": ["node_modules/*"],
       "src/*": ["./*"],
-      "@sr-actions/*": ["actions/*"]
+      "@sr-actions/*": ["actions/*"],
+      "@sr-services/*": ["services/*"]
     }
   },
   "exclude": [

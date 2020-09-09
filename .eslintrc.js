@@ -21,6 +21,7 @@ module.exports = {
     'prettier/@typescript-eslint',
   ],
   rules: {
+    camelcase: 'off',
     'import/extensions': 'off',
     'import/order': [
       'error',
@@ -74,6 +75,7 @@ module.exports = {
       alias: {
         map: [
           ['@sr-actions', './src/actions'],
+          ['@sr-services', './src/services'],
         ],
         extensions: ['.ts', '.js', '.json'],
       },

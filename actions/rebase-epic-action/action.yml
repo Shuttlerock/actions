@@ -1,0 +1,6 @@
+name: 'Rebase Epic Action'
+description: 'Rebases [Epic] pull requests when a commit is pushed'
+author: 'Shuttlerock'
+runs:
+  using: 'node12'
+  main: './index.js'
