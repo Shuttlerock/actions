@@ -37,10 +37,38 @@ Create a new folder under `src/actions`, and add an `action.yml` inside defining
 
 ## Developing locally
 
-Install the [act](https://github.com/nektos/act) utility to run actions locally:
+First, install the [act](https://github.com/nektos/act) utility to run actions locally:
 ```bash
-$ brew install nektos/tap/act
+$ git clone git@github.com:nektos/act.git
+$ cd act
 ```
+
+Edit the file `pkg/runner/step_context.go` and apply the following patch (it expects the `action.yml` file at the repository root, whereas we have it multiple actions in subfolders):
+
+```
+diff --git a/pkg/runner/step_context.go b/pkg/runner/step_context.go
+index 5cb8952..d800b1c 100644
+--- a/pkg/runner/step_context.go
++++ b/pkg/runner/step_context.go
+@@ -52,7 +52,7 @@ func (sc *StepContext) Executor() common.Executor {
+                actionDir := filepath.Join(rc.Config.Workdir, step.Uses)
+                return common.NewPipelineExecutor(
+                        sc.setupAction(actionDir, ""),
+-                       sc.runAction(actionDir, ""),
++                       sc.runAction(actionDir, step.Uses),
+                )
+        case model.StepTypeUsesActionRemote:
+                remoteAction := newRemoteAction(step.Uses)
+```
+
+Build `act`, and copy the resulting executable into your `PATH` somewhere:
+
+```
+$ go build
+$ cp act ~/.bin
+```
+
+Now that you have `act` patched, you can use it normally as per the [documentation](https://github.com/nektos/act#overview---):
 
 List available actions:
 ```bash
