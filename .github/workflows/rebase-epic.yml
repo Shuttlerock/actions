@@ -4,8 +4,11 @@ on:
     types: [synchronize]
 
 jobs:
-  rebase_epic: # make sure the action works on a clean machine without building
+  rebase_epic:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./actions/rebase-epic-action
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          actions-write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}

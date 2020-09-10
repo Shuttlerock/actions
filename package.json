@@ -5,7 +5,7 @@
   "description": "TypeScript template action",
   "main": "build/index.js",
   "scripts": {
-    "all": "yarn clean && yarn build && yarn format && yarn lint && yarn package && yarn test",
+    "all": "yarn clean && yarn build && yarn format && yarn package && yarn test",
     "build": "rm -rf actions  && tsc && tscpaths -p tsconfig.json -s ./src -o ./build",
     "clean": "rm -rf build node_modules/.cache",
     "format": "yarn lint --fix && prettier --write **/*.ts",
@@ -32,14 +32,14 @@
   },
   "lint-staged": {
     "*.{ts,.d.ts}": [
-      "yarn lint --fix",
       "yarn format"
     ]
   },
   "dependencies": {
     "@actions/core": "^1.2.5",
     "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0"
+    "@actions/github": "^4.0.0",
+    "@octokit/rest": "^18.0.5"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.11.2",

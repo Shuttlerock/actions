@@ -1,9 +1,18 @@
 {
   "pull_request": {
-    "number": 2,
-    "title": "[Epic] Update the README with new information."
+    "base": {
+      "ref": "develop"
+    },
+    "head": {
+      "ref": "dave/ch70989/rebase-epic-prs-when-a-commit-is-made"
+    },
+    "number": 10,
+    "title": "[Epic] Rebase epic PRs when a commit is made"
   },
   "repository": {
-    "name": "Hello-World"
+    "name": "actions",
+    "owner": {
+      "login": "Shuttlerock"
+    }
   }
 }

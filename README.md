@@ -45,7 +45,7 @@ $ cd act
 
 Edit the file `pkg/runner/step_context.go` and apply the following patch (it expects the `action.yml` file at the repository root, whereas we have it multiple actions in subfolders):
 
-```
+```bash
 diff --git a/pkg/runner/step_context.go b/pkg/runner/step_context.go
 index 5cb8952..d800b1c 100644
 --- a/pkg/runner/step_context.go
@@ -63,9 +63,21 @@ index 5cb8952..d800b1c 100644
 
 Build `act`, and copy the resulting executable into your `PATH` somewhere:
 
-```
+```bash
 $ go build
 $ cp act ~/.bin
+```
+
+You will also need to provide a github token in the `.secrets` file:
+
+```bash
+$ cp .secrets.example .secrets
+```
+
+If you want to use system `git`, you need a more recent docker image than `act` uses by default (and you need to use `--platform ubuntu-latest=nektos/act-environments-ubuntu:18.04` when running `act`):
+
+```bash
+$ docker pull nektos/act-environments-ubuntu:18.04
 ```
 
 Now that you have `act` patched, you can use it normally as per the [documentation](https://github.com/nektos/act#overview---):
@@ -80,7 +92,7 @@ Run a specific action
 $ act --job test
 ```
 
-Run a specific action, and pass a JSON payload:
+Run a specific action, and pass a JSON payload plus secrets:
 ```bash
-$ act -j rebase_epic --eventpath src/actions/rebase-epic-action/__tests__/fixtures/synchronize-epic.json
+$ act --secret-file .secrets --job rebase_epic --eventpath src/actions/rebase-epic-action/__tests__/fixtures/synchronize-epic.json
 ```
