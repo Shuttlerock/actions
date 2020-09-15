@@ -11,10 +11,10 @@ test('throws invalid number', async () => {
 
 test('wait 50 ms', async () => {
   const start = new Date()
-  await wait(500)
+  await wait(50)
   const end = new Date()
   const delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
+  expect(delta).toBeGreaterThan(45)
 })
 
 // shows how the runner will run a javascript action with env / stdout protocol
