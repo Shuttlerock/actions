@@ -1,4 +1,4 @@
-import {error} from '@actions/core'
+import {error, setFailed} from '@actions/core'
 import {context} from '@actions/github'
 import {EventPayloads} from '@octokit/webhooks'
 
@@ -10,7 +10,7 @@ import {debug} from '@sr-services/Log'
  *
  * Checks if the Pull request title starts with [Epic]. If so, it rebases the PR.
  */
-async function run(): Promise<void> {
+export const run = async (): Promise<void> => {
   const {
     payload: {pull_request, repository},
   } = ((await context) as unknown) as {
@@ -33,4 +33,7 @@ async function run(): Promise<void> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-run().catch(err => error(err))
+run().catch(err => {
+  error(err)
+  setFailed(err.message)
+})

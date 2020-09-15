@@ -353,9 +353,7 @@ function run() {
         try {
             const ms = core_1.getInput('milliseconds');
             core_1.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-            core_1.debug(new Date().toTimeString());
             yield wait_1.wait(parseInt(ms, 10));
-            core_1.debug(new Date().toTimeString());
             core_1.setOutput('time', new Date().toTimeString());
         }
         catch (err) {

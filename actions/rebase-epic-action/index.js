@@ -5770,6 +5770,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
 const Rebase_1 = __webpack_require__(436);
@@ -5779,18 +5780,19 @@ const Log_1 = __webpack_require__(637);
  *
  * Checks if the Pull request title starts with [Epic]. If so, it rebases the PR.
  */
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { payload: { pull_request, repository }, } = (yield github_1.context);
-        if (!pull_request.title.startsWith('[Epic] ')) {
-            Log_1.debug(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
-            return;
-        }
-        yield Rebase_1.rebase(repository.owner.login, repository.name, pull_request.head.ref, pull_request.base.ref);
-    });
-}
+exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { payload: { pull_request, repository }, } = (yield github_1.context);
+    if (!pull_request.title.startsWith('[Epic] ')) {
+        Log_1.debug(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
+        return;
+    }
+    yield Rebase_1.rebase(repository.owner.login, repository.name, pull_request.head.ref, pull_request.base.ref);
+});
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-run().catch(err => core_1.error(err));
+exports.run().catch(err => {
+    core_1.error(err);
+    core_1.setFailed(err.message);
+});
 
 
 /***/ }),
