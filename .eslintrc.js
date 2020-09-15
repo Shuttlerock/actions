@@ -22,7 +22,6 @@ module.exports = {
   ],
   rules: {
     camelcase: 'off',
-    'global-require': 'off', // We need requires to mock github actions payloads
     'import/extensions': 'off',
     'import/order': [
       'error',
@@ -52,7 +51,6 @@ module.exports = {
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
-    '@typescript-eslint/no-var-requires': 'off', // We need requires to mock github actions payloads
     'func-names': 'off',
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',

@@ -13,6 +13,7 @@ describe('rebase-epic-action', () => {
       'fixtures',
       'synchronize-epic.json'
     )
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const {run} = require('../index')
     await run()
     expect(rebase).toHaveBeenCalled()
