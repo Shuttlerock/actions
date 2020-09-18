@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import {error, getInput, setFailed, setOutput} from '@actions/core'
 
 import {wait} from '@sr-actions/test-action/wait'
 
@@ -7,18 +7,13 @@ import {wait} from '@sr-actions/test-action/wait'
  */
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
+    const ms: string = getInput('milliseconds')
     await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
+    setOutput('time', new Date().toTimeString())
+  } catch (err) {
+    setFailed(err.message)
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-run().catch(err => core.error(err))
+run().catch(err => error(err))

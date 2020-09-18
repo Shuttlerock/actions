@@ -1,34 +1,27 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# Shuttlerock Github Actions
 
-# Create a JavaScript Action using TypeScript
+This repository contains a library of Github Actions used to automate development at Shuttlerock.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+## Getting Started
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
-
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
-
-## Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Main
-
-Install the dependencies  
+Install the dependencies
 ```bash
-$ npm install
+$ yarn install
 ```
 
 Build the typescript and package it for distribution
 ```bash
-$ npm run build && npm run package
+$ yarn all
 ```
 
-Run the tests :heavy_check_mark:  
+Attempt to fix lint and formatting issues
 ```bash
-$ npm test
+$ yarn format
+```
+
+Run the tests :heavy_check_mark:
+```bash
+$ yarn test
 
  PASS  ./index.test.js
   ✓ throws invalid number (3ms)
@@ -38,64 +31,68 @@ $ npm test
 ...
 ```
 
-## Change action.yml
+## Adding a new action
 
-The action.yml contains defines the inputs and output for your action.
+Create a new folder under `src/actions`, and add an `action.yml` inside defining the action. See the [actions documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions) for details.
 
-Update the action.yml with your name, description, inputs and outputs for your action.
+## Developing locally
 
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
+First, install the [act](https://github.com/nektos/act) utility to run actions locally:
 ```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
+$ git clone git@github.com:nektos/act.git
+$ cd act
 ```
 
-Your action is now published! :rocket: 
+Edit the file `pkg/runner/step_context.go` and apply the following patch (it expects the `action.yml` file at the repository root, whereas we have it multiple actions in subfolders):
 
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
+```bash
+diff --git a/pkg/runner/step_context.go b/pkg/runner/step_context.go
+index 5cb8952..d800b1c 100644
+--- a/pkg/runner/step_context.go
++++ b/pkg/runner/step_context.go
+@@ -52,7 +52,7 @@ func (sc *StepContext) Executor() common.Executor {
+                actionDir := filepath.Join(rc.Config.Workdir, step.Uses)
+                return common.NewPipelineExecutor(
+                        sc.setupAction(actionDir, ""),
+-                       sc.runAction(actionDir, ""),
++                       sc.runAction(actionDir, step.Uses),
+                )
+        case model.StepTypeUsesActionRemote:
+                remoteAction := newRemoteAction(step.Uses)
 ```
 
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
+Build `act`, and copy the resulting executable into your `PATH` somewhere:
 
-## Usage:
+```bash
+$ go build
+$ cp act ~/.bin
+```
 
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+You will also need to provide a github token in the `.secrets` file:
+
+```bash
+$ cp .secrets.example .secrets
+```
+
+If you want to use system `git`, you need a more recent docker image than `act` uses by default (and you need to use `--platform ubuntu-latest=nektos/act-environments-ubuntu:18.04` when running `act`):
+
+```bash
+$ docker pull nektos/act-environments-ubuntu:18.04
+```
+
+Now that you have `act` patched, you can use it normally as per the [documentation](https://github.com/nektos/act#overview---):
+
+List available actions:
+```bash
+$ act --list
+```
+
+Run a specific action
+```bash
+$ act --job test
+```
+
+Run a specific action, and pass a JSON payload plus secrets:
+```bash
+$ act --secret-file .secrets --job rebase_epic --eventpath src/actions/rebase-epic-action/__tests__/fixtures/synchronize-epic.json
+```

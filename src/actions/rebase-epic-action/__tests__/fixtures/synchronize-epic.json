@@ -1,0 +1,18 @@
+{
+  "pull_request": {
+    "base": {
+      "ref": "develop"
+    },
+    "head": {
+      "ref": "dave/ch70989/rebase-epic-prs-when-a-commit-is-made"
+    },
+    "number": 10,
+    "title": "[Epic] Rebase epic PRs when a commit is made"
+  },
+  "repository": {
+    "name": "actions",
+    "owner": {
+      "login": "Shuttlerock"
+    }
+  }
+}

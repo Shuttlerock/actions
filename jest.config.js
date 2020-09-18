@@ -4,7 +4,8 @@ module.exports = {
   preset: 'ts-jest',
   roots: ["."],
   moduleNameMapper: {
-    "^@sr-actions/(.+)$": "<rootDir>/src/actions/$1"
+    "^@sr-actions/(.+)$": "<rootDir>/src/actions/$1",
+    "^@sr-services/(.+)$": "<rootDir>/src/services/$1",
   },
   testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
