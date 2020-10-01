@@ -1,9 +1,9 @@
-import {error, setFailed} from '@actions/core'
-import {context} from '@actions/github'
-import {EventPayloads} from '@octokit/webhooks'
+import { error, setFailed } from '@actions/core'
+import { context } from '@actions/github'
+import { EventPayloads } from '@octokit/webhooks'
 
-import {rebase} from '@sr-services/github/Rebase'
-import {debug} from '@sr-services/Log'
+import { rebase } from '@sr-services/github/Rebase'
+import { debug } from '@sr-services/Log'
 
 /**
  * Runs whenever a commit is added to a pull request.
@@ -12,7 +12,7 @@ import {debug} from '@sr-services/Log'
  */
 export const run = async (): Promise<void> => {
   const {
-    payload: {pull_request, repository},
+    payload: { pull_request, repository },
   } = ((await context) as unknown) as {
     payload: EventPayloads.WebhookPayloadPullRequest
   }

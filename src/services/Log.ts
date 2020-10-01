@@ -1,4 +1,4 @@
-import {debug as coreDebug} from '@actions/core'
+import { debug as coreDebug } from '@actions/core'
 
 export const debug = (message: string | unknown): void => {
   const payload =

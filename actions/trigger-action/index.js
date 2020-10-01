@@ -5778,7 +5778,7 @@ const Log_1 = __webpack_require__(637);
  * Extracts the payload and decides what action to run as a result.
  */
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload: { inputs: { event, param } }, } = (yield github_1.context);
+    const { payload: { inputs: { event, param }, }, } = (yield github_1.context);
     const jiraToken = core_1.getInput('jira-token', { required: true });
     const repoToken = core_1.getInput('repo-token', { required: true });
     const writeToken = core_1.getInput('write-token', { required: true });

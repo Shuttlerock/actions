@@ -40,6 +40,7 @@ module.exports = {
     'jsdoc/require-returns-type': 'off',
     'no-console': ['error', { allow: ['error'] }],
     'no-underscore-dangle': 'off',
+    'object-curly-spacing': ['error', 'always'],
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-imports-ts': 'error',
     '@typescript-eslint/await-thenable': 'off',

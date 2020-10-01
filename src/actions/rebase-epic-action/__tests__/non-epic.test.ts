@@ -1,6 +1,6 @@
-import {join} from 'path'
+import { join } from 'path'
 
-import {rebase} from '@sr-services/github/Rebase'
+import { rebase } from '@sr-services/github/Rebase'
 
 jest.mock('@sr-services/github/Rebase')
 
@@ -14,7 +14,7 @@ describe('rebase-epic-action', () => {
       'synchronize-non-epic.json'
     )
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-    const {run} = require('../index')
+    const { run } = require('../index')
     await run()
     expect(rebase).toHaveBeenCalledTimes(0)
   })

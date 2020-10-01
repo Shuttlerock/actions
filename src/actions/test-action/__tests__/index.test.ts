@@ -1,8 +1,8 @@
-import {execSync, ExecSyncOptions} from 'child_process'
-import {join} from 'path'
+import { execSync, ExecSyncOptions } from 'child_process'
+import { join } from 'path'
 import * as process from 'process'
 
-import {wait} from '@sr-actions/test-action/wait'
+import { wait } from '@sr-actions/test-action/wait'
 
 test('throws invalid number', async () => {
   const input = parseInt('foo', 10)

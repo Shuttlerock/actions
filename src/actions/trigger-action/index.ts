@@ -1,7 +1,7 @@
-import {error, setFailed, getInput} from '@actions/core'
-import {context} from '@actions/github'
+import { error, setFailed, getInput } from '@actions/core'
+import { context } from '@actions/github'
 
-import {debug} from '@sr-services/Log'
+import { debug } from '@sr-services/Log'
 
 interface Context {
   payload: {
@@ -18,13 +18,13 @@ interface Context {
 export const run = async (): Promise<void> => {
   const {
     payload: {
-      inputs: {event, param},
+      inputs: { event, param },
     },
   } = ((await context) as unknown) as Context
 
-  const jiraToken = getInput('jira-token', {required: true})
-  const repoToken = getInput('repo-token', {required: true})
-  const writeToken = getInput('write-token', {required: true})
+  const jiraToken = getInput('jira-token', { required: true })
+  const repoToken = getInput('repo-token', { required: true })
+  const writeToken = getInput('write-token', { required: true })
 
   debug('------------------------------')
   debug(event)

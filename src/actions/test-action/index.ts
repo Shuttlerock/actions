@@ -1,6 +1,6 @@
-import {error, getInput, setFailed, setOutput} from '@actions/core'
+import { error, getInput, setFailed, setOutput } from '@actions/core'
 
-import {wait} from '@sr-actions/test-action/wait'
+import { wait } from '@sr-actions/test-action/wait'
 
 /**
  *
