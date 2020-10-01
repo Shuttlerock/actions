@@ -1,0 +1,11 @@
+name: 'Trogger Action'
+description: 'Trigger an action via a HTTP request'
+author: 'Shuttlerock'
+runs:
+  using: 'node12'
+  main: 'index.js'
+inputs:
+  repo-token:
+    description: 'Github access token'
+  actions-write-token:
+    description: 'Github access token with write access'

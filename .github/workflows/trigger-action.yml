@@ -1,0 +1,13 @@
+name: 'trigger-action'
+on:
+  repository_dispatch:
+    types: trigger-action
+
+jobs:
+  trigger_action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./actions/trigger-action
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          actions-write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}
