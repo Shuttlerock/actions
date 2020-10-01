@@ -77,6 +77,7 @@ module.exports = {
         map: [
           ['@sr-actions', './src/actions'],
           ['@sr-services', './src/services'],
+          ['@sr-triggers', './src/triggers'],
         ],
         extensions: ['.ts', '.js', '.json'],
       },

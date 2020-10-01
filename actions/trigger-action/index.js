@@ -5773,22 +5773,19 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
-const Log_1 = __webpack_require__(637);
+const index_1 = __webpack_require__(464);
 /**
  * Extracts the payload and decides what action to run as a result.
  */
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload: { inputs: { event, param }, }, } = (yield github_1.context);
-    const jiraToken = core_1.getInput('jira-token', { required: true });
-    const repoToken = core_1.getInput('repo-token', { required: true });
-    const writeToken = core_1.getInput('write-token', { required: true });
-    Log_1.debug('------------------------------');
-    Log_1.debug(event);
-    Log_1.debug(param);
-    Log_1.debug(jiraToken);
-    Log_1.debug(repoToken);
-    Log_1.debug(writeToken);
-    Log_1.debug('------------------------------');
+    const { payload: { inputs: { email, event, param }, }, } = (yield github_1.context);
+    switch (event) {
+        case 'createPullRequestForJiraIssue':
+            yield index_1.createPullRequestForJiraIssue(email, param);
+            break;
+        default:
+            throw new Error(`Unknown event ${event}`);
+    }
 });
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch(err => {
@@ -5811,6 +5808,68 @@ exports.debug = (message) => {
     const payload = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
     core_1.debug(payload);
 };
+
+
+/***/ }),
+
+/***/ 736:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createPullRequestForJiraIssue = void 0;
+const core_1 = __webpack_require__(186);
+const Log_1 = __webpack_require__(637);
+// To trigger this event manually:
+//
+// curl --header "Accept: application/vnd.github.v3+json" \
+//      --header  "Authorization: token YOUR_TOKEN" \
+//      --request POST \
+//      --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
+//      https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
+exports.createPullRequestForJiraIssue = (email, param) => __awaiter(void 0, void 0, void 0, function* () {
+    const jiraToken = yield core_1.getInput('jira-token', { required: true });
+    const repoToken = core_1.getInput('repo-token', { required: true });
+    const writeToken = core_1.getInput('write-token', { required: true });
+    Log_1.debug('------------------------------');
+    Log_1.debug(email);
+    Log_1.debug(param);
+    Log_1.debug(jiraToken);
+    Log_1.debug(repoToken);
+    Log_1.debug(writeToken);
+    Log_1.debug('------------------------------');
+});
+
+
+/***/ }),
+
+/***/ 464:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(736), exports);
 
 
 /***/ }),

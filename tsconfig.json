@@ -34,7 +34,8 @@
       "*": ["node_modules/*"],
       "src/*": ["./*"],
       "@sr-actions/*": ["actions/*"],
-      "@sr-services/*": ["services/*"]
+      "@sr-services/*": ["services/*"],
+      "@sr-triggers/*": ["triggers/*"]
     }
   },
   "exclude": [

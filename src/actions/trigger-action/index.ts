@@ -1,11 +1,12 @@
-import { error, setFailed, getInput } from '@actions/core'
+import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 
-import { debug } from '@sr-services/Log'
+import { createPullRequestForJiraIssue } from '@sr-triggers/index'
 
 interface Context {
   payload: {
     inputs: {
+      email: string
       event: string
       param: string
     }
@@ -18,21 +19,17 @@ interface Context {
 export const run = async (): Promise<void> => {
   const {
     payload: {
-      inputs: { event, param },
+      inputs: { email, event, param },
     },
   } = ((await context) as unknown) as Context
 
-  const jiraToken = getInput('jira-token', { required: true })
-  const repoToken = getInput('repo-token', { required: true })
-  const writeToken = getInput('write-token', { required: true })
-
-  debug('------------------------------')
-  debug(event)
-  debug(param)
-  debug(jiraToken)
-  debug(repoToken)
-  debug(writeToken)
-  debug('------------------------------')
+  switch (event) {
+    case 'createPullRequestForJiraIssue':
+      await createPullRequestForJiraIssue(email, param)
+      break
+    default:
+      throw new Error(`Unknown event ${event}`)
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
