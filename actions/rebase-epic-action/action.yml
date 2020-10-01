@@ -7,5 +7,5 @@ runs:
 inputs:
   repo-token:
     description: 'Github access token'
-  actions-write-token:
+  write-token:
     description: "Github access token with write access - added manually to organization secrets because the default token provided by actions doesn't have enough permissions"
