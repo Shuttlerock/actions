@@ -5,6 +5,8 @@ runs:
   using: 'node12'
   main: 'index.js'
 inputs:
+  jira-email:
+    description: 'Email address of the Jira user whose access token we are using'
   jira-token:
     description: 'Jira access token'
   repo-token:

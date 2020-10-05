@@ -39,11 +39,13 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
-    "@octokit/rest": "^18.0.6"
+    "@octokit/rest": "^18.0.6",
+    "jira-client": "^6.21.0"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.12.2",
     "@types/jest": "^26.0.14",
+    "@types/jira-client": "^6.13.1",
     "@types/node": "^14.11.8",
     "@typescript-eslint/parser": "^4.4.1",
     "@vercel/ncc": "^0.24.1",

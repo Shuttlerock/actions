@@ -310,7 +310,7 @@
     core-js-pure "^3.0.0"
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.10.2":
+"@babel/runtime@^7.10.2", "@babel/runtime@^7.6.0":
   version "7.11.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.11.2.tgz#f549c13c754cc40b87644b9fa9f09a6a95fe0736"
   integrity sha512-TeWkU52so0mPtDcaCTxNBI/IHiz0pZgr8VEFqXFtZWpYD08ZB6FaSwVAS8MKRQAP3bYKiVjwysOJgMFY28o6Tw==
@@ -783,6 +783,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/caseless@*":
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
+  integrity sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -838,6 +843,14 @@
     jest-diff "^25.2.1"
     pretty-format "^25.2.1"
 
+"@types/jira-client@^6.13.1":
+  version "6.13.1"
+  resolved "https://registry.yarnpkg.com/@types/jira-client/-/jira-client-6.13.1.tgz#f76ea4c62fb0ffabae6190e757a8bf86a6f78998"
+  integrity sha512-VcJojFlOz7VhgZ5ee2k67P3y0MIAcweJAUVotBLZqQowiCVYVGWqLpZWQMlgcYewo1GKVDD9wOKe3sS+Z3U5vw==
+  dependencies:
+    "@types/node" "*"
+    "@types/request" "*"
+
 "@types/json-schema@^7.0.3":
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.6.tgz#f4c7ec43e81b319a9815115031709f26987891f0"
@@ -878,10 +891,25 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.1.0.tgz#5f96562c1075ee715a5b138f0b7f591c1f40f6b8"
   integrity sha512-hiYA88aHiEIgDmeKlsyVsuQdcFn3Z2VuFd/Xm/HCnGnPD8UFU5BM128uzzRVVGEzKDKYUrRsRH9S2o+NUy/3IA==
 
+"@types/request@*":
+  version "2.48.5"
+  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.48.5.tgz#019b8536b402069f6d11bee1b2c03e7f232937a0"
+  integrity sha512-/LO7xRVnL3DxJ1WkPGDQrp4VTV1reX9RkC85mJ+Qzykj2Bdw+mG15aAfDahc76HtknjzE16SX/Yddn6MxVbmGQ==
+  dependencies:
+    "@types/caseless" "*"
+    "@types/node" "*"
+    "@types/tough-cookie" "*"
+    form-data "^2.5.0"
+
 "@types/stack-utils@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.0.tgz#7036640b4e21cc2f259ae826ce843d277dad8cff"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
+
+"@types/tough-cookie@*":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-4.0.0.tgz#fef1904e4668b6e5ecee60c52cc6a078ffa6697d"
+  integrity sha512-I99sngh224D0M7XgW1s120zxCt3VYQ3IQsuw3P3jbq5GG4yc79+ZjyKznyOGIQrflfylLgcfekeZW/vk0yng6A==
 
 "@types/yargs-parser@*":
   version "15.0.0"
@@ -1357,6 +1385,11 @@ before-after-hook@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.1.0.tgz#b6c03487f44e24200dd30ca5e6a1979c5d2fb635"
   integrity sha512-IWIbu7pMqyw3EAJHzzHbWa85b6oud/yfKYg5rqB5hNE8CeMi3nX+2C2sj0HswfblST86hpVEOAb9x34NZd6P7A==
+
+bluebird@^3.5.0:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
+  integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -2553,6 +2586,15 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
+form-data@^2.5.0:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.5.1.tgz#f2cbec57b5e59e23716e128fe44d4e5dd23895f4"
+  integrity sha512-m21N3WOmEEURgk6B9GLOE4RuWOFf28Lhh9qGYeNlGq4VDXUlJy2th2slBNU8Gp8EzloYZOibZJ7t5ecIrFSjVA==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.6"
+    mime-types "^2.1.12"
+
 form-data@~2.3.2:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.3.3.tgz#dcce52c05f644f298c6a7ab936bd724ceffbf3a6"
@@ -3603,6 +3645,15 @@ jest@^26.5.3:
     import-local "^3.0.2"
     jest-cli "^26.5.3"
 
+jira-client@^6.21.0:
+  version "6.21.1"
+  resolved "https://registry.yarnpkg.com/jira-client/-/jira-client-6.21.1.tgz#34ad42ada04432e1490f2058c901ddd7e6dd3452"
+  integrity sha512-I9HyNNEOA7ZMJO7uLSyEZKk4oXkYct+kspy9/tbBOOvK9xsZI034p1GxGdTpyV6LyRB/Rd5IRJCS4IpDp6EzZw==
+  dependencies:
+    "@babel/runtime" "^7.6.0"
+    request "^2.88.0"
+    request-promise "^4.1.1"
+
 js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -4612,7 +4663,17 @@ request-promise-native@^1.0.8:
     stealthy-require "^1.1.1"
     tough-cookie "^2.3.3"
 
-request@^2.88.2:
+request-promise@^4.1.1:
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/request-promise/-/request-promise-4.2.6.tgz#7e7e5b9578630e6f598e3813c0f8eb342a27f0a2"
+  integrity sha512-HCHI3DJJUakkOr8fNoCc73E5nU5bqITjOYFMDrKHYOXWXrgD/SBaC7LjwuPymUprRyuF06UK7hd/lMHkmUXglQ==
+  dependencies:
+    bluebird "^3.5.0"
+    request-promise-core "1.1.4"
+    stealthy-require "^1.1.1"
+    tough-cookie "^2.3.3"
+
+request@^2.88.0, request@^2.88.2:
   version "2.88.2"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.2.tgz#d73c918731cb5a87da047e207234146f664d12b3"
   integrity sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==

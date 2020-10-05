@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./actions/trigger-action
         with:
+          jira-email:  ${{ secrets.JIRA_EMAIL }}
           jira-token:  ${{ secrets.JIRA_TOKEN }}
           repo-token:  ${{ secrets.GITHUB_TOKEN }}
           write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}
