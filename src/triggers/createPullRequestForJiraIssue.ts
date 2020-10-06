@@ -52,6 +52,7 @@ export const createPullRequestForJiraIssue = async (
 
   // 2. Check if a PR already exists for the issue.
   // TODO
+  // See https://shuttlerock.atlassian.net/rest/dev-status/latest/issue/summary?issueId=10910
 
   // 3. Try to find an existing branch.
   const repo = await getRepository(issue.fields.repository)
@@ -104,4 +105,12 @@ export const createPullRequestForJiraIssue = async (
   )
   debug(pullRequest)
   debug('------------------------------')
+
+  // Todo:
+  // - Fetch the email from the Jira issue rather than the user moving the Issue.
+  // - Check if the pull request already exists.
+  // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
+  // - Handle epic PRs.
+  // - Add tests.
+  // - Send success or failure to Slack.
 }
