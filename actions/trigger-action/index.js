@@ -2194,6 +2194,44 @@ exports.paginateRest = paginateRest;
 
 /***/ }),
 
+/***/ 8883:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+const VERSION = "1.0.0";
+
+/**
+ * @param octokit Octokit instance
+ * @param options Options passed to Octokit constructor
+ */
+
+function requestLog(octokit) {
+  octokit.hook.wrap("request", (request, options) => {
+    octokit.log.debug("request", options);
+    const start = Date.now();
+    const requestOptions = octokit.request.endpoint.parse(options);
+    const path = requestOptions.url.replace(options.baseUrl, "");
+    return request(options).then(response => {
+      octokit.log.info(`${requestOptions.method} ${path} - ${response.status} in ${Date.now() - start}ms`);
+      return response;
+    }).catch(error => {
+      octokit.log.info(`${requestOptions.method} ${path} - ${error.status} in ${Date.now() - start}ms`);
+      throw error;
+    });
+  });
+}
+requestLog.VERSION = VERSION;
+
+exports.requestLog = requestLog;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ 3044:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -3617,6 +3655,31 @@ function isPlainObject(o) {
 }
 
 exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
+/***/ 5375:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var core = __webpack_require__(6762);
+var pluginRequestLog = __webpack_require__(8883);
+var pluginPaginateRest = __webpack_require__(4193);
+var pluginRestEndpointMethods = __webpack_require__(3044);
+
+const VERSION = "18.0.6";
+
+const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.restEndpointMethods, pluginPaginateRest.paginateRest).defaults({
+  userAgent: `octokit-rest.js/${VERSION}`
+});
+
+exports.Octokit = Octokit;
+//# sourceMappingURL=index.js.map
 
 
 /***/ }),
@@ -26215,6 +26278,89 @@ module.exports = Symbol;
 
 /***/ }),
 
+/***/ 4356:
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+module.exports = arrayMap;
+
+
+/***/ }),
+
+/***/ 8018:
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.reduce` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {*} [accumulator] The initial value.
+ * @param {boolean} [initAccum] Specify using the first element of `array` as
+ *  the initial value.
+ * @returns {*} Returns the accumulated value.
+ */
+function arrayReduce(array, iteratee, accumulator, initAccum) {
+  var index = -1,
+      length = array == null ? 0 : array.length;
+
+  if (initAccum && length) {
+    accumulator = array[++index];
+  }
+  while (++index < length) {
+    accumulator = iteratee(accumulator, array[index], index, array);
+  }
+  return accumulator;
+}
+
+module.exports = arrayReduce;
+
+
+/***/ }),
+
+/***/ 2560:
+/***/ ((module) => {
+
+/** Used to match words composed of alphanumeric characters. */
+var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+
+/**
+ * Splits an ASCII `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function asciiWords(string) {
+  return string.match(reAsciiWord) || [];
+}
+
+module.exports = asciiWords;
+
+
+/***/ }),
+
 /***/ 7497:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -26246,6 +26392,180 @@ function baseGetTag(value) {
 }
 
 module.exports = baseGetTag;
+
+
+/***/ }),
+
+/***/ 6610:
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.propertyOf` without support for deep paths.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyOf(object) {
+  return function(key) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = basePropertyOf;
+
+
+/***/ }),
+
+/***/ 6792:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(9213),
+    arrayMap = __webpack_require__(4356),
+    isArray = __webpack_require__(4869),
+    isSymbol = __webpack_require__(6403);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = baseToString;
+
+
+/***/ }),
+
+/***/ 3702:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayReduce = __webpack_require__(8018),
+    deburr = __webpack_require__(833),
+    words = __webpack_require__(6454);
+
+/** Used to compose unicode capture groups. */
+var rsApos = "['\u2019]";
+
+/** Used to match apostrophes. */
+var reApos = RegExp(rsApos, 'g');
+
+/**
+ * Creates a function like `_.camelCase`.
+ *
+ * @private
+ * @param {Function} callback The function to combine each word.
+ * @returns {Function} Returns the new compounder function.
+ */
+function createCompounder(callback) {
+  return function(string) {
+    return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
+  };
+}
+
+module.exports = createCompounder;
+
+
+/***/ }),
+
+/***/ 1683:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var basePropertyOf = __webpack_require__(6610);
+
+/** Used to map Latin Unicode letters to basic Latin letters. */
+var deburredLetters = {
+  // Latin-1 Supplement block.
+  '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
+  '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
+  '\xc7': 'C',  '\xe7': 'c',
+  '\xd0': 'D',  '\xf0': 'd',
+  '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
+  '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
+  '\xcc': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+  '\xec': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+  '\xd1': 'N',  '\xf1': 'n',
+  '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
+  '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
+  '\xd9': 'U',  '\xda': 'U', '\xdb': 'U', '\xdc': 'U',
+  '\xf9': 'u',  '\xfa': 'u', '\xfb': 'u', '\xfc': 'u',
+  '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
+  '\xc6': 'Ae', '\xe6': 'ae',
+  '\xde': 'Th', '\xfe': 'th',
+  '\xdf': 'ss',
+  // Latin Extended-A block.
+  '\u0100': 'A',  '\u0102': 'A', '\u0104': 'A',
+  '\u0101': 'a',  '\u0103': 'a', '\u0105': 'a',
+  '\u0106': 'C',  '\u0108': 'C', '\u010a': 'C', '\u010c': 'C',
+  '\u0107': 'c',  '\u0109': 'c', '\u010b': 'c', '\u010d': 'c',
+  '\u010e': 'D',  '\u0110': 'D', '\u010f': 'd', '\u0111': 'd',
+  '\u0112': 'E',  '\u0114': 'E', '\u0116': 'E', '\u0118': 'E', '\u011a': 'E',
+  '\u0113': 'e',  '\u0115': 'e', '\u0117': 'e', '\u0119': 'e', '\u011b': 'e',
+  '\u011c': 'G',  '\u011e': 'G', '\u0120': 'G', '\u0122': 'G',
+  '\u011d': 'g',  '\u011f': 'g', '\u0121': 'g', '\u0123': 'g',
+  '\u0124': 'H',  '\u0126': 'H', '\u0125': 'h', '\u0127': 'h',
+  '\u0128': 'I',  '\u012a': 'I', '\u012c': 'I', '\u012e': 'I', '\u0130': 'I',
+  '\u0129': 'i',  '\u012b': 'i', '\u012d': 'i', '\u012f': 'i', '\u0131': 'i',
+  '\u0134': 'J',  '\u0135': 'j',
+  '\u0136': 'K',  '\u0137': 'k', '\u0138': 'k',
+  '\u0139': 'L',  '\u013b': 'L', '\u013d': 'L', '\u013f': 'L', '\u0141': 'L',
+  '\u013a': 'l',  '\u013c': 'l', '\u013e': 'l', '\u0140': 'l', '\u0142': 'l',
+  '\u0143': 'N',  '\u0145': 'N', '\u0147': 'N', '\u014a': 'N',
+  '\u0144': 'n',  '\u0146': 'n', '\u0148': 'n', '\u014b': 'n',
+  '\u014c': 'O',  '\u014e': 'O', '\u0150': 'O',
+  '\u014d': 'o',  '\u014f': 'o', '\u0151': 'o',
+  '\u0154': 'R',  '\u0156': 'R', '\u0158': 'R',
+  '\u0155': 'r',  '\u0157': 'r', '\u0159': 'r',
+  '\u015a': 'S',  '\u015c': 'S', '\u015e': 'S', '\u0160': 'S',
+  '\u015b': 's',  '\u015d': 's', '\u015f': 's', '\u0161': 's',
+  '\u0162': 'T',  '\u0164': 'T', '\u0166': 'T',
+  '\u0163': 't',  '\u0165': 't', '\u0167': 't',
+  '\u0168': 'U',  '\u016a': 'U', '\u016c': 'U', '\u016e': 'U', '\u0170': 'U', '\u0172': 'U',
+  '\u0169': 'u',  '\u016b': 'u', '\u016d': 'u', '\u016f': 'u', '\u0171': 'u', '\u0173': 'u',
+  '\u0174': 'W',  '\u0175': 'w',
+  '\u0176': 'Y',  '\u0177': 'y', '\u0178': 'Y',
+  '\u0179': 'Z',  '\u017b': 'Z', '\u017d': 'Z',
+  '\u017a': 'z',  '\u017c': 'z', '\u017e': 'z',
+  '\u0132': 'IJ', '\u0133': 'ij',
+  '\u0152': 'Oe', '\u0153': 'oe',
+  '\u0149': "'n", '\u017f': 's'
+};
+
+/**
+ * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+ * letters to basic Latin letters.
+ *
+ * @private
+ * @param {string} letter The matched letter to deburr.
+ * @returns {string} Returns the deburred letter.
+ */
+var deburrLetter = basePropertyOf(deburredLetters);
+
+module.exports = deburrLetter;
 
 
 /***/ }),
@@ -26314,6 +26634,28 @@ module.exports = getRawTag;
 
 /***/ }),
 
+/***/ 4632:
+/***/ ((module) => {
+
+/** Used to detect strings that need a more robust regexp to match words. */
+var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+
+/**
+ * Checks if `string` contains a word composed of Unicode symbols.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {boolean} Returns `true` if a word is found, else `false`.
+ */
+function hasUnicodeWord(string) {
+  return reHasUnicodeWord.test(string);
+}
+
+module.exports = hasUnicodeWord;
+
+
+/***/ }),
+
 /***/ 4200:
 /***/ ((module) => {
 
@@ -26355,6 +26697,134 @@ var freeSelf = typeof self == 'object' && self && self.Object === Object && self
 var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
+
+
+/***/ }),
+
+/***/ 5423:
+/***/ ((module) => {
+
+/** Used to compose unicode character classes. */
+var rsAstralRange = '\\ud800-\\udfff',
+    rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange,
+    rsDingbatRange = '\\u2700-\\u27bf',
+    rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff',
+    rsMathOpRange = '\\xac\\xb1\\xd7\\xf7',
+    rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf',
+    rsPunctuationRange = '\\u2000-\\u206f',
+    rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000',
+    rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde',
+    rsVarRange = '\\ufe0e\\ufe0f',
+    rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+
+/** Used to compose unicode capture groups. */
+var rsApos = "['\u2019]",
+    rsBreak = '[' + rsBreakRange + ']',
+    rsCombo = '[' + rsComboRange + ']',
+    rsDigits = '\\d+',
+    rsDingbat = '[' + rsDingbatRange + ']',
+    rsLower = '[' + rsLowerRange + ']',
+    rsMisc = '[^' + rsAstralRange + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + ']',
+    rsFitz = '\\ud83c[\\udffb-\\udfff]',
+    rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')',
+    rsNonAstral = '[^' + rsAstralRange + ']',
+    rsRegional = '(?:\\ud83c[\\udde6-\\uddff]){2}',
+    rsSurrPair = '[\\ud800-\\udbff][\\udc00-\\udfff]',
+    rsUpper = '[' + rsUpperRange + ']',
+    rsZWJ = '\\u200d';
+
+/** Used to compose unicode regexes. */
+var rsMiscLower = '(?:' + rsLower + '|' + rsMisc + ')',
+    rsMiscUpper = '(?:' + rsUpper + '|' + rsMisc + ')',
+    rsOptContrLower = '(?:' + rsApos + '(?:d|ll|m|re|s|t|ve))?',
+    rsOptContrUpper = '(?:' + rsApos + '(?:D|LL|M|RE|S|T|VE))?',
+    reOptMod = rsModifier + '?',
+    rsOptVar = '[' + rsVarRange + ']?',
+    rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
+    rsOrdLower = '\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])',
+    rsOrdUpper = '\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])',
+    rsSeq = rsOptVar + reOptMod + rsOptJoin,
+    rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq;
+
+/** Used to match complex or compound words. */
+var reUnicodeWord = RegExp([
+  rsUpper + '?' + rsLower + '+' + rsOptContrLower + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+  rsMiscUpper + '+' + rsOptContrUpper + '(?=' + [rsBreak, rsUpper + rsMiscLower, '$'].join('|') + ')',
+  rsUpper + '?' + rsMiscLower + '+' + rsOptContrLower,
+  rsUpper + '+' + rsOptContrUpper,
+  rsOrdUpper,
+  rsOrdLower,
+  rsDigits,
+  rsEmoji
+].join('|'), 'g');
+
+/**
+ * Splits a Unicode `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function unicodeWords(string) {
+  return string.match(reUnicodeWord) || [];
+}
+
+module.exports = unicodeWords;
+
+
+/***/ }),
+
+/***/ 833:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var deburrLetter = __webpack_require__(1683),
+    toString = __webpack_require__(2931);
+
+/** Used to match Latin Unicode letters (excluding mathematical operators). */
+var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+
+/** Used to compose unicode character classes. */
+var rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+
+/** Used to compose unicode capture groups. */
+var rsCombo = '[' + rsComboRange + ']';
+
+/**
+ * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+ * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
+ */
+var reComboMark = RegExp(rsCombo, 'g');
+
+/**
+ * Deburrs `string` by converting
+ * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+ * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+ * letters to basic Latin letters and removing
+ * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to deburr.
+ * @returns {string} Returns the deburred string.
+ * @example
+ *
+ * _.deburr('déjà vu');
+ * // => 'deja vu'
+ */
+function deburr(string) {
+  string = toString(string);
+  return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
+}
+
+module.exports = deburr;
 
 
 /***/ }),
@@ -26547,6 +27017,42 @@ module.exports = isString;
 
 /***/ }),
 
+/***/ 6403:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(7497),
+    isObjectLike = __webpack_require__(5926);
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
+
+module.exports = isSymbol;
+
+
+/***/ }),
+
 /***/ 2825:
 /***/ ((module) => {
 
@@ -26572,6 +27078,118 @@ function isUndefined(value) {
 }
 
 module.exports = isUndefined;
+
+
+/***/ }),
+
+/***/ 1419:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var createCompounder = __webpack_require__(3702);
+
+/**
+ * Converts `string` to
+ * [snake case](https://en.wikipedia.org/wiki/Snake_case).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the snake cased string.
+ * @example
+ *
+ * _.snakeCase('Foo Bar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('fooBar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('--FOO-BAR--');
+ * // => 'foo_bar'
+ */
+var snakeCase = createCompounder(function(result, word, index) {
+  return result + (index ? '_' : '') + word.toLowerCase();
+});
+
+module.exports = snakeCase;
+
+
+/***/ }),
+
+/***/ 2931:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseToString = __webpack_require__(6792);
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : baseToString(value);
+}
+
+module.exports = toString;
+
+
+/***/ }),
+
+/***/ 6454:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var asciiWords = __webpack_require__(2560),
+    hasUnicodeWord = __webpack_require__(4632),
+    toString = __webpack_require__(2931),
+    unicodeWords = __webpack_require__(5423);
+
+/**
+ * Splits `string` into an array of its words.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to inspect.
+ * @param {RegExp|string} [pattern] The pattern to match words.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+ * @returns {Array} Returns the words of `string`.
+ * @example
+ *
+ * _.words('fred, barney, & pebbles');
+ * // => ['fred', 'barney', 'pebbles']
+ *
+ * _.words('fred, barney, & pebbles', /[^, ]+/g);
+ * // => ['fred', 'barney', '&', 'pebbles']
+ */
+function words(string, pattern, guard) {
+  string = toString(string);
+  pattern = guard ? undefined : pattern;
+
+  if (pattern === undefined) {
+    return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
+  }
+  return string.match(pattern) || [];
+}
+
+module.exports = words;
 
 
 /***/ }),
@@ -48711,6 +49329,28 @@ exports.run().catch(err => {
 
 /***/ }),
 
+/***/ 7682:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
+const core_1 = __webpack_require__(2186);
+// Token with write access to Github - set in organization secrets.
+exports.GithubWriteToken = core_1.getInput('write-token', { required: true });
+// The email address to use when connecting to the Jira API.
+exports.JiraEmail = core_1.getInput('jira-email', { required: true });
+// The host to use when connecting to the Jira API.
+exports.JiraHost = 'shuttlerock.atlassian.net';
+// The API token to use when connecting to the Jira API.
+exports.JiraToken = core_1.getInput('jira-token', { required: true });
+// The Github organization name.
+exports.OrganizationName = 'Shuttlerock';
+
+
+/***/ }),
+
 /***/ 3637:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -48719,10 +49359,332 @@ exports.run().catch(err => {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.debug = void 0;
 const core_1 = __webpack_require__(2186);
+/**
+ * Logs the given message. This is a wrapper around the Github debug() method
+ * allowing it to log objects as well as strings.
+ *
+ * @param {unknown} message The string or object to log.
+ */
 exports.debug = (message) => {
     const payload = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
     core_1.debug(payload);
 };
+
+
+/***/ }),
+
+/***/ 5058:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parameterize = void 0;
+const snakeCase_1 = __importDefault(__webpack_require__(1419));
+/**
+ * Converts strings to a format safe for use in URLs, branch names etc.
+ *
+ * @param {string} str The string to parameterize.
+ *
+ * @returns {string} The parameterized string.
+ */
+exports.parameterize = (str) => snakeCase_1.default(str.trim().toLowerCase())
+    .replace(/[^0-9a-z_ ]/g, '')
+    .replace(/[_\- ]+/g, '-');
+
+
+/***/ }),
+
+/***/ 2049:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getBranch = void 0;
+const Constants_1 = __webpack_require__(7682);
+const Client_1 = __webpack_require__(5733);
+/**
+ * Fetches a branch from the Github API.
+ *
+ * @param {string} repo   The name of the repository that the branch belongs to.
+ * @param {string} branch The name of the branch to fetch.
+ *
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield Client_1.client.repos.getBranch({
+            owner: Constants_1.OrganizationName,
+            repo,
+            branch,
+        });
+        return response.data;
+    }
+    catch (err) {
+        if (err.message === 'Branch not found') {
+            return undefined;
+        }
+        throw err;
+    }
+    return undefined;
+});
+
+
+/***/ }),
+
+/***/ 5733:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.client = void 0;
+const rest_1 = __webpack_require__(5375);
+const Constants_1 = __webpack_require__(7682);
+exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
+
+
+/***/ }),
+
+/***/ 3844:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createTree = exports.createBranch = exports.createCommit = exports.createBlob = exports.TreeTypes = exports.TreeModes = void 0;
+const Constants_1 = __webpack_require__(7682);
+const Client_1 = __webpack_require__(5733);
+exports.TreeModes = {
+    ModeFile: '100644',
+    ModeExe: '100755',
+    ModeDirectory: '040000',
+};
+exports.TreeTypes = {
+    Blob: 'blob',
+    Commit: 'commit',
+    Tree: 'tree',
+};
+/**
+ * Creates a new blob, which can be used to make a tree.
+ *
+ * @param {string} repo    The name of the repository that the blob will belong to.
+ * @param {string} content The content to put in the blob.
+ *
+ * @returns {GitCreateBlobResponseData} The blob data.
+ */
+exports.createBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createBlob({
+        owner: Constants_1.OrganizationName,
+        repo,
+        content,
+    });
+    return response.data;
+});
+/**
+ * Creates a new commit.
+ *
+ * @param {string} repo    The name of the repository that the commit will belong to.
+ * @param {string} message The commit message.
+ * @param {Sha}    tree    The tree to attach the commit to.
+ * @param {Sha}    parent  The parent to attach the commit to.
+ *
+ * @returns {GitCreateCommitResponseData} The commit data.
+ */
+exports.createCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createCommit({
+        owner: Constants_1.OrganizationName,
+        repo,
+        message,
+        tree,
+        parents: [parent],
+    });
+    return response.data;
+});
+/**
+ * Creates a new branch.
+ *
+ * @param {string} repo The name of the repository that the branch will belong to.
+ * @param {Branch} name The name of the branch to create.
+ * @param {Sha}    sha  The commit sha to base the branch on.
+ *
+ * @returns {GitCreateRefResponseData} The branch data.
+ */
+exports.createBranch = (repo, name, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createRef({
+        owner: Constants_1.OrganizationName,
+        repo,
+        ref: `refs/heads/${name}`,
+        sha,
+    });
+    return response.data;
+});
+/**
+ * Creates a new tree, which can be used to make a commit.
+ *
+ * @param {string} repo     The name of the repository that the branch will belong to.
+ * @param {Tree}   tree     The data to use when creating the tree.
+ * @param {Sha}    baseTree The tree to base the new tree on.
+ *
+ * @returns {GitCreateRefResponseData} The branch data.
+ */
+exports.createTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createTree({
+        owner: Constants_1.OrganizationName,
+        repo,
+        tree,
+        base_tree: baseTree,
+    });
+    return response.data;
+});
+
+
+/***/ }),
+
+/***/ 5930:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createPullRequest = void 0;
+const Constants_1 = __webpack_require__(7682);
+const Client_1 = __webpack_require__(5733);
+/**
+ * Creates a new pull request.
+ *
+ * @param {string} repo  The name of the repository that the PR will belong to.
+ * @param {Branch} base  The base branch, which the PR will be merged into.
+ * @param {Branch} head  The head branch, which the PR will be based on.
+ * @param {string} title The title of the PR.
+ * @param {string} body  The body of the PR.
+ *
+ * @returns {PullsCreateResponseData} The PR data.
+ */
+exports.createPullRequest = (repo, base, head, title, body) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.create({
+        base,
+        body,
+        head,
+        owner: Constants_1.OrganizationName,
+        repo,
+        title,
+    });
+    return response.data;
+});
+
+
+/***/ }),
+
+/***/ 2944:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getRepository = exports.getNextPullRequestNumber = void 0;
+const Constants_1 = __webpack_require__(7682);
+const Client_1 = __webpack_require__(5733);
+/**
+ * Decides what number the next pull request will be.
+ *
+ * @param {string} repo The name of the repository that the PR will belong to.
+ *
+ * @returns {number} The number of the next PR.
+ */
+exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.list({
+        direction: 'desc',
+        owner: Constants_1.OrganizationName,
+        page: 1,
+        per_page: 1,
+        repo,
+        sort: 'created',
+        state: 'all',
+    });
+    if (response.data.length === 0) {
+        return 1;
+    }
+    return response.data[0].number + 1;
+});
+/**
+ * Returns the repository with the given name.
+ *
+ * @param {string} repo The name of the repository to fetch.
+ *
+ * @returns {ReposGetResponseData} The repository data.
+ */
+exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.repos.get({
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+
+
+/***/ }),
+
+/***/ 797:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(2049), exports);
+__exportStar(__webpack_require__(3844), exports);
+__exportStar(__webpack_require__(5930), exports);
+__exportStar(__webpack_require__(2944), exports);
 
 
 /***/ }),
@@ -48737,18 +49699,75 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.client = void 0;
-const core_1 = __webpack_require__(2186);
 const jira_client_1 = __importDefault(__webpack_require__(6411));
-const email = core_1.getInput('jira-email', { required: true });
-const token = core_1.getInput('jira-token', { required: true });
+const Constants_1 = __webpack_require__(7682);
 exports.client = new jira_client_1.default({
     apiVersion: '2',
-    host: 'shuttlerock.atlassian.net',
-    password: token,
+    host: Constants_1.JiraHost,
+    password: Constants_1.JiraToken,
     protocol: 'https',
     strictSSL: true,
-    username: email,
+    username: Constants_1.JiraEmail,
 });
+
+
+/***/ }),
+
+/***/ 6252:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getIssue = void 0;
+const Client_1 = __webpack_require__(2142);
+/**
+ * Fetches the issue with the given key from Jira.s
+ *
+ * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ *
+ * @returns {Issue} The issue data.
+ */
+exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const issue = (yield Client_1.client.findIssue(key, 'names'));
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
+    if (fieldName) {
+        issue.fields.repository = issue.fields[fieldName].value;
+    }
+    return issue;
+});
+
+
+/***/ }),
+
+/***/ 3947:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(6252), exports);
 
 
 /***/ }),
@@ -48767,10 +49786,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createPullRequestForJiraIssue = void 0;
-const Client_1 = __webpack_require__(2142);
+const core_1 = __webpack_require__(2186);
+const isUndefined_1 = __importDefault(__webpack_require__(2825));
+const Constants_1 = __webpack_require__(7682);
+const github_1 = __webpack_require__(797);
+const jira_1 = __webpack_require__(3947);
 const Log_1 = __webpack_require__(3637);
+const String_1 = __webpack_require__(5058);
 /**
  * To trigger this event manually:
  *
@@ -48784,22 +49811,55 @@ const Log_1 = __webpack_require__(3637);
  * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
  * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
  *
- * @param {string} email    The email address of the user who will own the pull request.
+ * @param {string} _email   The email address of the user who will own the pull request.
  * @param {string} issueKey The key of the Jira issue we will base the pull request on.
  */
-exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
-    Log_1.debug('------------------------------');
-    Log_1.debug(email);
-    Log_1.debug(issueKey);
-    Log_1.debug('------------------------------');
-    const issue = yield Client_1.client.findIssue('STUDIO-232');
-    Log_1.debug(issue);
-    Log_1.debug('------------------------------');
+exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
     // 1. Fetch the Jira issue details.
+    const issue = yield jira_1.getIssue(issueKey);
+    if (issue.fields.subtasks.length > 0) {
+        core_1.info(`Issue ${issue.key} has subtasks, so no pull request will be created`);
+        return;
+    }
+    if (isUndefined_1.default(issue.fields.repository)) {
+        throw new Error(`No repository was set for issue ${issue.key}`);
+    }
     // 2. Check if a PR already exists for the issue.
-    // 3. Check if this is an epic issue.
-    // 4. If an epic issue, create an epic PR.
-    // 5. If not an epic issue, check if it belongs to an epic.s
+    // TODO
+    // 3. Try to find an existing branch.
+    const repo = yield github_1.getRepository(issue.fields.repository);
+    const baseBranchName = repo.default_branch;
+    const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
+    const branch = yield github_1.getBranch(repo.name, newBranchName);
+    // 4. If no branch exists with the right name, make a new one.
+    if (isUndefined_1.default(branch)) {
+        const baseBranch = yield github_1.getBranch(repo.name, baseBranchName);
+        if (isUndefined_1.default(baseBranch)) {
+            throw new Error(`Base branch not found for repository '${repo.name}'`);
+        }
+        // Figure out what the next pull request number will be.
+        const prNumber = yield github_1.getNextPullRequestNumber(repo.name);
+        const content = `https://${Constants_1.JiraHost}/browse/${issue.key}\n\nCreated at ${new Date().toISOString()}`;
+        const blob = yield github_1.createBlob(issue.fields.repository, content);
+        const treeData = [
+            {
+                path: `.meta/${issue.key}.md`,
+                mode: github_1.TreeModes.ModeFile,
+                type: github_1.TreeTypes.Blob,
+                sha: blob.sha,
+            },
+        ];
+        const tree = yield github_1.createTree(repo.name, treeData, baseBranch.commit.sha);
+        const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`;
+        const commit = yield github_1.createCommit(repo.name, commitMsg, tree.sha, baseBranch.commit.sha);
+        yield github_1.createBranch(repo.name, newBranchName, commit.sha);
+    }
+    // 6. Create the pull request.
+    const prTitle = `[${issue.key}] ${issue.fields.summary}`;
+    const prBody = 'TODO - render with mustache';
+    const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody);
+    Log_1.debug(pullRequest);
+    Log_1.debug('------------------------------');
 });
 
 

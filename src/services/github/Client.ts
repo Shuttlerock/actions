@@ -1,6 +1,5 @@
-import { getInput } from '@actions/core'
 import { Octokit } from '@octokit/rest'
 
-const token = getInput('write-token', { required: true })
+import { GithubWriteToken } from '@sr-services/Constants'
 
-export const client = new Octokit({ auth: token })
+export const client = new Octokit({ auth: GithubWriteToken })

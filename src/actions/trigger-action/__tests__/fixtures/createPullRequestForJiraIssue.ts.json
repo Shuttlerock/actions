@@ -3,6 +3,6 @@
   "inputs": {
     "email": "dave@shuttlerock.com",
     "event": "createPullRequestForJiraIssue",
-    "param": "STUDIO-232"
+    "param": "STUDIO-236"
   }
 }

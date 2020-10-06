@@ -40,7 +40,9 @@
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.6",
-    "jira-client": "^6.21.0"
+    "@types/lodash": "^4.14.161",
+    "jira-client": "^6.21.0",
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.12.2",

@@ -1,14 +1,12 @@
-import { getInput } from '@actions/core'
 import JiraClient from 'jira-client'
 
-const email = getInput('jira-email', { required: true })
-const token = getInput('jira-token', { required: true })
+import { JiraEmail, JiraHost, JiraToken } from '@sr-services/Constants'
 
 export const client = new JiraClient({
   apiVersion: '2',
-  host: 'shuttlerock.atlassian.net',
-  password: token,
+  host: JiraHost,
+  password: JiraToken,
   protocol: 'https',
   strictSSL: true,
-  username: email,
+  username: JiraEmail,
 })

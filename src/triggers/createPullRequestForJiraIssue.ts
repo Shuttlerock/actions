@@ -1,5 +1,22 @@
-import { client } from '@sr-services/jira/Client'
+import { info } from '@actions/core'
+import isUndefined from 'lodash/isUndefined'
+
+import { JiraHost } from '@sr-services/Constants'
+import {
+  createBlob,
+  createBranch,
+  createCommit,
+  createPullRequest,
+  createTree,
+  getBranch,
+  getNextPullRequestNumber,
+  getRepository,
+  TreeModes,
+  TreeTypes,
+} from '@sr-services/github'
+import { getIssue } from '@sr-services/jira'
 import { debug } from '@sr-services/Log'
+import { parameterize } from '@sr-services/String'
 
 /**
  * To trigger this event manually:
@@ -14,25 +31,77 @@ import { debug } from '@sr-services/Log'
  * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
  * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
  *
- * @param {string} email    The email address of the user who will own the pull request.
+ * @param {string} _email   The email address of the user who will own the pull request.
  * @param {string} issueKey The key of the Jira issue we will base the pull request on.
  */
 export const createPullRequestForJiraIssue = async (
-  email: string,
+  _email: string,
   issueKey: string
 ): Promise<void> => {
-  debug('------------------------------')
-  debug(email)
-  debug(issueKey)
-  debug('------------------------------')
-
-  const issue = await client.findIssue('STUDIO-232')
-  debug(issue)
-  debug('------------------------------')
-
   // 1. Fetch the Jira issue details.
+  const issue = await getIssue(issueKey)
+
+  if (issue.fields.subtasks.length > 0) {
+    info(`Issue ${issue.key} has subtasks, so no pull request will be created`)
+    return
+  }
+
+  if (isUndefined(issue.fields.repository)) {
+    throw new Error(`No repository was set for issue ${issue.key}`)
+  }
+
   // 2. Check if a PR already exists for the issue.
-  // 3. Check if this is an epic issue.
-  // 4. If an epic issue, create an epic PR.
-  // 5. If not an epic issue, check if it belongs to an epic.s
+  // TODO
+
+  // 3. Try to find an existing branch.
+  const repo = await getRepository(issue.fields.repository)
+  const baseBranchName = repo.default_branch
+  const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
+  const branch = await getBranch(repo.name, newBranchName)
+
+  // 4. If no branch exists with the right name, make a new one.
+  if (isUndefined(branch)) {
+    const baseBranch = await getBranch(repo.name, baseBranchName)
+    if (isUndefined(baseBranch)) {
+      throw new Error(`Base branch not found for repository '${repo.name}'`)
+    }
+
+    // Figure out what the next pull request number will be.
+    const prNumber = await getNextPullRequestNumber(repo.name)
+
+    const content = `https://${JiraHost}/browse/${
+      issue.key
+    }\n\nCreated at ${new Date().toISOString()}`
+    const blob = await createBlob(issue.fields.repository, content)
+    const treeData = [
+      {
+        path: `.meta/${issue.key}.md`,
+        mode: TreeModes.ModeFile,
+        type: TreeTypes.Blob,
+        sha: blob.sha,
+      },
+    ]
+    const tree = await createTree(repo.name, treeData, baseBranch.commit.sha)
+    const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`
+    const commit = await createCommit(
+      repo.name,
+      commitMsg,
+      tree.sha,
+      baseBranch.commit.sha
+    )
+    await createBranch(repo.name, newBranchName, commit.sha)
+  }
+
+  // 6. Create the pull request.
+  const prTitle = `[${issue.key}] ${issue.fields.summary}`
+  const prBody = 'TODO - render with mustache'
+  const pullRequest = await createPullRequest(
+    repo.name,
+    baseBranchName,
+    newBranchName,
+    prTitle,
+    prBody
+  )
+  debug(pullRequest)
+  debug('------------------------------')
 }

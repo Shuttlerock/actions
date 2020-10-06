@@ -5774,7 +5774,6 @@ exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
 const Rebase_1 = __webpack_require__(436);
-const Log_1 = __webpack_require__(637);
 /**
  * Runs whenever a commit is added to a pull request.
  *
@@ -5783,7 +5782,7 @@ const Log_1 = __webpack_require__(637);
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const { payload: { pull_request, repository }, } = (yield github_1.context);
     if (!pull_request.title.startsWith('[Epic] ')) {
-        Log_1.debug(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
+        core_1.info(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
         return;
     }
     yield Rebase_1.rebase(repository.owner.login, repository.name, pull_request.head.ref, pull_request.base.ref);
@@ -5793,22 +5792,6 @@ exports.run().catch(err => {
     core_1.error(err);
     core_1.setFailed(err.message);
 });
-
-
-/***/ }),
-
-/***/ 637:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.debug = void 0;
-const core_1 = __webpack_require__(186);
-exports.debug = (message) => {
-    const payload = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
-    core_1.debug(payload);
-};
 
 
 /***/ }),
