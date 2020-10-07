@@ -25,6 +25,7 @@ export const createPullRequest = async (
   const response = await client.pulls.create({
     base,
     body,
+    draft: true,
     head,
     owner: OrganizationName,
     repo,

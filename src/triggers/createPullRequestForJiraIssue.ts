@@ -131,5 +131,7 @@ export const createPullRequestForJiraIssue = async (
   // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
   // - Handle epic PRs.
   // - Send success or failure to Slack.
+  // - Assign the PR owner.
+  // - Add the in-progress label.
   // - Add tests.
 }

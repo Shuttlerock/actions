@@ -50451,6 +50451,7 @@ exports.createPullRequest = (repo, base, head, title, body) => __awaiter(void 0,
     const response = yield Client_1.client.pulls.create({
         base,
         body,
+        draft: true,
         head,
         owner: Constants_1.OrganizationName,
         repo,
@@ -50763,6 +50764,8 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
     // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
     // - Handle epic PRs.
     // - Send success or failure to Slack.
+    // - Assign the PR owner.
+    // - Add the in-progress label.
     // - Add tests.
 });
 
