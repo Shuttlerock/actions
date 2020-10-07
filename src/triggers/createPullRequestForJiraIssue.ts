@@ -17,6 +17,7 @@ import {
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/jira'
 import { debug } from '@sr-services/Log'
 import { parameterize } from '@sr-services/String'
+import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
 
 /**
  * To trigger this event manually:
@@ -49,6 +50,8 @@ export const createPullRequestForJiraIssue = async (
   if (isUndefined(issue.fields.repository)) {
     throw new Error(`No repository was set for issue ${issue.key}`)
   }
+
+  const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
 
   // 2. Check if a PR already exists for the issue.
   const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
@@ -84,9 +87,7 @@ export const createPullRequestForJiraIssue = async (
     // Figure out what the next pull request number will be.
     const prNumber = await getNextPullRequestNumber(repo.name)
 
-    const content = `https://${JiraHost}/browse/${
-      issue.key
-    }\n\nCreated at ${new Date().toISOString()}`
+    const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`
     const blob = await createBlob(issue.fields.repository, content)
     const treeData = [
       {
@@ -109,7 +110,12 @@ export const createPullRequestForJiraIssue = async (
 
   // 6. Create the pull request.
   const prTitle = `[${issue.key}] ${issue.fields.summary}`
-  const prBody = 'TODO - render with mustache'
+  const templateVars = {
+    description: issue.fields.description,
+    summary: issue.fields.summary,
+    jiraUrl,
+  }
+  const prBody = render(PullRequestForIssueTemplate, templateVars)
   const pullRequest = await createPullRequest(
     repo.name,
     baseBranchName,
@@ -117,11 +123,11 @@ export const createPullRequestForJiraIssue = async (
     prTitle,
     prBody
   )
-  debug(pullRequest)
+  debug('------------------------------')
+  debug(pullRequest.html_url)
   debug('------------------------------')
 
   // Todo:
-  // - Render the PR body with mustache.js
   // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
   // - Handle epic PRs.
   // - Send success or failure to Slack.
