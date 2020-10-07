@@ -7,10 +7,15 @@ export const GithubWriteToken = getInput('write-token', { required: true })
 export const JiraEmail = getInput('jira-email', { required: true })
 
 // The host to use when connecting to the Jira API.
-export const JiraHost = 'shuttlerock.atlassian.net'
+export const JiraHost = getInput('jira-host', { required: true })
 
 // The API token to use when connecting to the Jira API.
 export const JiraToken = getInput('jira-token', { required: true })
 
 // The Github organization name.
-export const OrganizationName = 'Shuttlerock'
+export const OrganizationName = getInput('organization-name', {
+  required: true,
+})
+
+// The host to use when connecting to the Jira API.
+export const UserApiPrefix = getInput('user-api-prefix', { required: true })

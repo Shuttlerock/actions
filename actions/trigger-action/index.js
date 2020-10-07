@@ -50146,18 +50146,22 @@ exports.run().catch(err => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
+exports.UserApiPrefix = exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
 const core_1 = __webpack_require__(2186);
 // Token with write access to Github - set in organization secrets.
 exports.GithubWriteToken = core_1.getInput('write-token', { required: true });
 // The email address to use when connecting to the Jira API.
 exports.JiraEmail = core_1.getInput('jira-email', { required: true });
 // The host to use when connecting to the Jira API.
-exports.JiraHost = 'shuttlerock.atlassian.net';
+exports.JiraHost = core_1.getInput('jira-host', { required: true });
 // The API token to use when connecting to the Jira API.
 exports.JiraToken = core_1.getInput('jira-token', { required: true });
 // The Github organization name.
-exports.OrganizationName = 'Shuttlerock';
+exports.OrganizationName = core_1.getInput('organization-name', {
+    required: true,
+});
+// The host to use when connecting to the Jira API.
+exports.UserApiPrefix = core_1.getInput('user-api-prefix', { required: true });
 
 
 /***/ }),
