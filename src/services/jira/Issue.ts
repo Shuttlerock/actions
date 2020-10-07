@@ -1,7 +1,16 @@
+import fetch from 'node-fetch'
+
+import { JiraEmail, JiraHost, JiraToken } from '@sr-services/Constants'
 import { client } from '@sr-services/jira/Client'
+
+interface User {
+  accountId: string
+  emailAddress: string
+}
 
 export interface Issue {
   fields: {
+    assignee: User
     description: string
     issuetype: {
       name: 'Bug' | 'Chore' | 'Feature' | 'Story'
@@ -20,8 +29,21 @@ export interface Issue {
   subtask: boolean
 }
 
+interface GithubPullRequest {
+  id: string
+  status: 'DECLINED' | 'OPEN'
+}
+
+interface GithubDetail {
+  pullRequests: GithubPullRequest[]
+}
+
+interface GithubDetails {
+  detail: GithubDetail[]
+}
+
 /**
- * Fetches the issue with the given key from Jira.s
+ * Fetches the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
  *
@@ -42,4 +64,31 @@ export const getIssue = async (key: string): Promise<Issue> => {
   }
 
   return issue
+}
+
+/**
+ * Fetches the numbers of the pull requests attached to this issue. Note that
+ * this is a **PRIVATE API**, and may break in the future.
+ *
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number[]} The PR numbers.
+ */
+export const getIssuePullRequestNumbers = async (
+  issueId: string
+): Promise<number[]> => {
+  const host = `https://${JiraEmail}:${JiraToken}@${JiraHost}/`
+  const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`
+  const response = await fetch(url)
+  const data = (await response.json()) as GithubDetails
+  const ids = data.detail
+    .map((detail: GithubDetail) =>
+      detail.pullRequests
+        .filter((pr: GithubPullRequest) => pr.status === 'OPEN')
+        .map((pr: GithubPullRequest) => pr.id)
+    )
+    .flat()
+    .map((id: string) => parseInt(id.replace(/[^\d]/, ''), 10))
+
+  return ids
 }

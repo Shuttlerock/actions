@@ -14,7 +14,7 @@ import {
   TreeModes,
   TreeTypes,
 } from '@sr-services/github'
-import { getIssue } from '@sr-services/jira'
+import { getIssue, getIssuePullRequestNumbers } from '@sr-services/jira'
 import { debug } from '@sr-services/Log'
 import { parameterize } from '@sr-services/String'
 
@@ -51,16 +51,30 @@ export const createPullRequestForJiraIssue = async (
   }
 
   // 2. Check if a PR already exists for the issue.
-  // TODO
-  // See https://shuttlerock.atlassian.net/rest/dev-status/latest/issue/summary?issueId=10910
+  const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
+  if (pullRequestNumbers.length > 0) {
+    info(
+      `Issue ${issue.key} already has ${pullRequestNumbers.length} open PR(s), so no new pull request will be created`
+    )
+    return
+  }
 
-  // 3. Try to find an existing branch.
+  // 3. Find out who the PR should belong to.
+  if (issue.fields.assignee === null) {
+    throw new Error(
+      `Issue ${issue.key} is not assigned to anyone, so no pull request will be created`
+    )
+  }
+  const _assigneeEmail = issue.fields.assignee.emailAddress
+  debug(_assigneeEmail)
+
+  // 4. Try to find an existing branch.
   const repo = await getRepository(issue.fields.repository)
   const baseBranchName = repo.default_branch
   const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
   const branch = await getBranch(repo.name, newBranchName)
 
-  // 4. If no branch exists with the right name, make a new one.
+  // 5. If no branch exists with the right name, make a new one.
   if (isUndefined(branch)) {
     const baseBranch = await getBranch(repo.name, baseBranchName)
     if (isUndefined(baseBranch)) {
@@ -107,10 +121,9 @@ export const createPullRequestForJiraIssue = async (
   debug('------------------------------')
 
   // Todo:
-  // - Fetch the email from the Jira issue rather than the user moving the Issue.
-  // - Check if the pull request already exists.
+  // - Render the PR body with mustache.js
   // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
   // - Handle epic PRs.
-  // - Add tests.
   // - Send success or failure to Slack.
+  // - Add tests.
 }

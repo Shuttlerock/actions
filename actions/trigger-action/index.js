@@ -49792,11 +49792,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getIssue = void 0;
+exports.getIssuePullRequestNumbers = exports.getIssue = void 0;
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Constants_1 = __webpack_require__(7682);
 const Client_1 = __webpack_require__(2142);
 /**
- * Fetches the issue with the given key from Jira.s
+ * Fetches the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
  *
@@ -49811,6 +49816,27 @@ exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
         issue.fields.repository = issue.fields[fieldName].value;
     }
     return issue;
+});
+/**
+ * Fetches the numbers of the pull requests attached to this issue. Note that
+ * this is a **PRIVATE API**, and may break in the future.
+ *
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number[]} The PR numbers.
+ */
+exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
+    const host = `https://${Constants_1.JiraEmail}:${Constants_1.JiraToken}@${Constants_1.JiraHost}/`;
+    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    const ids = data.detail
+        .map((detail) => detail.pullRequests
+        .filter((pr) => pr.status === 'OPEN')
+        .map((pr) => pr.id))
+        .flat()
+        .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
+    return ids;
 });
 
 
@@ -49890,14 +49916,23 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
         throw new Error(`No repository was set for issue ${issue.key}`);
     }
     // 2. Check if a PR already exists for the issue.
-    // TODO
-    // See https://shuttlerock.atlassian.net/rest/dev-status/latest/issue/summary?issueId=10910
-    // 3. Try to find an existing branch.
+    const pullRequestNumbers = yield jira_1.getIssuePullRequestNumbers(issue.id);
+    if (pullRequestNumbers.length > 0) {
+        core_1.info(`Issue ${issue.key} already has ${pullRequestNumbers.length} open PR(s), so no new pull request will be created`);
+        return;
+    }
+    // 3. Find out who the PR should belong to.
+    if (issue.fields.assignee === null) {
+        throw new Error(`Issue ${issue.key} is not assigned to anyone, so no pull request will be created`);
+    }
+    const _assigneeEmail = issue.fields.assignee.emailAddress;
+    Log_1.debug(_assigneeEmail);
+    // 4. Try to find an existing branch.
     const repo = yield github_1.getRepository(issue.fields.repository);
     const baseBranchName = repo.default_branch;
     const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
     const branch = yield github_1.getBranch(repo.name, newBranchName);
-    // 4. If no branch exists with the right name, make a new one.
+    // 5. If no branch exists with the right name, make a new one.
     if (isUndefined_1.default(branch)) {
         const baseBranch = yield github_1.getBranch(repo.name, baseBranchName);
         if (isUndefined_1.default(baseBranch)) {
@@ -49927,12 +49962,11 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
     Log_1.debug(pullRequest);
     Log_1.debug('------------------------------');
     // Todo:
-    // - Fetch the email from the Jira issue rather than the user moving the Issue.
-    // - Check if the pull request already exists.
+    // - Render the PR body with mustache.js
     // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
     // - Handle epic PRs.
-    // - Add tests.
     // - Send success or failure to Slack.
+    // - Add tests.
 });
 
 
