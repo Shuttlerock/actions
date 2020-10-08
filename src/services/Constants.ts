@@ -18,4 +18,11 @@ export const OrganizationName = getInput('organization-name', {
 })
 
 // The host to use when connecting to the Jira API.
-export const UserApiPrefix = getInput('user-api-prefix', { required: true })
+export const CredentialsApiPrefix = getInput('credentials-api-prefix', {
+  required: true,
+})
+
+// The host to use when connecting to the Jira API.
+export const CredentialsApiSecret = getInput('credentials-api-secret', {
+  required: true,
+})

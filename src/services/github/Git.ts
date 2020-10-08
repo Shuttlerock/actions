@@ -10,6 +10,7 @@ import { client } from '@sr-services/github/Client'
 
 export type Branch = string
 export type Sha = string
+export type Repository = string
 
 // Mode is one of:
 // - 100644: file (blob)
@@ -47,7 +48,7 @@ interface Tree {
  * @returns {GitCreateBlobResponseData} The blob data.
  */
 export const createBlob = async (
-  repo: string,
+  repo: Repository,
   content: string
 ): Promise<GitCreateBlobResponseData> => {
   const response = await client.git.createBlob({
@@ -70,7 +71,7 @@ export const createBlob = async (
  * @returns {GitCreateCommitResponseData} The commit data.
  */
 export const createCommit = async (
-  repo: string,
+  repo: Repository,
   message: string,
   tree: Sha,
   parent: Sha
@@ -96,7 +97,7 @@ export const createCommit = async (
  * @returns {GitCreateRefResponseData} The branch data.
  */
 export const createBranch = async (
-  repo: string,
+  repo: Repository,
   name: Branch,
   sha: Sha
 ): Promise<GitCreateRefResponseData> => {
@@ -120,7 +121,7 @@ export const createBranch = async (
  * @returns {GitCreateRefResponseData} The branch data.
  */
 export const createTree = async (
-  repo: string,
+  repo: Repository,
   tree: Tree[],
   baseTree: Sha
 ): Promise<GitCreateTreeResponseData> => {

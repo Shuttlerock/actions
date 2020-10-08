@@ -2,6 +2,7 @@ import { info } from '@actions/core'
 import isUndefined from 'lodash/isUndefined'
 
 import { JiraHost } from '@sr-services/Constants'
+import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
   createBlob,
   createBranch,
@@ -68,8 +69,8 @@ export const createPullRequestForJiraIssue = async (
       `Issue ${issue.key} is not assigned to anyone, so no pull request will be created`
     )
   }
-  const _assigneeEmail = issue.fields.assignee.emailAddress
-  debug(_assigneeEmail)
+  const assigneeEmail = issue.fields.assignee.emailAddress
+  const credentials = await getCredentialsByEmail(assigneeEmail)
 
   // 4. Try to find an existing branch.
   const repo = await getRepository(issue.fields.repository)
@@ -121,14 +122,14 @@ export const createPullRequestForJiraIssue = async (
     baseBranchName,
     newBranchName,
     prTitle,
-    prBody
+    prBody,
+    credentials.github_token
   )
   debug('------------------------------')
   debug(pullRequest.html_url)
   debug('------------------------------')
 
   // Todo:
-  // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
   // - Handle epic PRs.
   // - Send success or failure to Slack.
   // - Assign the PR owner.

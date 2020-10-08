@@ -2,16 +2,16 @@ import { ReposGetResponseData } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/github/Client'
+import { Repository } from '@sr-services/github/Git'
 
 /**
  * Decides what number the next pull request will be.
  *
- * @param {string} repo The name of the repository that the PR will belong to.
- *
- * @returns {number} The number of the next PR.
+ * @param {Repository} repo The name of the repository that the PR will belong to.
+ * @returns {number}   The number of the next PR.
  */
 export const getNextPullRequestNumber = async (
-  repo: string
+  repo: Repository
 ): Promise<number> => {
   const response = await client.pulls.list({
     direction: 'desc',
@@ -33,12 +33,12 @@ export const getNextPullRequestNumber = async (
 /**
  * Returns the repository with the given name.
  *
- * @param {string} repo The name of the repository to fetch.
+ * @param {Repository} repo The name of the repository to fetch.
  *
  * @returns {ReposGetResponseData} The repository data.
  */
 export const getRepository = async (
-  repo: string
+  repo: Repository
 ): Promise<ReposGetResponseData> => {
   const response = await client.repos.get({
     owner: OrganizationName,

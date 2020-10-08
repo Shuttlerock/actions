@@ -50146,7 +50146,7 @@ exports.run().catch(err => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserApiPrefix = exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
+exports.CredentialsApiSecret = exports.CredentialsApiPrefix = exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
 const core_1 = __webpack_require__(2186);
 // Token with write access to Github - set in organization secrets.
 exports.GithubWriteToken = core_1.getInput('write-token', { required: true });
@@ -50161,7 +50161,54 @@ exports.OrganizationName = core_1.getInput('organization-name', {
     required: true,
 });
 // The host to use when connecting to the Jira API.
-exports.UserApiPrefix = core_1.getInput('user-api-prefix', { required: true });
+exports.CredentialsApiPrefix = core_1.getInput('credentials-api-prefix', {
+    required: true,
+});
+// The host to use when connecting to the Jira API.
+exports.CredentialsApiSecret = core_1.getInput('credentials-api-secret', {
+    required: true,
+});
+
+
+/***/ }),
+
+/***/ 3543:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCredentialsByEmail = void 0;
+const crypto_1 = __webpack_require__(6417);
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Constants_1 = __webpack_require__(7682);
+exports.getCredentialsByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Buffer.from(email).toString('base64');
+    const signature = crypto_1.createHmac('sha256', Constants_1.CredentialsApiSecret)
+        .update(email)
+        .digest('hex');
+    const url = `${Constants_1.CredentialsApiPrefix}${id}`;
+    const response = yield node_fetch_1.default(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const credentials = (yield response.json());
+    if (credentials.status !== 'ok') {
+        throw new Error(`Could not get credentials for the user ${email}, so no pull request will be created`);
+    }
+    return credentials;
+});
 
 
 /***/ }),
@@ -50278,8 +50325,8 @@ const Client_1 = __webpack_require__(5733);
 /**
  * Fetches a branch from the Github API.
  *
- * @param {string} repo   The name of the repository that the branch belongs to.
- * @param {string} branch The name of the branch to fetch.
+ * @param {Repository} repo   The name of the repository that the branch belongs to.
+ * @param {Branch}     branch The name of the branch to fetch.
  *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
@@ -50310,10 +50357,13 @@ exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.client = void 0;
+exports.clientForToken = exports.client = void 0;
 const rest_1 = __webpack_require__(5375);
 const Constants_1 = __webpack_require__(7682);
 exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
+exports.clientForToken = (token) => {
+    return new rest_1.Octokit({ auth: token });
+};
 
 
 /***/ }),
@@ -50443,16 +50493,17 @@ const Client_1 = __webpack_require__(5733);
 /**
  * Creates a new pull request.
  *
- * @param {string} repo  The name of the repository that the PR will belong to.
- * @param {Branch} base  The base branch, which the PR will be merged into.
- * @param {Branch} head  The head branch, which the PR will be based on.
- * @param {string} title The title of the PR.
- * @param {string} body  The body of the PR.
+ * @param {Repository} repo  The name of the repository that the PR will belong to.
+ * @param {Branch}     base  The base branch, which the PR will be merged into.
+ * @param {Branch}     head  The head branch, which the PR will be based on.
+ * @param {string}     title The title of the PR.
+ * @param {string}     body  The body of the PR.
+ * @param {string}     token The Github API token to use when creating the PR.
  *
  * @returns {PullsCreateResponseData} The PR data.
  */
-exports.createPullRequest = (repo, base, head, title, body) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.pulls.create({
+exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.clientForToken(token).pulls.create({
         base,
         body,
         draft: true,
@@ -50488,9 +50539,8 @@ const Client_1 = __webpack_require__(5733);
 /**
  * Decides what number the next pull request will be.
  *
- * @param {string} repo The name of the repository that the PR will belong to.
- *
- * @returns {number} The number of the next PR.
+ * @param {Repository} repo The name of the repository that the PR will belong to.
+ * @returns {number}   The number of the next PR.
  */
 exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.pulls.list({
@@ -50510,7 +50560,7 @@ exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, f
 /**
  * Returns the repository with the given name.
  *
- * @param {string} repo The name of the repository to fetch.
+ * @param {Repository} repo The name of the repository to fetch.
  *
  * @returns {ReposGetResponseData} The repository data.
  */
@@ -50680,6 +50730,7 @@ exports.createPullRequestForJiraIssue = void 0;
 const core_1 = __webpack_require__(2186);
 const isUndefined_1 = __importDefault(__webpack_require__(2825));
 const Constants_1 = __webpack_require__(7682);
+const Credentials_1 = __webpack_require__(3543);
 const github_1 = __webpack_require__(797);
 const jira_1 = __webpack_require__(3947);
 const Log_1 = __webpack_require__(3637);
@@ -50722,8 +50773,8 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
     if (issue.fields.assignee === null) {
         throw new Error(`Issue ${issue.key} is not assigned to anyone, so no pull request will be created`);
     }
-    const _assigneeEmail = issue.fields.assignee.emailAddress;
-    Log_1.debug(_assigneeEmail);
+    const assigneeEmail = issue.fields.assignee.emailAddress;
+    const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
     // 4. Try to find an existing branch.
     const repo = yield github_1.getRepository(issue.fields.repository);
     const baseBranchName = repo.default_branch;
@@ -50760,7 +50811,7 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
         jiraUrl,
     };
     const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
-    const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody);
+    const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
     Log_1.debug('------------------------------');
     Log_1.debug(pullRequest.html_url);
     Log_1.debug('------------------------------');
