@@ -26,3 +26,6 @@ export const CredentialsApiPrefix = getInput('credentials-api-prefix', {
 export const CredentialsApiSecret = getInput('credentials-api-secret', {
   required: true,
 })
+
+// Labels.
+export const InProgressLabel = 'in-progress'

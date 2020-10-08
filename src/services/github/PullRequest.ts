@@ -1,8 +1,60 @@
-import { PullsCreateResponseData } from '@octokit/types'
+import {
+  IssuesAddAssigneesResponseData,
+  IssuesAddLabelsResponseData,
+  PullsCreateResponseData,
+} from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { clientForToken } from '@sr-services/github/Client'
+import { client, clientForToken } from '@sr-services/github/Client'
 import { Branch, Repository } from '@sr-services/github/Git'
+
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+export const addLabels = async (
+  repo: Repository,
+  number: number,
+  labels: string[]
+): Promise<IssuesAddLabelsResponseData> => {
+  const response = await client.issues.addLabels({
+    issue_number: number,
+    labels,
+    owner: OrganizationName,
+    repo,
+  })
+
+  return response.data
+}
+
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {IssuesAddAssigneesResponseData} The PR data.
+ */
+export const assignOwners = async (
+  repo: Repository,
+  number: number,
+  usernames: string[]
+): Promise<IssuesAddAssigneesResponseData> => {
+  const response = await client.issues.addAssignees({
+    assignees: usernames,
+    issue_number: number,
+    owner: OrganizationName,
+    repo,
+  })
+
+  return response.data
+}
 
 /**
  * Creates a new pull request.

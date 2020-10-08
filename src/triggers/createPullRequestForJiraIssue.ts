@@ -1,9 +1,11 @@
 import { info } from '@actions/core'
 import isUndefined from 'lodash/isUndefined'
 
-import { JiraHost } from '@sr-services/Constants'
+import { InProgressLabel, JiraHost } from '@sr-services/Constants'
 import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
+  addLabels,
+  assignOwners,
   createBlob,
   createBranch,
   createCommit,
@@ -54,16 +56,7 @@ export const createPullRequestForJiraIssue = async (
 
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
 
-  // 2. Check if a PR already exists for the issue.
-  const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
-  if (pullRequestNumbers.length > 0) {
-    info(
-      `Issue ${issue.key} already has ${pullRequestNumbers.length} open PR(s), so no new pull request will be created`
-    )
-    return
-  }
-
-  // 3. Find out who the PR should belong to.
+  // 2. Find out who the PR should belong to.
   if (issue.fields.assignee === null) {
     throw new Error(
       `Issue ${issue.key} is not assigned to anyone, so no pull request will be created`
@@ -72,67 +65,85 @@ export const createPullRequestForJiraIssue = async (
   const assigneeEmail = issue.fields.assignee.emailAddress
   const credentials = await getCredentialsByEmail(assigneeEmail)
 
-  // 4. Try to find an existing branch.
+  // 3. Check if a PR already exists for the issue.
+  let pullRequestNumber
   const repo = await getRepository(issue.fields.repository)
-  const baseBranchName = repo.default_branch
-  const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
-  const branch = await getBranch(repo.name, newBranchName)
+  const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
 
-  // 5. If no branch exists with the right name, make a new one.
-  if (isUndefined(branch)) {
-    const baseBranch = await getBranch(repo.name, baseBranchName)
-    if (isUndefined(baseBranch)) {
-      throw new Error(`Base branch not found for repository '${repo.name}'`)
+  if (pullRequestNumbers.length > 0) {
+    ;[pullRequestNumber] = pullRequestNumbers
+  } else {
+    // 4. Try to find an existing branch.
+    const baseBranchName = repo.default_branch
+    const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
+    const branch = await getBranch(repo.name, newBranchName)
+
+    // 5. If no branch exists with the right name, make a new one.
+    if (isUndefined(branch)) {
+      const baseBranch = await getBranch(repo.name, baseBranchName)
+      if (isUndefined(baseBranch)) {
+        throw new Error(`Base branch not found for repository '${repo.name}'`)
+      }
+
+      // Figure out what the next pull request number will be.
+      const prNumber = await getNextPullRequestNumber(repo.name)
+
+      const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`
+      const blob = await createBlob(issue.fields.repository, content)
+      const treeData = [
+        {
+          path: `.meta/${issue.key}.md`,
+          mode: TreeModes.ModeFile,
+          type: TreeTypes.Blob,
+          sha: blob.sha,
+        },
+      ]
+      const tree = await createTree(repo.name, treeData, baseBranch.commit.sha)
+      const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`
+      const commit = await createCommit(
+        repo.name,
+        commitMsg,
+        tree.sha,
+        baseBranch.commit.sha
+      )
+      await createBranch(repo.name, newBranchName, commit.sha)
     }
 
-    // Figure out what the next pull request number will be.
-    const prNumber = await getNextPullRequestNumber(repo.name)
-
-    const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`
-    const blob = await createBlob(issue.fields.repository, content)
-    const treeData = [
-      {
-        path: `.meta/${issue.key}.md`,
-        mode: TreeModes.ModeFile,
-        type: TreeTypes.Blob,
-        sha: blob.sha,
-      },
-    ]
-    const tree = await createTree(repo.name, treeData, baseBranch.commit.sha)
-    const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`
-    const commit = await createCommit(
+    // 6. Create the pull request.
+    const prTitle = `[${issue.key}] ${issue.fields.summary}`
+    const templateVars = {
+      description: issue.fields.description,
+      summary: issue.fields.summary,
+      jiraUrl,
+    }
+    const prBody = render(PullRequestForIssueTemplate, templateVars)
+    const pullRequest = await createPullRequest(
       repo.name,
-      commitMsg,
-      tree.sha,
-      baseBranch.commit.sha
+      baseBranchName,
+      newBranchName,
+      prTitle,
+      prBody,
+      credentials.github_token
     )
-    await createBranch(repo.name, newBranchName, commit.sha)
+
+    pullRequestNumber = pullRequest.number
   }
 
-  // 6. Create the pull request.
-  const prTitle = `[${issue.key}] ${issue.fields.summary}`
-  const templateVars = {
-    description: issue.fields.description,
-    summary: issue.fields.summary,
-    jiraUrl,
-  }
-  const prBody = render(PullRequestForIssueTemplate, templateVars)
-  const pullRequest = await createPullRequest(
-    repo.name,
-    baseBranchName,
-    newBranchName,
-    prTitle,
-    prBody,
-    credentials.github_token
-  )
+  // 7. Mark the pull request as in-progress.
+  await addLabels(repo.name, pullRequestNumber, [InProgressLabel])
+
+  // 8. Assign the pull request to the appropriate user.
+  await assignOwners(repo.name, pullRequestNumber, [
+    credentials.github_username,
+  ])
+
   debug('------------------------------')
-  debug(pullRequest.html_url)
+  debug(pullRequestNumber)
   debug('------------------------------')
 
   // Todo:
-  // - Handle epic PRs.
+  // - Check before adding labels or assigning an owner?
   // - Send success or failure to Slack.
-  // - Assign the PR owner.
-  // - Add the in-progress label.
   // - Add tests.
+  // - Handle epic PRs.
 }

@@ -22016,7 +22016,7 @@ var JiraApi = /*#__PURE__*/function () {
      * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)
      * @name updateVersion
      * @function
-     * @param {string} version - an new object of the version to update
+     * @param {object} version - an new object of the version to update
      */
 
   }, {
@@ -50146,7 +50146,7 @@ exports.run().catch(err => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CredentialsApiSecret = exports.CredentialsApiPrefix = exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
+exports.InProgressLabel = exports.CredentialsApiSecret = exports.CredentialsApiPrefix = exports.OrganizationName = exports.JiraToken = exports.JiraHost = exports.JiraEmail = exports.GithubWriteToken = void 0;
 const core_1 = __webpack_require__(2186);
 // Token with write access to Github - set in organization secrets.
 exports.GithubWriteToken = core_1.getInput('write-token', { required: true });
@@ -50168,6 +50168,8 @@ exports.CredentialsApiPrefix = core_1.getInput('credentials-api-prefix', {
 exports.CredentialsApiSecret = core_1.getInput('credentials-api-secret', {
     required: true,
 });
+// Labels.
+exports.InProgressLabel = 'in-progress';
 
 
 /***/ }),
@@ -50487,9 +50489,45 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createPullRequest = void 0;
+exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
 const Constants_1 = __webpack_require__(7682);
 const Client_1 = __webpack_require__(5733);
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addLabels({
+        issue_number: number,
+        labels,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {IssuesAddAssigneesResponseData} The PR data.
+ */
+exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addAssignees({
+        assignees: usernames,
+        issue_number: number,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
 /**
  * Creates a new pull request.
  *
@@ -50763,65 +50801,73 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
         throw new Error(`No repository was set for issue ${issue.key}`);
     }
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
-    // 2. Check if a PR already exists for the issue.
-    const pullRequestNumbers = yield jira_1.getIssuePullRequestNumbers(issue.id);
-    if (pullRequestNumbers.length > 0) {
-        core_1.info(`Issue ${issue.key} already has ${pullRequestNumbers.length} open PR(s), so no new pull request will be created`);
-        return;
-    }
-    // 3. Find out who the PR should belong to.
+    // 2. Find out who the PR should belong to.
     if (issue.fields.assignee === null) {
         throw new Error(`Issue ${issue.key} is not assigned to anyone, so no pull request will be created`);
     }
     const assigneeEmail = issue.fields.assignee.emailAddress;
     const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
-    // 4. Try to find an existing branch.
+    // 3. Check if a PR already exists for the issue.
+    let pullRequestNumber;
     const repo = yield github_1.getRepository(issue.fields.repository);
-    const baseBranchName = repo.default_branch;
-    const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
-    const branch = yield github_1.getBranch(repo.name, newBranchName);
-    // 5. If no branch exists with the right name, make a new one.
-    if (isUndefined_1.default(branch)) {
-        const baseBranch = yield github_1.getBranch(repo.name, baseBranchName);
-        if (isUndefined_1.default(baseBranch)) {
-            throw new Error(`Base branch not found for repository '${repo.name}'`);
-        }
-        // Figure out what the next pull request number will be.
-        const prNumber = yield github_1.getNextPullRequestNumber(repo.name);
-        const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`;
-        const blob = yield github_1.createBlob(issue.fields.repository, content);
-        const treeData = [
-            {
-                path: `.meta/${issue.key}.md`,
-                mode: github_1.TreeModes.ModeFile,
-                type: github_1.TreeTypes.Blob,
-                sha: blob.sha,
-            },
-        ];
-        const tree = yield github_1.createTree(repo.name, treeData, baseBranch.commit.sha);
-        const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`;
-        const commit = yield github_1.createCommit(repo.name, commitMsg, tree.sha, baseBranch.commit.sha);
-        yield github_1.createBranch(repo.name, newBranchName, commit.sha);
+    const pullRequestNumbers = yield jira_1.getIssuePullRequestNumbers(issue.id);
+    if (pullRequestNumbers.length > 0) {
+        ;
+        [pullRequestNumber] = pullRequestNumbers;
     }
-    // 6. Create the pull request.
-    const prTitle = `[${issue.key}] ${issue.fields.summary}`;
-    const templateVars = {
-        description: issue.fields.description,
-        summary: issue.fields.summary,
-        jiraUrl,
-    };
-    const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
-    const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
+    else {
+        // 4. Try to find an existing branch.
+        const baseBranchName = repo.default_branch;
+        const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
+        const branch = yield github_1.getBranch(repo.name, newBranchName);
+        // 5. If no branch exists with the right name, make a new one.
+        if (isUndefined_1.default(branch)) {
+            const baseBranch = yield github_1.getBranch(repo.name, baseBranchName);
+            if (isUndefined_1.default(baseBranch)) {
+                throw new Error(`Base branch not found for repository '${repo.name}'`);
+            }
+            // Figure out what the next pull request number will be.
+            const prNumber = yield github_1.getNextPullRequestNumber(repo.name);
+            const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`;
+            const blob = yield github_1.createBlob(issue.fields.repository, content);
+            const treeData = [
+                {
+                    path: `.meta/${issue.key}.md`,
+                    mode: github_1.TreeModes.ModeFile,
+                    type: github_1.TreeTypes.Blob,
+                    sha: blob.sha,
+                },
+            ];
+            const tree = yield github_1.createTree(repo.name, treeData, baseBranch.commit.sha);
+            const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`;
+            const commit = yield github_1.createCommit(repo.name, commitMsg, tree.sha, baseBranch.commit.sha);
+            yield github_1.createBranch(repo.name, newBranchName, commit.sha);
+        }
+        // 6. Create the pull request.
+        const prTitle = `[${issue.key}] ${issue.fields.summary}`;
+        const templateVars = {
+            description: issue.fields.description,
+            summary: issue.fields.summary,
+            jiraUrl,
+        };
+        const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
+        const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
+        pullRequestNumber = pullRequest.number;
+    }
+    // 7. Mark the pull request as in-progress.
+    yield github_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
+    // 8. Assign the pull request to the appropriate user.
+    yield github_1.assignOwners(repo.name, pullRequestNumber, [
+        credentials.github_username,
+    ]);
     Log_1.debug('------------------------------');
-    Log_1.debug(pullRequest.html_url);
+    Log_1.debug(pullRequestNumber);
     Log_1.debug('------------------------------');
     // Todo:
-    // - Fetch a token from next.shuttlerock.com rather than using the sr-devops one.
-    // - Handle epic PRs.
+    // - Check before adding labels or assigning an owner?
     // - Send success or failure to Slack.
-    // - Assign the PR owner.
-    // - Add the in-progress label.
     // - Add tests.
+    // - Handle epic PRs.
 });
 
 
