@@ -1,4 +1,4 @@
-import { info } from '@actions/core'
+import { error, info } from '@actions/core'
 import isUndefined from 'lodash/isUndefined'
 
 import {
@@ -33,34 +33,39 @@ import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
  * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
  * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
  *
- * @param {string} _email   The email address of the user who will own the pull request.
+ * @param {string} email    The email address of the user who will own the pull request.
  * @param {string} issueKey The key of the Jira issue we will base the pull request on.
  */
 export const createPullRequestForJiraIssue = async (
-  _email: string,
+  email: string,
   issueKey: string
 ): Promise<void> => {
   // 1. Fetch the Jira issue details.
   const issue = await getIssue(issueKey)
-
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
 
   // 2. Find out who the PR should belong to.
   if (issue.fields.assignee === null) {
-    throw new Error(
-      `Issue ${issue.key} is not assigned to anyone, so no pull request will be created`
-    )
+    const credentials = await getCredentialsByEmail(email)
+    const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
+    await sendUserMessage(credentials.slack_id, message)
+    return
   }
   const assigneeEmail = issue.fields.assignee.emailAddress
   const credentials = await getCredentialsByEmail(assigneeEmail)
 
   if (issue.fields.subtasks.length > 0) {
-    info(`Issue ${issue.key} has subtasks, so no pull request will be created`)
+    const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`
+    await sendUserMessage(credentials.slack_id, message)
+    info(message)
     return
   }
 
   if (isUndefined(issue.fields.repository)) {
-    throw new Error(`No repository was set for issue ${issue.key}`)
+    const message = `No repository was set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`
+    await sendUserMessage(credentials.slack_id, message)
+    error(message)
+    return
   }
 
   // 3. Check if a PR already exists for the issue.
@@ -122,9 +127,5 @@ export const createPullRequestForJiraIssue = async (
   await sendUserMessage(credentials.slack_id, message)
 
   // Todo:
-  // - Send errors to Slack.
-  // - Refactor branch and pull request creation into library methods.
-  // - Check before adding labels or assigning an owner?
   // - Add tests.
-  // - Handle epic PRs.
 }

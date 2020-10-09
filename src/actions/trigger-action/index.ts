@@ -1,6 +1,7 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 
+import { sendErrorMessage } from '@sr-services/Slack'
 import { createPullRequestForJiraIssue } from '@sr-triggers/index'
 
 interface Context {
@@ -33,7 +34,8 @@ export const run = async (): Promise<void> => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-run().catch(err => {
+run().catch(async err => {
   error(err)
+  await sendErrorMessage(err.message)
   setFailed(err.message)
 })

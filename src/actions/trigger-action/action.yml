@@ -19,6 +19,8 @@ inputs:
     description: 'The name of the Github organization'
   repo-token:
     description: 'Github access token'
+  slack-error-channel-id:
+    description: "ID of the Slack channel to post errors to, if we don't know where else to send them"
   slack-token:
     description: 'Slack access token with write access'
   write-token:

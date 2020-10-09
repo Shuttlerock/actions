@@ -27,6 +27,11 @@ export const OrganizationName = getInput('organization-name', {
   required: true,
 })
 
+// ID of the Slack channel to post errors to, if we don't know where else to send them.
+export const SlackErrorChannelId = getInput('slack-error-channel-id', {
+  required: true,
+})
+
 // Token with write access to Slack.
 export const SlackToken = getInput('slack-token', { required: true })
 
