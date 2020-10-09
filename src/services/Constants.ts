@@ -1,5 +1,15 @@
 import { getInput } from '@actions/core'
 
+// The host to use when connecting to the Jira API.
+export const CredentialsApiPrefix = getInput('credentials-api-prefix', {
+  required: true,
+})
+
+// The host to use when connecting to the Jira API.
+export const CredentialsApiSecret = getInput('credentials-api-secret', {
+  required: true,
+})
+
 // Token with write access to Github - set in organization secrets.
 export const GithubWriteToken = getInput('write-token', { required: true })
 
@@ -17,15 +27,8 @@ export const OrganizationName = getInput('organization-name', {
   required: true,
 })
 
-// The host to use when connecting to the Jira API.
-export const CredentialsApiPrefix = getInput('credentials-api-prefix', {
-  required: true,
-})
-
-// The host to use when connecting to the Jira API.
-export const CredentialsApiSecret = getInput('credentials-api-secret', {
-  required: true,
-})
+// Token with write access to Slack.
+export const SlackToken = getInput('slack-token', { required: true })
 
 // Labels.
 export const InProgressLabel = 'in-progress'

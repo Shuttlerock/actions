@@ -16,6 +16,13 @@ export interface Credentials {
   status: 'forbidden' | 'not_found' | 'ok'
 }
 
+/**
+ * Fetches the user credentials from the remote credential service for the given email address.
+ *
+ * @param {string} email The email addres of the user to look up.
+ *
+ * @returns {Credentials} The credentials object.
+ */
 export const getCredentialsByEmail = async (
   email: string
 ): Promise<Credentials> => {

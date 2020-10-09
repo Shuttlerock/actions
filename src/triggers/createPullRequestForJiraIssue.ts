@@ -1,7 +1,11 @@
 import { info } from '@actions/core'
 import isUndefined from 'lodash/isUndefined'
 
-import { InProgressLabel, JiraHost } from '@sr-services/Constants'
+import {
+  InProgressLabel,
+  JiraHost,
+  OrganizationName,
+} from '@sr-services/Constants'
 import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
   addLabels,
@@ -18,7 +22,7 @@ import {
   TreeTypes,
 } from '@sr-services/github'
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/jira'
-import { debug } from '@sr-services/Log'
+import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'
 import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
 
@@ -45,15 +49,6 @@ export const createPullRequestForJiraIssue = async (
   // 1. Fetch the Jira issue details.
   const issue = await getIssue(issueKey)
 
-  if (issue.fields.subtasks.length > 0) {
-    info(`Issue ${issue.key} has subtasks, so no pull request will be created`)
-    return
-  }
-
-  if (isUndefined(issue.fields.repository)) {
-    throw new Error(`No repository was set for issue ${issue.key}`)
-  }
-
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
 
   // 2. Find out who the PR should belong to.
@@ -64,6 +59,15 @@ export const createPullRequestForJiraIssue = async (
   }
   const assigneeEmail = issue.fields.assignee.emailAddress
   const credentials = await getCredentialsByEmail(assigneeEmail)
+
+  if (issue.fields.subtasks.length > 0) {
+    info(`Issue ${issue.key} has subtasks, so no pull request will be created`)
+    return
+  }
+
+  if (isUndefined(issue.fields.repository)) {
+    throw new Error(`No repository was set for issue ${issue.key}`)
+  }
 
   // 3. Check if a PR already exists for the issue.
   let pullRequestNumber
@@ -137,13 +141,15 @@ export const createPullRequestForJiraIssue = async (
     credentials.github_username,
   ])
 
-  debug('------------------------------')
-  debug(pullRequestNumber)
-  debug('------------------------------')
+  // 9. Tell the user.
+  const url = `https://github.com/${OrganizationName}/${repo.name}/pull/${pullRequestNumber}`
+  const message = `Here's your pull request: ${url}`
+  await sendUserMessage(credentials.slack_id, message)
 
   // Todo:
+  // - Send errors to Slack.
+  // - Refactor branch and pull request creation into library methods.
   // - Check before adding labels or assigning an owner?
-  // - Send success or failure to Slack.
   // - Add tests.
   // - Handle epic PRs.
 }
