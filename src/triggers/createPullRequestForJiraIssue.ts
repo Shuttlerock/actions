@@ -10,16 +10,10 @@ import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
   addLabels,
   assignOwners,
-  createBlob,
   createBranch,
-  createCommit,
   createPullRequest,
-  createTree,
   getBranch,
-  getNextPullRequestNumber,
   getRepository,
-  TreeModes,
-  TreeTypes,
 } from '@sr-services/github'
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/jira'
 import { sendUserMessage } from '@sr-services/Slack'
@@ -84,33 +78,14 @@ export const createPullRequestForJiraIssue = async (
 
     // 5. If no branch exists with the right name, make a new one.
     if (isUndefined(branch)) {
-      const baseBranch = await getBranch(repo.name, baseBranchName)
-      if (isUndefined(baseBranch)) {
-        throw new Error(`Base branch not found for repository '${repo.name}'`)
-      }
-
-      // Figure out what the next pull request number will be.
-      const prNumber = await getNextPullRequestNumber(repo.name)
-
-      const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`
-      const blob = await createBlob(issue.fields.repository, content)
-      const treeData = [
-        {
-          path: `.meta/${issue.key}.md`,
-          mode: TreeModes.ModeFile,
-          type: TreeTypes.Blob,
-          sha: blob.sha,
-        },
-      ]
-      const tree = await createTree(repo.name, treeData, baseBranch.commit.sha)
-      const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`
-      const commit = await createCommit(
+      await createBranch(
         repo.name,
-        commitMsg,
-        tree.sha,
-        baseBranch.commit.sha
+        baseBranchName,
+        newBranchName,
+        `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+        `.meta/${issue.key}.md`,
+        `[${issue.key}] [skip ci] Create pull request.`
       )
-      await createBranch(repo.name, newBranchName, commit.sha)
     }
 
     // 6. Create the pull request.

@@ -47,7 +47,7 @@ interface Tree {
  *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
-export const createBlob = async (
+export const createGitBlob = async (
   repo: Repository,
   content: string
 ): Promise<GitCreateBlobResponseData> => {
@@ -70,7 +70,7 @@ export const createBlob = async (
  *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
-export const createCommit = async (
+export const createGitCommit = async (
   repo: Repository,
   message: string,
   tree: Sha,
@@ -90,21 +90,21 @@ export const createCommit = async (
 /**
  * Creates a new branch.
  *
- * @param {string} repo The name of the repository that the branch will belong to.
- * @param {Branch} name The name of the branch to create.
- * @param {Sha}    sha  The commit sha to base the branch on.
+ * @param {string} repo   The name of the repository that the branch will belong to.
+ * @param {Branch} branch The name of the branch to create.
+ * @param {Sha}    sha    The commit sha to base the branch on.
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-export const createBranch = async (
+export const createGitBranch = async (
   repo: Repository,
-  name: Branch,
+  branch: Branch,
   sha: Sha
 ): Promise<GitCreateRefResponseData> => {
   const response = await client.git.createRef({
     owner: OrganizationName,
     repo,
-    ref: `refs/heads/${name}`,
+    ref: `refs/heads/${branch}`,
     sha,
   })
 
@@ -120,7 +120,7 @@ export const createBranch = async (
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-export const createTree = async (
+export const createGitTree = async (
   repo: Repository,
   tree: Tree[],
   baseTree: Sha

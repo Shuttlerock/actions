@@ -5045,10 +5045,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBranch = void 0;
+exports.createBranch = exports.getBranch = void 0;
+const isUndefined_1 = __importDefault(__webpack_require__(825));
 const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(733);
+const Git_1 = __webpack_require__(844);
+const Repository_1 = __webpack_require__(944);
 /**
  * Fetches a branch from the Github API.
  *
@@ -5073,6 +5079,25 @@ exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function
         throw err;
     }
     return undefined;
+});
+exports.createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
+    const baseBranch = yield exports.getBranch(repo, baseBranchName);
+    if (isUndefined_1.default(baseBranch)) {
+        throw new Error(`Base branch not found for repository '${repo}'`);
+    }
+    const prNumber = yield Repository_1.getNextPullRequestNumber(repo);
+    const blob = yield Git_1.createGitBlob(repo, fileContent);
+    const treeData = [
+        {
+            path: filePath,
+            mode: Git_1.TreeModes.ModeFile,
+            type: Git_1.TreeTypes.Blob,
+            sha: blob.sha,
+        },
+    ];
+    const tree = yield Git_1.createGitTree(repo, treeData, baseBranch.commit.sha);
+    const commit = yield Git_1.createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
+    return Git_1.createGitBranch(repo, newBranchName, commit.sha);
 });
 
 
@@ -46178,26 +46203,7 @@ exports.createPullRequestForJiraIssue = (_email, issueKey) => __awaiter(void 0, 
         const branch = yield github_1.getBranch(repo.name, newBranchName);
         // 5. If no branch exists with the right name, make a new one.
         if (isUndefined_1.default(branch)) {
-            const baseBranch = yield github_1.getBranch(repo.name, baseBranchName);
-            if (isUndefined_1.default(baseBranch)) {
-                throw new Error(`Base branch not found for repository '${repo.name}'`);
-            }
-            // Figure out what the next pull request number will be.
-            const prNumber = yield github_1.getNextPullRequestNumber(repo.name);
-            const content = `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`;
-            const blob = yield github_1.createBlob(issue.fields.repository, content);
-            const treeData = [
-                {
-                    path: `.meta/${issue.key}.md`,
-                    mode: github_1.TreeModes.ModeFile,
-                    type: github_1.TreeTypes.Blob,
-                    sha: blob.sha,
-                },
-            ];
-            const tree = yield github_1.createTree(repo.name, treeData, baseBranch.commit.sha);
-            const commitMsg = `[#${prNumber}] [${issue.key}] [skip ci] Create pull request.`;
-            const commit = yield github_1.createCommit(repo.name, commitMsg, tree.sha, baseBranch.commit.sha);
-            yield github_1.createBranch(repo.name, newBranchName, commit.sha);
+            yield github_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
         }
         // 6. Create the pull request.
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
@@ -49778,7 +49784,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTree = exports.createBranch = exports.createCommit = exports.createBlob = exports.TreeTypes = exports.TreeModes = void 0;
+exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
 const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(733);
 exports.TreeModes = {
@@ -49799,7 +49805,7 @@ exports.TreeTypes = {
  *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
-exports.createBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createBlob({
         owner: Constants_1.OrganizationName,
         repo,
@@ -49817,7 +49823,7 @@ exports.createBlob = (repo, content) => __awaiter(void 0, void 0, void 0, functi
  *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
-exports.createCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createCommit({
         owner: Constants_1.OrganizationName,
         repo,
@@ -49830,17 +49836,17 @@ exports.createCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0
 /**
  * Creates a new branch.
  *
- * @param {string} repo The name of the repository that the branch will belong to.
- * @param {Branch} name The name of the branch to create.
- * @param {Sha}    sha  The commit sha to base the branch on.
+ * @param {string} repo   The name of the repository that the branch will belong to.
+ * @param {Branch} branch The name of the branch to create.
+ * @param {Sha}    sha    The commit sha to base the branch on.
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-exports.createBranch = (repo, name, sha) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createRef({
         owner: Constants_1.OrganizationName,
         repo,
-        ref: `refs/heads/${name}`,
+        ref: `refs/heads/${branch}`,
         sha,
     });
     return response.data;
@@ -49854,7 +49860,7 @@ exports.createBranch = (repo, name, sha) => __awaiter(void 0, void 0, void 0, fu
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-exports.createTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createTree({
         owner: Constants_1.OrganizationName,
         repo,
