@@ -16,7 +16,7 @@ export type Repository = string
 // - 100644: file (blob)
 // - 100755: executable (blob)
 // - 040000: subdirectory (tree).
-type TreeMode = '100644' | '100755' | '040000'
+type TreeMode = '100644' | '100755' | '040000' | '160000' | '120000'
 export const TreeModes = {
   ModeFile: '100644' as TreeMode,
   ModeExe: '100755' as TreeMode,
@@ -31,12 +31,12 @@ export const TreeTypes = {
 }
 
 // Only ONE of 'sha' or 'content' should be provided.
-interface Tree {
+export interface Tree {
   content?: string
-  mode: TreeMode
-  type: TreeType
-  path: string
-  sha?: Sha
+  mode?: TreeMode
+  type?: TreeType
+  path?: string
+  sha?: Sha | null
 }
 
 /**
@@ -115,10 +115,10 @@ export const createGitBranch = async (
  * Creates a new tree, which can be used to make a commit.
  *
  * @param {string} repo     The name of the repository that the branch will belong to.
- * @param {Tree}   tree     The data to use when creating the tree.
+ * @param {Tree[]} tree     The data to use when creating the tree.
  * @param {Sha}    baseTree The tree to base the new tree on.
  *
- * @returns {GitCreateRefResponseData} The branch data.
+ * @returns {GitCreateTreeResponseData} The branch data.
  */
 export const createGitTree = async (
   repo: Repository,

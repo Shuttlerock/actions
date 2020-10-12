@@ -7,6 +7,7 @@ module.exports = {
     "^@sr-actions/(.+)$": "<rootDir>/src/actions/$1",
     "^@sr-services/(.+)$": "<rootDir>/src/services/$1",
   },
+  setupFiles: ['./src/__tests__/setup.ts'],
   testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
   testRunner: 'jest-circus/runner',

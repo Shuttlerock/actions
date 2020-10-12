@@ -50142,10 +50142,10 @@ exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 
  * Creates a new tree, which can be used to make a commit.
  *
  * @param {string} repo     The name of the repository that the branch will belong to.
- * @param {Tree}   tree     The data to use when creating the tree.
+ * @param {Tree[]} tree     The data to use when creating the tree.
  * @param {Sha}    baseTree The tree to base the new tree on.
  *
- * @returns {GitCreateRefResponseData} The branch data.
+ * @returns {GitCreateTreeResponseData} The branch data.
  */
 exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createTree({
