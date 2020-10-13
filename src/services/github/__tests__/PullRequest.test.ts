@@ -8,7 +8,11 @@ import {
 import { OrganizationName } from '@sr-services/Constants'
 import * as Client from '@sr-services/github/Client'
 import { Branch, Repository } from '@sr-services/github/Git'
-import * as PullRequest from '@sr-services/github/PullRequest'
+import {
+  addLabels,
+  assignOwners,
+  createPullRequest,
+} from '@sr-services/github/PullRequest'
 
 const repo = 'my-repo'
 
@@ -28,7 +32,7 @@ describe('PullRequest', () => {
               data: [{ name: 'my-label' }],
             } as OctokitResponse<IssuesAddLabelsResponseData>)
         )
-      const result = await PullRequest.addLabels(repo, 23, ['my-label'])
+      const result = await addLabels(repo, 23, ['my-label'])
       expect(spy).toHaveBeenCalledWith({
         issue_number: 23,
         labels: ['my-label'],
@@ -55,7 +59,7 @@ describe('PullRequest', () => {
               data: { id: 1234 },
             } as OctokitResponse<IssuesAddAssigneesResponseData>)
         )
-      const result = await PullRequest.assignOwners(repo, 23, ['dperrett'])
+      const result = await assignOwners(repo, 23, ['dperrett'])
       expect(spy).toHaveBeenCalledWith({
         assignees: ['dperrett'],
         issue_number: 23,
@@ -88,7 +92,7 @@ describe('PullRequest', () => {
               data: { id: 1234 },
             } as OctokitResponse<PullsCreateResponseData>)
         )
-      const result = await PullRequest.createPullRequest(
+      const result = await createPullRequest(
         repo,
         'master',
         'feature/add-a-widget',

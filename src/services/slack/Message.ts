@@ -1,10 +1,5 @@
-import { WebClient } from '@slack/web-api'
-
-import { SlackErrorChannelId, SlackToken } from '@sr-services/Constants'
-
-// We had to roll back the NCC version so that this would work.
-// See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
-const client = new WebClient(SlackToken)
+import { SlackErrorChannelId } from '@sr-services/Constants'
+import { client } from '@sr-services/slack/Client'
 
 /**
  * Sends an error message to the default slack group.

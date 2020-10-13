@@ -8,7 +8,18 @@ import {
 
 import { OrganizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/github/Client'
-import * as Git from '@sr-services/github/Git'
+import {
+  Branch,
+  createGitBlob,
+  createGitBranch,
+  createGitCommit,
+  createGitTree,
+  Repository,
+  Sha,
+  Tree,
+  TreeModes,
+  TreeTypes,
+} from '@sr-services/github/Git'
 
 const repo = 'my-repo'
 
@@ -18,12 +29,12 @@ describe('Git', () => {
       const spy = jest
         .spyOn(client.git, 'createBlob')
         .mockImplementation(
-          (_args?: { owner: string; repo: Git.Repository; content: string }) =>
+          (_args?: { owner: string; repo: Repository; content: string }) =>
             Promise.resolve({
               data: { sha: 'blob-sha' },
             } as OctokitResponse<GitCreateBlobResponseData>)
         )
-      const result = await Git.createGitBlob(repo, 'my-content')
+      const result = await createGitBlob(repo, 'my-content')
       expect(spy).toHaveBeenCalledWith({
         owner: OrganizationName,
         repo,
@@ -41,16 +52,16 @@ describe('Git', () => {
         .mockImplementation(
           (_args?: {
             owner: string
-            repo: Git.Repository
+            repo: Repository
             message: string
-            tree: Git.Sha
-            parents: Git.Sha[]
+            tree: Sha
+            parents: Sha[]
           }) =>
             Promise.resolve({
               data: { sha: 'commit-sha' },
             } as OctokitResponse<GitCreateCommitResponseData>)
         )
-      const result = await Git.createGitCommit(
+      const result = await createGitCommit(
         repo,
         'my-message',
         'master',
@@ -75,15 +86,15 @@ describe('Git', () => {
         .mockImplementation(
           (_args?: {
             owner: string
-            repo: Git.Repository
-            ref: Git.Branch
-            sha: Git.Sha
+            repo: Repository
+            ref: Branch
+            sha: Sha
           }) =>
             Promise.resolve({
               data: { ref: 'branch-ref' },
             } as OctokitResponse<GitCreateRefResponseData>)
         )
-      const result = await Git.createGitBranch(repo, 'my-branch', 'my-sha')
+      const result = await createGitBranch(repo, 'my-branch', 'my-sha')
       expect(spy).toHaveBeenCalledWith({
         owner: OrganizationName,
         repo,
@@ -102,9 +113,9 @@ describe('Git', () => {
         .mockImplementation(
           (_args?: {
             owner: string
-            repo: Git.Repository
-            tree: Git.Tree[]
-            base_tree?: Git.Sha
+            repo: Repository
+            tree: Tree[]
+            base_tree?: Sha
           }) =>
             Promise.resolve({
               data: { sha: 'tree-sha' },
@@ -113,12 +124,12 @@ describe('Git', () => {
       const tree = [
         {
           path: '/some/path',
-          mode: Git.TreeModes.ModeFile,
-          type: Git.TreeTypes.Blob,
+          mode: TreeModes.ModeFile,
+          type: TreeTypes.Blob,
           sha: 'tree-sha',
         },
       ]
-      const result = await Git.createGitTree(repo, tree, 'my-sha')
+      const result = await createGitTree(repo, tree, 'my-sha')
       expect(spy).toHaveBeenCalledWith({
         owner: OrganizationName,
         repo,

@@ -1,0 +1,348 @@
+{
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "id": "10000",
+  "self": "https://example.atlassian.net/rest/api/2/issue/10000",
+  "key": "ISSUE-236",
+  "properties": {},
+  "names": {
+    "statuscategorychangedate": "Status Category Changed",
+    "parent": "Parent",
+    "issuetype": "Issue Type",
+    "timespent": "Time Spent",
+    "customfield_10030": "Flagged",
+    "project": "Project",
+    "customfield_10031": "Issue color",
+    "customfield_10032": "Target start",
+    "fixVersions": "Fix versions",
+    "customfield_10033": "Target end",
+    "customfield_10034": "Repository",
+    "aggregatetimespent": "Σ Time Spent",
+    "customfield_10035": "Complexity",
+    "resolution": "Resolution",
+    "customfield_10027": "Satisfaction",
+    "customfield_10028": "Satisfaction date",
+    "customfield_10029": "Flagged",
+    "resolutiondate": "Resolved",
+    "workratio": "Work Ratio",
+    "lastViewed": "Last Viewed",
+    "issuerestriction": "Restrict to",
+    "watches": "Watchers",
+    "created": "Created",
+    "customfield_10020": "Rank",
+    "customfield_10021": "Request Type",
+    "customfield_10022": "Request participants",
+    "customfield_10023": "Story Points",
+    "priority": "Priority",
+    "customfield_10026": "Approvals",
+    "labels": "Labels",
+    "customfield_10016": "Parent Link",
+    "customfield_10017": "[CHART] Date of First Response",
+    "customfield_10018": "[CHART] Time in Status",
+    "customfield_10000": "Sprint",
+    "timeestimate": "Remaining Estimate",
+    "aggregatetimeoriginalestimate": "Σ Original Estimate",
+    "versions": "Affects versions",
+    "issuelinks": "Linked Issues",
+    "assignee": "Assignee",
+    "updated": "Updated",
+    "status": "Status",
+    "components": "Components",
+    "timeoriginalestimate": "Original Estimate",
+    "description": "Description",
+    "customfield_10013": "Epic Link",
+    "customfield_10014": "Start date",
+    "timetracking": "Time tracking",
+    "customfield_10015": "Story point estimate",
+    "customfield_10005": "Change type",
+    "customfield_10006": "Change risk",
+    "customfield_10007": "Change reason",
+    "security": "Security Level",
+    "customfield_10008": "Change start date",
+    "customfield_10009": "Change completion date",
+    "aggregatetimeestimate": "Σ Remaining Estimate",
+    "attachment": "Attachment",
+    "summary": "Summary",
+    "creator": "Creator",
+    "subtasks": "Sub-tasks",
+    "reporter": "Reporter",
+    "aggregateprogress": "Σ Progress",
+    "customfield_10000": "Development",
+    "customfield_10001": "Team",
+    "customfield_10002": "Organizations",
+    "customfield_10003": "Approvers",
+    "customfield_10004": "Impact",
+    "environment": "Environment",
+    "duedate": "Due date",
+    "progress": "Progress",
+    "votes": "Votes",
+    "comment": "Comment",
+    "worklog": "Log Work"
+  },
+  "fields": {
+    "statuscategorychangedate": "2020-10-06T15:49:06.097+0900",
+    "issuetype": {
+      "self": "https://example.atlassian.net/rest/api/2/issuetype/10000",
+      "id": "10000",
+      "description": "Subtasks track small pieces of work that are part of a larger task.",
+      "iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10000&avatarType=issuetype",
+      "name": "Tech task",
+      "subtask": true,
+      "avatarId": 10000,
+      "entityId": "11111111-1111-1111-1111-111111111111"
+    },
+    "parent": {
+      "id": "10906",
+      "key": "ISSUE-232",
+      "self": "https://example.atlassian.net/rest/api/2/issue/10906",
+      "fields": {
+        "summary": "Automate deployment",
+        "status": {
+          "self": "https://example.atlassian.net/rest/api/2/status/10016",
+          "description": "",
+          "iconUrl": "https://example.atlassian.net/",
+          "name": "In development",
+          "id": "10016",
+          "statusCategory": {
+            "self": "https://example.atlassian.net/rest/api/2/statuscategory/4",
+            "id": 4,
+            "key": "indeterminate",
+            "colorName": "yellow",
+            "name": "In Progress"
+          }
+        },
+        "priority": {
+          "self": "https://example.atlassian.net/rest/api/2/priority/3",
+          "iconUrl": "https://example.atlassian.net/images/icons/priorities/medium.svg",
+          "name": "Medium",
+          "id": "3"
+        },
+        "issuetype": {
+          "self": "https://example.atlassian.net/rest/api/2/issuetype/10015",
+          "id": "10015",
+          "description": "Functionality or a feature expressed as a user goal.",
+          "iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10315&avatarType=issuetype",
+          "name": "Story",
+          "subtask": false,
+          "avatarId": 10000,
+          "entityId": "11111111-1111-1111-1111-111111111111"
+        }
+      }
+    },
+    "timespent": null,
+    "customfield_10030": null,
+    "project": {
+      "self": "https://example.atlassian.net/rest/api/2/project/10003",
+      "id": "10003",
+      "key": "EXAMPLE",
+      "name": "Example Studio",
+      "projectTypeKey": "software",
+      "simplified": true,
+      "avatarUrls": {
+        "48x48": "https://example.atlassian.net/secure/projectavatar?pid=10003&avatarId=10406",
+        "24x24": "https://example.atlassian.net/secure/projectavatar?size=small&s=small&pid=10003&avatarId=10406",
+        "16x16": "https://example.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10003&avatarId=10406",
+        "32x32": "https://example.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10003&avatarId=10406"
+      }
+    },
+    "customfield_10031": null,
+    "customfield_10032": null,
+    "fixVersions": [],
+    "customfield_10033": null,
+    "customfield_10034": {
+      "self": "https://example.atlassian.net/rest/api/2/customFieldOption/10031",
+      "value": "actions",
+      "id": "10031"
+    },
+    "aggregatetimespent": null,
+    "customfield_10035": null,
+    "resolution": null,
+    "customfield_10027": null,
+    "customfield_10028": null,
+    "customfield_10029": null,
+    "resolutiondate": null,
+    "workratio": -1,
+    "lastViewed": "2020-10-07T10:52:29.974+0900",
+    "issuerestriction": {
+      "issuerestrictions": {},
+      "shouldDisplay": true
+    },
+    "watches": {
+      "self": "https://example.atlassian.net/rest/api/2/issue/ISSUE-236/watchers",
+      "watchCount": 1,
+      "isWatching": false
+    },
+    "created": "2020-08-27T06:51:38.159+0900",
+    "customfield_10020": "0|i003gv:",
+    "customfield_10021": null,
+    "customfield_10022": [],
+    "customfield_10023": null,
+    "priority": {
+      "self": "https://example.atlassian.net/rest/api/2/priority/3",
+      "iconUrl": "https://example.atlassian.net/images/icons/priorities/medium.svg",
+      "name": "Medium",
+      "id": "3"
+    },
+    "customfield_10026": null,
+    "labels": [],
+    "customfield_10016": {
+      "hasEpicLinkFieldDependency": false,
+      "showField": false,
+      "nonEditableReason": {
+        "reason": "PLUGIN_LICENSE_ERROR",
+        "message": "The Parent Link is only available to Jira Premium users."
+      }
+    },
+    "customfield_10017": null,
+    "customfield_10018": null,
+    "customfield_10000": null,
+    "timeestimate": null,
+    "aggregatetimeoriginalestimate": null,
+    "versions": [],
+    "issuelinks": [],
+    "assignee": {
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=557058%253A11111111-1111-1111-1111-111111111111",
+      "accountId": "557058:11111111-1111-1111-1111-111111111111",
+      "emailAddress": "***",
+      "avatarUrls": {
+        "48x48": "https://secure.gravatar.com/avatar/735790280ff7927627022b48db1e57db?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FDP-5.png",
+        "24x24": "https://secure.gravatar.com/avatar/735790280ff7927627022b48db1e57db?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FDP-5.png",
+        "16x16": "https://secure.gravatar.com/avatar/735790280ff7927627022b48db1e57db?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FDP-5.png",
+        "32x32": "https://secure.gravatar.com/avatar/735790280ff7927627022b48db1e57db?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FDP-5.png"
+      },
+      "displayName": "Dave Perrett",
+      "active": true,
+      "timeZone": "Asia/Tokyo",
+      "accountType": "atlassian"
+    },
+    "updated": "2020-10-07T11:00:51.100+0900",
+    "status": {
+      "self": "https://example.atlassian.net/rest/api/2/status/10016",
+      "description": "",
+      "iconUrl": "https://example.atlassian.net/",
+      "name": "In development",
+      "id": "10016",
+      "statusCategory": {
+        "self": "https://example.atlassian.net/rest/api/2/statuscategory/4",
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "components": [],
+    "timeoriginalestimate": null,
+    "description": "+ create a PR with rodney (develop → master)\n\n+ ping reviewers\n\n+ create release notes\n\n+ tag release candidate",
+    "customfield_10013": null,
+    "customfield_10014": null,
+    "timetracking": {},
+    "customfield_10015": null,
+    "customfield_10005": null,
+    "customfield_10006": null,
+    "customfield_10007": null,
+    "security": null,
+    "customfield_10008": null,
+    "customfield_10009": null,
+    "aggregatetimeestimate": null,
+    "attachment": [],
+    "summary": "Create a release PR",
+    "creator": {
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=111111111111111111111111",
+      "accountId": "111111111111111111111111",
+      "avatarUrls": {
+        "48x48": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "24x24": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "16x16": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "32x32": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png"
+      },
+      "displayName": "John Smith",
+      "active": true,
+      "timeZone": "Asia/Tokyo",
+      "accountType": "atlassian"
+    },
+    "subtasks": [],
+    "reporter": {
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=111111111111111111111111",
+      "accountId": "111111111111111111111111",
+      "avatarUrls": {
+        "48x48": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "24x24": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "16x16": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+        "32x32": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png"
+      },
+      "displayName": "John Smith",
+      "active": true,
+      "timeZone": "Asia/Tokyo",
+      "accountType": "atlassian"
+    },
+    "aggregateprogress": {
+      "progress": 0,
+      "total": 0
+    },
+    "customfield_10000": "{pullrequest={dataType=pullrequest, state=OPEN, stateCount=1}, json={\"cachedValue\":{\"errors\":[],\"summary\":{\"pullrequest\":{\"overall\":{\"count\":1,\"lastUpdated\":\"2020-10-06T16:10:46.000+0900\",\"stateCount\":1,\"state\":\"OPEN\",\"dataType\":\"pullrequest\",\"open\":true},\"byInstanceType\":{\"GitHub\":{\"count\":1,\"name\":\"GitHub\"}}}}},\"isStale\":true}}",
+    "customfield_10001": null,
+    "customfield_10002": null,
+    "customfield_10003": null,
+    "customfield_10004": null,
+    "environment": null,
+    "duedate": null,
+    "progress": {
+      "progress": 0,
+      "total": 0
+    },
+    "votes": {
+      "self": "https://example.atlassian.net/rest/api/2/issue/ISSUE-236/votes",
+      "votes": 0,
+      "hasVoted": false
+    },
+    "comment": {
+      "comments": [
+        {
+          "self": "https://example.atlassian.net/rest/api/2/issue/10000/comment/10382",
+          "id": "10382",
+          "author": {
+            "self": "https://example.atlassian.net/rest/api/2/user?accountId=111111111111111111111111",
+            "accountId": "111111111111111111111111",
+            "avatarUrls": {
+              "48x48": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "24x24": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "16x16": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "32x32": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png"
+            },
+            "displayName": "John Smith",
+            "active": true,
+            "timeZone": "Asia/Tokyo",
+            "accountType": "atlassian"
+          },
+          "body": "This is what we want to do: ...",
+          "updateAuthor": {
+            "self": "https://example.atlassian.net/rest/api/2/user?accountId=111111111111111111111111",
+            "accountId": "111111111111111111111111",
+            "avatarUrls": {
+              "48x48": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "24x24": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "16x16": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png",
+              "32x32": "https://secure.gravatar.com/avatar/11111111111111111111111111111111?d=https%253A%252F%252Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%252Finitials%252FSB-0.png"
+            },
+            "displayName": "John Smith",
+            "active": true,
+            "timeZone": "Asia/Tokyo",
+            "accountType": "atlassian"
+          },
+          "created": "2020-09-30T10:22:29.570+0900",
+          "updated": "2020-09-30T10:22:43.168+0900",
+          "jsdPublic": true
+        }
+      ],
+      "maxResults": 1,
+      "total": 1,
+      "startAt": 0
+    },
+    "worklog": {
+      "startAt": 0,
+      "maxResults": 20,
+      "total": 0,
+      "worklogs": []
+    },
+    "repository": "actions"
+  }
+}
