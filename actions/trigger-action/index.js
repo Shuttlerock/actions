@@ -56165,7 +56165,7 @@ exports.getCredentialsByEmail = (email) => __awaiter(void 0, void 0, void 0, fun
     });
     const credentials = (yield response.json());
     if (credentials.status !== 'ok') {
-        throw new Error(`Could not get credentials for the user ${email}, so no pull request will be created`);
+        throw new Error(`Could not get credentials for the user ${email}`);
     }
     return credentials;
 });
@@ -56807,6 +56807,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         const credentials = yield Credentials_1.getCredentialsByEmail(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
+        core_1.error(message);
         return;
     }
     const assigneeEmail = issue.fields.assignee.emailAddress;

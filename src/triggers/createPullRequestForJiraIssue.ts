@@ -49,6 +49,7 @@ export const createPullRequestForJiraIssue = async (
     const credentials = await getCredentialsByEmail(email)
     const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
     await sendUserMessage(credentials.slack_id, message)
+    error(message)
     return
   }
   const assigneeEmail = issue.fields.assignee.emailAddress

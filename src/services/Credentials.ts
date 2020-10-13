@@ -39,9 +39,7 @@ export const getCredentialsByEmail = async (
   const credentials = (await response.json()) as Credentials
 
   if (credentials.status !== 'ok') {
-    throw new Error(
-      `Could not get credentials for the user ${email}, so no pull request will be created`
-    )
+    throw new Error(`Could not get credentials for the user ${email}`)
   }
 
   return credentials
