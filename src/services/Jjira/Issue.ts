@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 import { JiraEmail, JiraHost, JiraToken } from '@sr-services/Constants'
-import { client } from '@sr-services/jira/Client'
+import { client } from '@sr-services/Jjira/Client'
 
 interface User {
   accountId: string

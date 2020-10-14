@@ -5,7 +5,7 @@ import {
 import isUndefined from 'lodash/isUndefined'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/github/Client'
+import { client } from '@sr-services/Ggithub/Client'
 import {
   Branch,
   createGitBlob,
@@ -15,8 +15,8 @@ import {
   Repository,
   TreeModes,
   TreeTypes,
-} from '@sr-services/github/Git'
-import { getNextPullRequestNumber } from '@sr-services/github/Repository'
+} from '@sr-services/Ggithub/Git'
+import { getNextPullRequestNumber } from '@sr-services/Ggithub/Repository'
 
 /**
  * Fetches a branch from the Github API.

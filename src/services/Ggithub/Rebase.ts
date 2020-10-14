@@ -3,7 +3,7 @@
 
 import { info } from '@actions/core'
 
-import { Repository } from '@sr-services/github/Git'
+import { Repository } from '@sr-services/Ggithub/Git'
 
 export const rebase = (
   owner: string,

@@ -149,7 +149,7 @@ module.exports = function(Promise, Context,
 var async = Promise._async;
 var Warning = __webpack_require__(816).Warning;
 var util = __webpack_require__(448);
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 var canAttachTrace = util.canAttachTrace;
 var unhandledRejectionHandled;
 var possiblyUnhandledRejection;
@@ -5025,77 +5025,7 @@ module.exports = function generate__limitLength(it, $keyword, $ruleType) {
 
 
 /***/ }),
-/* 49 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createBranch = exports.getBranch = void 0;
-const isUndefined_1 = __importDefault(__webpack_require__(825));
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(733);
-const Git_1 = __webpack_require__(844);
-const Repository_1 = __webpack_require__(944);
-/**
- * Fetches a branch from the Github API.
- *
- * @param {Repository} repo   The name of the repository that the branch belongs to.
- * @param {Branch}     branch The name of the branch to fetch.
- *
- * @returns {ReposGetBranchResponseData} The branch data.
- */
-exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield Client_1.client.repos.getBranch({
-            owner: Constants_1.OrganizationName,
-            repo,
-            branch,
-        });
-        return response.data;
-    }
-    catch (err) {
-        if (err.message === 'Branch not found') {
-            return undefined;
-        }
-        throw err;
-    }
-    return undefined;
-});
-exports.createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
-    const baseBranch = yield exports.getBranch(repo, baseBranchName);
-    if (isUndefined_1.default(baseBranch)) {
-        throw new Error(`Base branch not found for repository '${repo}'`);
-    }
-    const prNumber = yield Repository_1.getNextPullRequestNumber(repo);
-    const blob = yield Git_1.createGitBlob(repo, fileContent);
-    const treeData = [
-        {
-            path: filePath,
-            mode: Git_1.TreeModes.ModeFile,
-            type: Git_1.TreeTypes.Blob,
-            sha: blob.sha,
-        },
-    ];
-    const tree = yield Git_1.createGitTree(repo, treeData, baseBranch.commit.sha);
-    const commit = yield Git_1.createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
-    return Git_1.createGitBranch(repo, newBranchName, commit.sha);
-});
-
-
-/***/ }),
+/* 49 */,
 /* 50 */,
 /* 51 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -6017,7 +5947,109 @@ function serializer(replacer, cycleReplacer) {
 /***/ }),
 /* 74 */,
 /* 75 */,
-/* 76 */,
+/* 76 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(476);
+exports.TreeModes = {
+    ModeFile: '100644',
+    ModeExe: '100755',
+    ModeDirectory: '040000',
+};
+exports.TreeTypes = {
+    Blob: 'blob',
+    Commit: 'commit',
+    Tree: 'tree',
+};
+/**
+ * Creates a new blob, which can be used to make a tree.
+ *
+ * @param {string} repo    The name of the repository that the blob will belong to.
+ * @param {string} content The content to put in the blob.
+ *
+ * @returns {GitCreateBlobResponseData} The blob data.
+ */
+exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createBlob({
+        owner: Constants_1.OrganizationName,
+        repo,
+        content,
+    });
+    return response.data;
+});
+/**
+ * Creates a new commit.
+ *
+ * @param {string} repo    The name of the repository that the commit will belong to.
+ * @param {string} message The commit message.
+ * @param {Sha}    tree    The tree to attach the commit to.
+ * @param {Sha}    parent  The parent to attach the commit to.
+ *
+ * @returns {GitCreateCommitResponseData} The commit data.
+ */
+exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createCommit({
+        owner: Constants_1.OrganizationName,
+        repo,
+        message,
+        tree,
+        parents: [parent],
+    });
+    return response.data;
+});
+/**
+ * Creates a new branch.
+ *
+ * @param {string} repo   The name of the repository that the branch will belong to.
+ * @param {Branch} branch The name of the branch to create.
+ * @param {Sha}    sha    The commit sha to base the branch on.
+ *
+ * @returns {GitCreateRefResponseData} The branch data.
+ */
+exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createRef({
+        owner: Constants_1.OrganizationName,
+        repo,
+        ref: `refs/heads/${branch}`,
+        sha,
+    });
+    return response.data;
+});
+/**
+ * Creates a new tree, which can be used to make a commit.
+ *
+ * @param {string} repo     The name of the repository that the branch will belong to.
+ * @param {Tree[]} tree     The data to use when creating the tree.
+ * @param {Sha}    baseTree The tree to base the new tree on.
+ *
+ * @returns {GitCreateTreeResponseData} The branch data.
+ */
+exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createTree({
+        owner: Constants_1.OrganizationName,
+        repo,
+        tree,
+        base_tree: baseTree,
+    });
+    return response.data;
+});
+
+
+/***/ }),
 /* 77 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6712,92 +6744,82 @@ module.exports = function generate_anyOf(it, $keyword, $ruleType) {
 /* 95 */,
 /* 96 */,
 /* 97 */,
-/* 98 */,
+/* 98 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var createCompounder = __webpack_require__(702);
+
+/**
+ * Converts `string` to
+ * [snake case](https://en.wikipedia.org/wiki/Snake_case).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the snake cased string.
+ * @example
+ *
+ * _.snakeCase('Foo Bar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('fooBar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('--FOO-BAR--');
+ * // => 'foo_bar'
+ */
+var snakeCase = createCompounder(function(result, word, index) {
+  return result + (index ? '_' : '') + word.toLowerCase();
+});
+
+module.exports = snakeCase;
+
+
+/***/ }),
 /* 99 */,
 /* 100 */,
 /* 101 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var isES5 = (function(){
-    "use strict";
-    return this === undefined;
-})();
+"use strict";
 
-if (isES5) {
-    module.exports = {
-        freeze: Object.freeze,
-        defineProperty: Object.defineProperty,
-        getDescriptor: Object.getOwnPropertyDescriptor,
-        keys: Object.keys,
-        names: Object.getOwnPropertyNames,
-        getPrototypeOf: Object.getPrototypeOf,
-        isArray: Array.isArray,
-        isES5: isES5,
-        propertyIsWritable: function(obj, prop) {
-            var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-            return !!(!descriptor || descriptor.writable || descriptor.set);
-        }
-    };
-} else {
-    var has = {}.hasOwnProperty;
-    var str = {}.toString;
-    var proto = {}.constructor.prototype;
-
-    var ObjectKeys = function (o) {
-        var ret = [];
-        for (var key in o) {
-            if (has.call(o, key)) {
-                ret.push(key);
-            }
-        }
-        return ret;
-    };
-
-    var ObjectGetDescriptor = function(o, key) {
-        return {value: o[key]};
-    };
-
-    var ObjectDefineProperty = function (o, key, desc) {
-        o[key] = desc.value;
-        return o;
-    };
-
-    var ObjectFreeze = function (obj) {
-        return obj;
-    };
-
-    var ObjectGetPrototypeOf = function (obj) {
-        try {
-            return Object(obj).constructor.prototype;
-        }
-        catch (e) {
-            return proto;
-        }
-    };
-
-    var ArrayIsArray = function (obj) {
-        try {
-            return str.call(obj) === "[object Array]";
-        }
-        catch(e) {
-            return false;
-        }
-    };
-
-    module.exports = {
-        isArray: ArrayIsArray,
-        keys: ObjectKeys,
-        names: ObjectKeys,
-        defineProperty: ObjectDefineProperty,
-        getDescriptor: ObjectGetDescriptor,
-        freeze: ObjectFreeze,
-        getPrototypeOf: ObjectGetPrototypeOf,
-        isES5: isES5,
-        propertyIsWritable: function() {
-            return true;
-        }
-    };
-}
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sendUserMessage = exports.sendErrorMessage = void 0;
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(434);
+/**
+ * Sends an error message to the default slack group.
+ *
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Client_1.client.chat.postMessage({ channel: Constants_1.SlackErrorChannelId, text: message });
+});
+/**
+ * Sends a slack message to the user with the given slack ID.
+ *
+ * @param {string} userId  The Slack user ID to send the message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+exports.sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, function* () {
+    // See: https://api.slack.com/methods/chat.postMessage
+    yield Client_1.client.chat.postMessage({ channel: userId, text: message });
+});
 
 
 /***/ }),
@@ -7744,7 +7766,7 @@ var isTypedArray = __webpack_require__(657).strict
 var helpers = __webpack_require__(845)
 var cookies = __webpack_require__(976)
 var getProxyFromURI = __webpack_require__(654)
-var Querystring = __webpack_require__(476).Querystring
+var Querystring = __webpack_require__(419).Querystring
 var Har = __webpack_require__(423).Har
 var Auth = __webpack_require__(624).Auth
 var OAuth = __webpack_require__(174).OAuth
@@ -7753,7 +7775,7 @@ var Multipart = __webpack_require__(531).Multipart
 var Redirect = __webpack_require__(451).Redirect
 var Tunnel = __webpack_require__(51).Tunnel
 var now = __webpack_require__(644)
-var Buffer = __webpack_require__(457).Buffer
+var Buffer = __webpack_require__(961).Buffer
 
 var safeStringify = helpers.safeStringify
 var isReadStream = helpers.isReadStream
@@ -9534,7 +9556,7 @@ var net = __webpack_require__(631)
   , events = __webpack_require__(614)
   , assert = __webpack_require__(357)
   , util = __webpack_require__(669)
-  , Buffer = __webpack_require__(457).Buffer
+  , Buffer = __webpack_require__(961).Buffer
   ;
 
 exports.httpOverHttp = httpOverHttp
@@ -11410,7 +11432,7 @@ var caseless = __webpack_require__(684)
 var uuid = __webpack_require__(824)
 var oauth = __webpack_require__(468)
 var crypto = __webpack_require__(417)
-var Buffer = __webpack_require__(457).Buffer
+var Buffer = __webpack_require__(961).Buffer
 
 function OAuth (request) {
   this.request = request
@@ -13047,29 +13069,7 @@ exports.debug = debug; // for test
 /***/ }),
 /* 220 */,
 /* 221 */,
-/* 222 */
-/***/ (function(module) {
-
-function HARError (errors) {
-  var message = 'validation failed'
-
-  this.name = 'HARError'
-  this.message = message
-  this.errors = errors
-
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor)
-  } else {
-    this.stack = (new Error(message)).stack
-  }
-}
-
-HARError.prototype = Error.prototype
-
-module.exports = HARError
-
-
-/***/ }),
+/* 222 */,
 /* 223 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -13509,7 +13509,69 @@ exports.request = request;
 /* 235 */,
 /* 236 */,
 /* 237 */,
-/* 238 */,
+/* 238 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getIssuePullRequestNumbers = exports.getIssue = void 0;
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(656);
+/**
+ * Fetches the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ *
+ * @returns {Issue} The issue data.
+ */
+exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const issue = (yield Client_1.client.findIssue(key, 'names'));
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
+    if (fieldName) {
+        issue.fields.repository = issue.fields[fieldName].value;
+    }
+    return issue;
+});
+/**
+ * Fetches the numbers of the pull requests attached to this issue. Note that
+ * this is a **PRIVATE API**, and may break in the future.
+ *
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number[]} The PR numbers.
+ */
+exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
+    const host = `https://${Constants_1.JiraEmail}:${Constants_1.JiraToken}@${Constants_1.JiraHost}/`;
+    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    const ids = data.detail
+        .map((detail) => detail.pullRequests
+        .filter((pr) => pr.status === 'OPEN')
+        .map((pr) => pr.id))
+        .flat()
+        .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
+    return ids;
+});
+
+
+/***/ }),
 /* 239 */,
 /* 240 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -13946,69 +14008,7 @@ Promise.join = function () {
 /* 249 */,
 /* 250 */,
 /* 251 */,
-/* 252 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getIssuePullRequestNumbers = exports.getIssue = void 0;
-const node_fetch_1 = __importDefault(__webpack_require__(467));
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(807);
-/**
- * Fetches the issue with the given key from Jira.
- *
- * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
- *
- * @returns {Issue} The issue data.
- */
-exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    const issue = (yield Client_1.client.findIssue(key, 'names'));
-    // Find the repository, and include it explicitly. This is a bit ugly due to the way
-    // Jira includes custom fields.
-    const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
-    if (fieldName) {
-        issue.fields.repository = issue.fields[fieldName].value;
-    }
-    return issue;
-});
-/**
- * Fetches the numbers of the pull requests attached to this issue. Note that
- * this is a **PRIVATE API**, and may break in the future.
- *
- * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
- * @returns {number[]} The PR numbers.
- */
-exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
-    const host = `https://${Constants_1.JiraEmail}:${Constants_1.JiraToken}@${Constants_1.JiraHost}/`;
-    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
-    const response = yield node_fetch_1.default(url);
-    const data = (yield response.json());
-    const ids = data.detail
-        .map((detail) => detail.pullRequests
-        .filter((pr) => pr.status === 'OPEN')
-        .map((pr) => pr.id))
-        .flat()
-        .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
-    return ids;
-});
-
-
-/***/ }),
+/* 252 */,
 /* 253 */,
 /* 254 */,
 /* 255 */,
@@ -14081,7 +14081,7 @@ module.exports = function(
     Promise, PromiseArray, tryConvertToPromise, apiRejection) {
 var util = __webpack_require__(448);
 var isObject = util.isObject;
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 var Es6Map;
 if (typeof Map === "function") Es6Map = Map;
 
@@ -15997,7 +15997,26 @@ module.exports =
 
 /***/ }),
 /* 285 */,
-/* 286 */,
+/* 286 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(101), exports);
+
+
+/***/ }),
 /* 287 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -18729,7 +18748,7 @@ var util = __webpack_require__(448);
 var maybeWrapAsError = util.maybeWrapAsError;
 var errors = __webpack_require__(816);
 var OperationalError = errors.OperationalError;
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 
 function isUntypedError(obj) {
     return obj instanceof Error &&
@@ -27011,36 +27030,59 @@ module.exports = require("crypto");
 /***/ }),
 /* 418 */,
 /* 419 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var createCompounder = __webpack_require__(702);
+"use strict";
 
-/**
- * Converts `string` to
- * [snake case](https://en.wikipedia.org/wiki/Snake_case).
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category String
- * @param {string} [string=''] The string to convert.
- * @returns {string} Returns the snake cased string.
- * @example
- *
- * _.snakeCase('Foo Bar');
- * // => 'foo_bar'
- *
- * _.snakeCase('fooBar');
- * // => 'foo_bar'
- *
- * _.snakeCase('--FOO-BAR--');
- * // => 'foo_bar'
- */
-var snakeCase = createCompounder(function(result, word, index) {
-  return result + (index ? '_' : '') + word.toLowerCase();
-});
 
-module.exports = snakeCase;
+var qs = __webpack_require__(760)
+var querystring = __webpack_require__(191)
+
+function Querystring (request) {
+  this.request = request
+  this.lib = null
+  this.useQuerystring = null
+  this.parseOptions = null
+  this.stringifyOptions = null
+}
+
+Querystring.prototype.init = function (options) {
+  if (this.lib) { return }
+
+  this.useQuerystring = options.useQuerystring
+  this.lib = (this.useQuerystring ? querystring : qs)
+
+  this.parseOptions = options.qsParseOptions || {}
+  this.stringifyOptions = options.qsStringifyOptions || {}
+}
+
+Querystring.prototype.stringify = function (obj) {
+  return (this.useQuerystring)
+    ? this.rfc3986(this.lib.stringify(obj,
+      this.stringifyOptions.sep || null,
+      this.stringifyOptions.eq || null,
+      this.stringifyOptions))
+    : this.lib.stringify(obj, this.stringifyOptions)
+}
+
+Querystring.prototype.parse = function (str) {
+  return (this.useQuerystring)
+    ? this.lib.parse(str,
+      this.parseOptions.sep || null,
+      this.parseOptions.eq || null,
+      this.parseOptions)
+    : this.lib.parse(str, this.parseOptions)
+}
+
+Querystring.prototype.rfc3986 = function (str) {
+  return str.replace(/[!'()*]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+Querystring.prototype.unescape = querystring.unescape
+
+exports.Querystring = Querystring
 
 
 /***/ }),
@@ -28086,7 +28128,29 @@ module.exports = __webpack_require__(498)
 
 
 /***/ }),
-/* 427 */,
+/* 427 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(936), exports);
+__exportStar(__webpack_require__(76), exports);
+__exportStar(__webpack_require__(803), exports);
+__exportStar(__webpack_require__(629), exports);
+
+
+/***/ }),
 /* 428 */,
 /* 429 */
 /***/ (function(__unusedmodule, exports) {
@@ -28148,51 +28212,23 @@ __exportStar(__webpack_require__(571), exports);
 /***/ }),
 /* 432 */,
 /* 433 */,
-/* 434 */,
-/* 435 */,
-/* 436 */
+/* 434 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendUserMessage = exports.sendErrorMessage = void 0;
+exports.client = void 0;
+const web_api_1 = __webpack_require__(431);
 const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(811);
-/**
- * Sends an error message to the default slack group.
- *
- * @param {string} message The message to send.
- *
- * @returns {void}
- */
-exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
-    yield Client_1.client.chat.postMessage({ channel: Constants_1.SlackErrorChannelId, text: message });
-});
-/**
- * Sends a slack message to the user with the given slack ID.
- *
- * @param {string} userId  The Slack user ID to send the message to.
- * @param {string} message The message to send.
- *
- * @returns {void}
- */
-exports.sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, function* () {
-    // See: https://api.slack.com/methods/chat.postMessage
-    yield Client_1.client.chat.postMessage({ channel: userId, text: message });
-});
+// We had to roll back the NCC version so that this would work.
+// See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
+exports.client = new web_api_1.WebClient(Constants_1.SlackToken);
 
 
 /***/ }),
+/* 435 */,
+/* 436 */,
 /* 437 */,
 /* 438 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -29176,7 +29212,7 @@ Promise.prototype.asCallback = Promise.prototype.nodeify = function (nodeback,
 
 "use strict";
 
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 var canEvaluate = typeof navigator == "undefined";
 
 var errorObj = {e: {}};
@@ -30188,73 +30224,22 @@ module.exports = function parseHeaders(headers) {
 /***/ }),
 /* 456 */,
 /* 457 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(293)
-var Buffer = buffer.Buffer
+"use strict";
 
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.prototype = Object.create(Buffer.prototype)
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(238), exports);
 
 
 /***/ }),
@@ -32542,55 +32527,14 @@ function state(list, sortMethod)
 
 "use strict";
 
-
-var qs = __webpack_require__(760)
-var querystring = __webpack_require__(191)
-
-function Querystring (request) {
-  this.request = request
-  this.lib = null
-  this.useQuerystring = null
-  this.parseOptions = null
-  this.stringifyOptions = null
-}
-
-Querystring.prototype.init = function (options) {
-  if (this.lib) { return }
-
-  this.useQuerystring = options.useQuerystring
-  this.lib = (this.useQuerystring ? querystring : qs)
-
-  this.parseOptions = options.qsParseOptions || {}
-  this.stringifyOptions = options.qsStringifyOptions || {}
-}
-
-Querystring.prototype.stringify = function (obj) {
-  return (this.useQuerystring)
-    ? this.rfc3986(this.lib.stringify(obj,
-      this.stringifyOptions.sep || null,
-      this.stringifyOptions.eq || null,
-      this.stringifyOptions))
-    : this.lib.stringify(obj, this.stringifyOptions)
-}
-
-Querystring.prototype.parse = function (str) {
-  return (this.useQuerystring)
-    ? this.lib.parse(str,
-      this.parseOptions.sep || null,
-      this.parseOptions.eq || null,
-      this.parseOptions)
-    : this.lib.parse(str, this.parseOptions)
-}
-
-Querystring.prototype.rfc3986 = function (str) {
-  return str.replace(/[!'()*]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-Querystring.prototype.unescape = querystring.unescape
-
-exports.Querystring = Querystring
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.clientForToken = exports.client = void 0;
+const rest_1 = __webpack_require__(375);
+const Constants_1 = __webpack_require__(168);
+exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
+exports.clientForToken = (token) => {
+    return new rest_1.Octokit({ auth: token });
+};
 
 
 /***/ }),
@@ -32855,7 +32799,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parameterize = void 0;
-const snakeCase_1 = __importDefault(__webpack_require__(419));
+const snakeCase_1 = __importDefault(__webpack_require__(98));
 /**
  * Converts strings to a format safe for use in URLs, branch names etc.
  *
@@ -33121,26 +33065,7 @@ exports.delay = delay;
 /* 504 */,
 /* 505 */,
 /* 506 */,
-/* 507 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(436), exports);
-
-
-/***/ }),
+/* 507 */,
 /* 508 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -33604,7 +33529,7 @@ module.exports = {"$id":"query.json#","$schema":"http://json-schema.org/draft-06
 var uuid = __webpack_require__(824)
 var CombinedStream = __webpack_require__(477)
 var isstream = __webpack_require__(362)
-var Buffer = __webpack_require__(457).Buffer
+var Buffer = __webpack_require__(961).Buffer
 
 function Multipart (request) {
   this.request = request
@@ -38608,7 +38533,62 @@ function regex(str) {
 
 /***/ }),
 /* 628 */,
-/* 629 */,
+/* 629 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getRepository = exports.getNextPullRequestNumber = void 0;
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(476);
+/**
+ * Decides what number the next pull request will be.
+ *
+ * @param {Repository} repo The name of the repository that the PR will belong to.
+ * @returns {number}   The number of the next PR.
+ */
+exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.list({
+        direction: 'desc',
+        owner: Constants_1.OrganizationName,
+        page: 1,
+        per_page: 1,
+        repo,
+        sort: 'created',
+        state: 'all',
+    });
+    if (response.data.length === 0) {
+        return 1;
+    }
+    return response.data[0].number + 1;
+});
+/**
+ * Returns the repository with the given name.
+ *
+ * @param {Repository} repo The name of the repository to fetch.
+ *
+ * @returns {ReposGetResponseData} The repository data.
+ */
+exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.repos.get({
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+
+
+/***/ }),
 /* 630 */,
 /* 631 */
 /***/ (function(module) {
@@ -39690,7 +39670,29 @@ module.exports = getProxyFromURI
 
 /***/ }),
 /* 655 */,
-/* 656 */,
+/* 656 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.client = void 0;
+const jira_client_1 = __importDefault(__webpack_require__(411));
+const Constants_1 = __webpack_require__(168);
+exports.client = new jira_client_1.default({
+    apiVersion: '2',
+    host: Constants_1.JiraHost,
+    password: Constants_1.JiraToken,
+    protocol: 'https',
+    strictSSL: true,
+    username: Constants_1.JiraEmail,
+});
+
+
+/***/ }),
 /* 657 */
 /***/ (function(module) {
 
@@ -42322,7 +42324,7 @@ var disableAsyncHooks = function() {
     util.notEnumerableProp(Promise, "_getContext", getContextDomain);
 };
 
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 var Async = __webpack_require__(61);
 var async = new Async();
 es5.defineProperty(Promise, "_async", {value: async});
@@ -43099,7 +43101,7 @@ __webpack_require__(862)(Promise, INTERNAL);
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 var Ajv = __webpack_require__(745)
-var HARError = __webpack_require__(222)
+var HARError = __webpack_require__(944)
 var schemas = __webpack_require__(390)
 
 var ajv
@@ -46472,22 +46474,7 @@ nacl.setPRNG = function(fn) {
 /* 730 */,
 /* 731 */,
 /* 732 */,
-/* 733 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.clientForToken = exports.client = void 0;
-const rest_1 = __webpack_require__(375);
-const Constants_1 = __webpack_require__(168);
-exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
-exports.clientForToken = (token) => {
-    return new rest_1.Octokit({ auth: token });
-};
-
-
-/***/ }),
+/* 733 */,
 /* 734 */,
 /* 735 */,
 /* 736 */
@@ -46513,9 +46500,9 @@ const core_1 = __webpack_require__(186);
 const isUndefined_1 = __importDefault(__webpack_require__(825));
 const Constants_1 = __webpack_require__(168);
 const Credentials_1 = __webpack_require__(543);
-const github_1 = __webpack_require__(797);
-const jira_1 = __webpack_require__(947);
-const slack_1 = __webpack_require__(507);
+const Ggithub_1 = __webpack_require__(427);
+const Jjira_1 = __webpack_require__(457);
+const Sslack_1 = __webpack_require__(286);
 const String_1 = __webpack_require__(481);
 const Template_1 = __webpack_require__(920);
 /**
@@ -46536,13 +46523,13 @@ const Template_1 = __webpack_require__(920);
  */
 exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
     // 1. Fetch the Jira issue details.
-    const issue = yield jira_1.getIssue(issueKey);
+    const issue = yield Jjira_1.getIssue(issueKey);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
     // 2. Find out who the PR should belong to.
     if (issue.fields.assignee === null) {
         const credentials = yield Credentials_1.getCredentialsByEmail(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
-        yield slack_1.sendUserMessage(credentials.slack_id, message);
+        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
     }
@@ -46550,20 +46537,20 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
     if (issue.fields.subtasks.length > 0) {
         const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`;
-        yield slack_1.sendUserMessage(credentials.slack_id, message);
+        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
         core_1.info(message);
         return;
     }
     if (isUndefined_1.default(issue.fields.repository)) {
         const message = `No repository was set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
-        yield slack_1.sendUserMessage(credentials.slack_id, message);
+        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
     }
     // 3. Check if a PR already exists for the issue.
     let pullRequestNumber;
-    const repo = yield github_1.getRepository(issue.fields.repository);
-    const pullRequestNumbers = yield jira_1.getIssuePullRequestNumbers(issue.id);
+    const repo = yield Ggithub_1.getRepository(issue.fields.repository);
+    const pullRequestNumbers = yield Jjira_1.getIssuePullRequestNumbers(issue.id);
     if (pullRequestNumbers.length > 0) {
         ;
         [pullRequestNumber] = pullRequestNumbers;
@@ -46572,10 +46559,10 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         // 4. Try to find an existing branch.
         const baseBranchName = repo.default_branch;
         const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
-        const branch = yield github_1.getBranch(repo.name, newBranchName);
+        const branch = yield Ggithub_1.getBranch(repo.name, newBranchName);
         // 5. If no branch exists with the right name, make a new one.
         if (isUndefined_1.default(branch)) {
-            yield github_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
+            yield Ggithub_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
         }
         // 6. Create the pull request.
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
@@ -46585,19 +46572,19 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
             jiraUrl,
         };
         const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
-        const pullRequest = yield github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
+        const pullRequest = yield Ggithub_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
         pullRequestNumber = pullRequest.number;
     }
     // 7. Mark the pull request as in-progress.
-    yield github_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
+    yield Ggithub_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
     // 8. Assign the pull request to the appropriate user.
-    yield github_1.assignOwners(repo.name, pullRequestNumber, [
+    yield Ggithub_1.assignOwners(repo.name, pullRequestNumber, [
         credentials.github_username,
     ]);
     // 9. Tell the user.
     const url = `https://github.com/${Constants_1.OrganizationName}/${repo.name}/pull/${pullRequestNumber}`;
     const message = `Here's your pull request: ${url}`;
-    yield slack_1.sendUserMessage(credentials.slack_id, message);
+    yield Sslack_1.sendUserMessage(credentials.slack_id, message);
     // Todo:
     // - Add tests.
 });
@@ -47151,7 +47138,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
-const slack_1 = __webpack_require__(507);
+const Sslack_1 = __webpack_require__(286);
 const index_1 = __webpack_require__(464);
 /**
  * Extracts the payload and decides what action to run as a result.
@@ -47169,7 +47156,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.error(err);
-    yield slack_1.sendErrorMessage(err.message);
+    yield Sslack_1.sendErrorMessage(err.message);
     core_1.setFailed(err.message);
 }));
 
@@ -48210,29 +48197,7 @@ function async(callback)
 /***/ }),
 /* 795 */,
 /* 796 */,
-/* 797 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(49), exports);
-__exportStar(__webpack_require__(844), exports);
-__exportStar(__webpack_require__(930), exports);
-__exportStar(__webpack_require__(944), exports);
-
-
-/***/ }),
+/* 797 */,
 /* 798 */,
 /* 799 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -48280,33 +48245,91 @@ module.exports = isFunction;
 /* 800 */,
 /* 801 */,
 /* 802 */,
-/* 803 */,
-/* 804 */,
-/* 805 */,
-/* 806 */,
-/* 807 */
+/* 803 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
-const jira_client_1 = __importDefault(__webpack_require__(411));
+exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
 const Constants_1 = __webpack_require__(168);
-exports.client = new jira_client_1.default({
-    apiVersion: '2',
-    host: Constants_1.JiraHost,
-    password: Constants_1.JiraToken,
-    protocol: 'https',
-    strictSSL: true,
-    username: Constants_1.JiraEmail,
+const Client_1 = __webpack_require__(476);
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addLabels({
+        issue_number: number,
+        labels,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {IssuesAddAssigneesResponseData} The PR data.
+ */
+exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addAssignees({
+        assignees: usernames,
+        issue_number: number,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Creates a new pull request.
+ *
+ * @param {Repository} repo  The name of the repository that the PR will belong to.
+ * @param {Branch}     base  The base branch, which the PR will be merged into.
+ * @param {Branch}     head  The head branch, which the PR will be based on.
+ * @param {string}     title The title of the PR.
+ * @param {string}     body  The body of the PR.
+ * @param {string}     token The Github API token to use when creating the PR.
+ *
+ * @returns {PullsCreateResponseData} The PR data.
+ */
+exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.clientForToken(token).pulls.create({
+        base,
+        body,
+        draft: true,
+        head,
+        owner: Constants_1.OrganizationName,
+        repo,
+        title,
+    });
+    return response.data;
 });
 
 
 /***/ }),
+/* 804 */,
+/* 805 */,
+/* 806 */,
+/* 807 */,
 /* 808 */,
 /* 809 */,
 /* 810 */
@@ -48349,21 +48372,7 @@ module.exports = {
 
 
 /***/ }),
-/* 811 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
-const web_api_1 = __webpack_require__(431);
-const Constants_1 = __webpack_require__(168);
-// We had to roll back the NCC version so that this would work.
-// See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
-exports.client = new web_api_1.WebClient(Constants_1.SlackToken);
-
-
-/***/ }),
+/* 811 */,
 /* 812 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -48703,7 +48712,7 @@ module.exports = require("punycode");
 
 "use strict";
 
-var es5 = __webpack_require__(101);
+var es5 = __webpack_require__(837);
 var Objectfreeze = es5.freeze;
 var util = __webpack_require__(448);
 var inherits = util.inherits;
@@ -49722,7 +49731,92 @@ module.exports = require("url");
 
 /***/ }),
 /* 836 */,
-/* 837 */,
+/* 837 */
+/***/ (function(module) {
+
+var isES5 = (function(){
+    "use strict";
+    return this === undefined;
+})();
+
+if (isES5) {
+    module.exports = {
+        freeze: Object.freeze,
+        defineProperty: Object.defineProperty,
+        getDescriptor: Object.getOwnPropertyDescriptor,
+        keys: Object.keys,
+        names: Object.getOwnPropertyNames,
+        getPrototypeOf: Object.getPrototypeOf,
+        isArray: Array.isArray,
+        isES5: isES5,
+        propertyIsWritable: function(obj, prop) {
+            var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+            return !!(!descriptor || descriptor.writable || descriptor.set);
+        }
+    };
+} else {
+    var has = {}.hasOwnProperty;
+    var str = {}.toString;
+    var proto = {}.constructor.prototype;
+
+    var ObjectKeys = function (o) {
+        var ret = [];
+        for (var key in o) {
+            if (has.call(o, key)) {
+                ret.push(key);
+            }
+        }
+        return ret;
+    };
+
+    var ObjectGetDescriptor = function(o, key) {
+        return {value: o[key]};
+    };
+
+    var ObjectDefineProperty = function (o, key, desc) {
+        o[key] = desc.value;
+        return o;
+    };
+
+    var ObjectFreeze = function (obj) {
+        return obj;
+    };
+
+    var ObjectGetPrototypeOf = function (obj) {
+        try {
+            return Object(obj).constructor.prototype;
+        }
+        catch (e) {
+            return proto;
+        }
+    };
+
+    var ArrayIsArray = function (obj) {
+        try {
+            return str.call(obj) === "[object Array]";
+        }
+        catch(e) {
+            return false;
+        }
+    };
+
+    module.exports = {
+        isArray: ArrayIsArray,
+        keys: ObjectKeys,
+        names: ObjectKeys,
+        defineProperty: ObjectDefineProperty,
+        getDescriptor: ObjectGetDescriptor,
+        freeze: ObjectFreeze,
+        getPrototypeOf: ObjectGetPrototypeOf,
+        isES5: isES5,
+        propertyIsWritable: function() {
+            return true;
+        }
+    };
+}
+
+
+/***/ }),
 /* 838 */
 /***/ (function(module) {
 
@@ -50087,109 +50181,7 @@ module.exports = Writer;
 /***/ }),
 /* 842 */,
 /* 843 */,
-/* 844 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(733);
-exports.TreeModes = {
-    ModeFile: '100644',
-    ModeExe: '100755',
-    ModeDirectory: '040000',
-};
-exports.TreeTypes = {
-    Blob: 'blob',
-    Commit: 'commit',
-    Tree: 'tree',
-};
-/**
- * Creates a new blob, which can be used to make a tree.
- *
- * @param {string} repo    The name of the repository that the blob will belong to.
- * @param {string} content The content to put in the blob.
- *
- * @returns {GitCreateBlobResponseData} The blob data.
- */
-exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createBlob({
-        owner: Constants_1.OrganizationName,
-        repo,
-        content,
-    });
-    return response.data;
-});
-/**
- * Creates a new commit.
- *
- * @param {string} repo    The name of the repository that the commit will belong to.
- * @param {string} message The commit message.
- * @param {Sha}    tree    The tree to attach the commit to.
- * @param {Sha}    parent  The parent to attach the commit to.
- *
- * @returns {GitCreateCommitResponseData} The commit data.
- */
-exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createCommit({
-        owner: Constants_1.OrganizationName,
-        repo,
-        message,
-        tree,
-        parents: [parent],
-    });
-    return response.data;
-});
-/**
- * Creates a new branch.
- *
- * @param {string} repo   The name of the repository that the branch will belong to.
- * @param {Branch} branch The name of the branch to create.
- * @param {Sha}    sha    The commit sha to base the branch on.
- *
- * @returns {GitCreateRefResponseData} The branch data.
- */
-exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createRef({
-        owner: Constants_1.OrganizationName,
-        repo,
-        ref: `refs/heads/${branch}`,
-        sha,
-    });
-    return response.data;
-});
-/**
- * Creates a new tree, which can be used to make a commit.
- *
- * @param {string} repo     The name of the repository that the branch will belong to.
- * @param {Tree[]} tree     The data to use when creating the tree.
- * @param {Sha}    baseTree The tree to base the new tree on.
- *
- * @returns {GitCreateTreeResponseData} The branch data.
- */
-exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createTree({
-        owner: Constants_1.OrganizationName,
-        repo,
-        tree,
-        base_tree: baseTree,
-    });
-    return response.data;
-});
-
-
-/***/ }),
+/* 844 */,
 /* 845 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -50198,7 +50190,7 @@ exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void
 
 var jsonSafeStringify = __webpack_require__(73)
 var crypto = __webpack_require__(417)
-var Buffer = __webpack_require__(457).Buffer
+var Buffer = __webpack_require__(961).Buffer
 
 var defer = typeof setImmediate === 'undefined'
   ? process.nextTick
@@ -53909,87 +53901,7 @@ function write(key, options) {
 /***/ }),
 /* 928 */,
 /* 929 */,
-/* 930 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(733);
-/**
- * Adds labels to the given issue or PR.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The labels to add.
- *
- * @returns {IssuesAddLabelsResponseData} The PR data.
- */
-exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addLabels({
-        issue_number: number,
-        labels,
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
-/**
- * Assigns owners to the given issue or PR.
- *
- * @param {Repository} repo      The name of the repository that the PR belongs to.
- * @param {number}     number    The PR number.
- * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
- * @returns {IssuesAddAssigneesResponseData} The PR data.
- */
-exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addAssignees({
-        assignees: usernames,
-        issue_number: number,
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
-/**
- * Creates a new pull request.
- *
- * @param {Repository} repo  The name of the repository that the PR will belong to.
- * @param {Branch}     base  The base branch, which the PR will be merged into.
- * @param {Branch}     head  The head branch, which the PR will be based on.
- * @param {string}     title The title of the PR.
- * @param {string}     body  The body of the PR.
- * @param {string}     token The Github API token to use when creating the PR.
- *
- * @returns {PullsCreateResponseData} The PR data.
- */
-exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.clientForToken(token).pulls.create({
-        base,
-        body,
-        draft: true,
-        head,
-        owner: Constants_1.OrganizationName,
-        repo,
-        title,
-    });
-    return response.data;
-});
-
-
-/***/ }),
+/* 930 */,
 /* 931 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -54080,7 +53992,77 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 
 /***/ }),
 /* 935 */,
-/* 936 */,
+/* 936 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createBranch = exports.getBranch = void 0;
+const isUndefined_1 = __importDefault(__webpack_require__(825));
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(476);
+const Git_1 = __webpack_require__(76);
+const Repository_1 = __webpack_require__(629);
+/**
+ * Fetches a branch from the Github API.
+ *
+ * @param {Repository} repo   The name of the repository that the branch belongs to.
+ * @param {Branch}     branch The name of the branch to fetch.
+ *
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield Client_1.client.repos.getBranch({
+            owner: Constants_1.OrganizationName,
+            repo,
+            branch,
+        });
+        return response.data;
+    }
+    catch (err) {
+        if (err.message === 'Branch not found') {
+            return undefined;
+        }
+        throw err;
+    }
+    return undefined;
+});
+exports.createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
+    const baseBranch = yield exports.getBranch(repo, baseBranchName);
+    if (isUndefined_1.default(baseBranch)) {
+        throw new Error(`Base branch not found for repository '${repo}'`);
+    }
+    const prNumber = yield Repository_1.getNextPullRequestNumber(repo);
+    const blob = yield Git_1.createGitBlob(repo, fileContent);
+    const treeData = [
+        {
+            path: filePath,
+            mode: Git_1.TreeModes.ModeFile,
+            type: Git_1.TreeTypes.Blob,
+            sha: blob.sha,
+        },
+    ];
+    const tree = yield Git_1.createGitTree(repo, treeData, baseBranch.commit.sha);
+    const commit = yield Git_1.createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
+    return Git_1.createGitBranch(repo, newBranchName, commit.sha);
+});
+
+
+/***/ }),
 /* 937 */,
 /* 938 */
 /***/ (function(module) {
@@ -55189,58 +55171,25 @@ module.exports = exports
 
 /***/ }),
 /* 944 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
+function HARError (errors) {
+  var message = 'validation failed'
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepository = exports.getNextPullRequestNumber = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(733);
-/**
- * Decides what number the next pull request will be.
- *
- * @param {Repository} repo The name of the repository that the PR will belong to.
- * @returns {number}   The number of the next PR.
- */
-exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.pulls.list({
-        direction: 'desc',
-        owner: Constants_1.OrganizationName,
-        page: 1,
-        per_page: 1,
-        repo,
-        sort: 'created',
-        state: 'all',
-    });
-    if (response.data.length === 0) {
-        return 1;
-    }
-    return response.data[0].number + 1;
-});
-/**
- * Returns the repository with the given name.
- *
- * @param {Repository} repo The name of the repository to fetch.
- *
- * @returns {ReposGetResponseData} The repository data.
- */
-exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.repos.get({
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
+  this.name = 'HARError'
+  this.message = message
+  this.errors = errors
+
+  if (typeof Error.captureStackTrace === 'function') {
+    Error.captureStackTrace(this, this.constructor)
+  } else {
+    this.stack = (new Error(message)).stack
+  }
+}
+
+HARError.prototype = Error.prototype
+
+module.exports = HARError
 
 
 /***/ }),
@@ -55251,26 +55200,7 @@ module.exports = {"name":"@slack/web-api","version":"5.12.0","description":"Offi
 
 /***/ }),
 /* 946 */,
-/* 947 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(252), exports);
-
-
-/***/ }),
+/* 947 */,
 /* 948 */,
 /* 949 */,
 /* 950 */,
@@ -56251,7 +56181,77 @@ function gotValue(value) {
 
 /***/ }),
 /* 960 */,
-/* 961 */,
+/* 961 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(293)
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.prototype = Object.create(Buffer.prototype)
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+
+/***/ }),
 /* 962 */,
 /* 963 */,
 /* 964 */
@@ -57205,7 +57205,7 @@ module.exports = {
 
 module.exports = function(NEXT_FILTER) {
 var util = __webpack_require__(448);
-var getKeys = __webpack_require__(101).keys;
+var getKeys = __webpack_require__(837).keys;
 var tryCatch = util.tryCatch;
 var errorObj = util.errorObj;
 

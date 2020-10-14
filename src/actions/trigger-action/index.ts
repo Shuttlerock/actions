@@ -1,7 +1,7 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 
-import { sendErrorMessage } from '@sr-services/slack'
+import { sendErrorMessage } from '@sr-services/Sslack'
 import { createPullRequestForJiraIssue } from '@sr-triggers/index'
 
 interface Context {

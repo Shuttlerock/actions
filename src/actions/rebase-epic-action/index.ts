@@ -2,7 +2,7 @@ import { error, info, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { rebase } from '@sr-services/github/Rebase'
+import { rebase } from '@sr-services/Ggithub/Rebase'
 
 /**
  * Runs whenever a commit is added to a pull request.

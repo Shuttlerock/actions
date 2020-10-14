@@ -1400,7 +1400,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
-const Rebase_1 = __webpack_require__(436);
+const Rebase_1 = __webpack_require__(480);
 /**
  * Runs whenever a commit is added to a pull request.
  *
@@ -2510,24 +2510,6 @@ function getUserAgent() {
 
 exports.getUserAgent = getUserAgent;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 436:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-// https://github.com/steveukx/git-js#readme
-// See https://github.com/actions/toolkit/tree/main/packages/github
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.rebase = void 0;
-const core_1 = __webpack_require__(186);
-exports.rebase = (owner, repo, head, base) => {
-    // This is much harder than expected to get right - leaving a placeholder method for now.
-    core_1.info(`Todo: rebasing ${owner}/${repo} ${base} → ${head}...`);
-};
 
 
 /***/ }),
@@ -4679,6 +4661,24 @@ exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
 exports.FetchError = FetchError;
+
+
+/***/ }),
+
+/***/ 480:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+// https://github.com/steveukx/git-js#readme
+// See https://github.com/actions/toolkit/tree/main/packages/github
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.rebase = void 0;
+const core_1 = __webpack_require__(186);
+exports.rebase = (owner, repo, head, base) => {
+    // This is much harder than expected to get right - leaving a placeholder method for now.
+    core_1.info(`Todo: rebasing ${owner}/${repo} ${base} → ${head}...`);
+};
 
 
 /***/ }),

@@ -6,7 +6,7 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/github/Client'
+import { client } from '@sr-services/Ggithub/Client'
 
 export type Branch = string
 export type Sha = string

@@ -7,7 +7,7 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/github/Client'
+import { client } from '@sr-services/Ggithub/Client'
 import {
   Branch,
   createGitBlob,
@@ -19,7 +19,7 @@ import {
   Tree,
   TreeModes,
   TreeTypes,
-} from '@sr-services/github/Git'
+} from '@sr-services/Ggithub/Git'
 
 const repo = 'my-repo'
 

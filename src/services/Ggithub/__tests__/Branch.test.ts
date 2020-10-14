@@ -8,10 +8,10 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import * as Branch from '@sr-services/github/Branch'
-import { client } from '@sr-services/github/Client'
-import * as Git from '@sr-services/github/Git'
-import * as Repository from '@sr-services/github/Repository'
+import * as Branch from '@sr-services/Ggithub/Branch'
+import { client } from '@sr-services/Ggithub/Client'
+import * as Git from '@sr-services/Ggithub/Git'
+import * as Repository from '@sr-services/Ggithub/Repository'
 
 interface GetBranchParams {
   owner: string

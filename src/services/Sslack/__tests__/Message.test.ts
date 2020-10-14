@@ -1,8 +1,8 @@
 import { ChatPostMessageArguments } from '@slack/web-api'
 
 import { SlackErrorChannelId } from '@sr-services/Constants'
-import { client } from '@sr-services/slack/Client'
-import { sendErrorMessage, sendUserMessage } from '@sr-services/slack/Message'
+import { client } from '@sr-services/Sslack/Client'
+import { sendErrorMessage, sendUserMessage } from '@sr-services/Sslack/Message'
 
 describe('Message', () => {
   describe('sendErrorMessage', () => {

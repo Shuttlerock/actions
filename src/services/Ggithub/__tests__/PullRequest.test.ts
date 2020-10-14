@@ -6,13 +6,13 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import * as Client from '@sr-services/github/Client'
-import { Branch, Repository } from '@sr-services/github/Git'
+import * as Client from '@sr-services/Ggithub/Client'
+import { Branch, Repository } from '@sr-services/Ggithub/Git'
 import {
   addLabels,
   assignOwners,
   createPullRequest,
-} from '@sr-services/github/PullRequest'
+} from '@sr-services/Ggithub/PullRequest'
 
 const repo = 'my-repo'
 
