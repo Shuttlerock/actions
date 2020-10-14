@@ -11,8 +11,9 @@ import {
   getNextPullRequestNumber,
   getRepository,
 } from '@sr-services/Github/Repository'
+import { mockGithubRepository } from '@sr-tests/Mocks'
 
-const repo = 'my-repo'
+const repo = mockGithubRepository.name
 
 describe('Repository', () => {
   describe('getNextPullRequestNumber', () => {
@@ -57,7 +58,7 @@ describe('Repository', () => {
         .spyOn(client.repos, 'get')
         .mockImplementation((_args?: { owner: string; repo: Repository }) =>
           Promise.resolve({
-            data: { name: repo },
+            data: mockGithubRepository,
           } as OctokitResponse<ReposGetResponseData>)
         )
       const result = await getRepository(repo)

@@ -6,7 +6,7 @@ jest.mock('@sr-services/Constants', () => ({
   JiraEmail: 'xxxx@example.com',
   JiraHost: 'example.atlassian.net',
   JiraToken: 'xxxxxxxxxxxxxxxxxxxxxxxx',
-  OrganizationName: 'SuperCoders',
+  OrganizationName: 'octokit',
   SlackErrorChannelId: 'C0000000000',
   SlackToken: 'xoxb-xxxxxxxxxx-xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx',
 }))

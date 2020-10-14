@@ -47387,7 +47387,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPullRequestForJiraIssue = void 0;
 const core_1 = __webpack_require__(186);
-const isUndefined_1 = __importDefault(__webpack_require__(825));
+const isNil_1 = __importDefault(__webpack_require__(977));
 const Constants_1 = __webpack_require__(168);
 const Credentials_1 = __webpack_require__(543);
 const Github_1 = __webpack_require__(390);
@@ -47416,7 +47416,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     const issue = yield Jira_1.getIssue(issueKey);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
     // 2. Find out who the PR should belong to.
-    if (issue.fields.assignee === null) {
+    if (isNil_1.default(issue.fields.assignee)) {
         const credentials = yield Credentials_1.getCredentialsByEmail(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
@@ -47431,8 +47431,8 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         core_1.info(message);
         return;
     }
-    if (isUndefined_1.default(issue.fields.repository)) {
-        const message = `No repository was set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
+    if (isNil_1.default(issue.fields.repository)) {
+        const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
@@ -47451,8 +47451,8 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
         const branch = yield Github_1.getBranch(repo.name, newBranchName);
         // 5. If no branch exists with the right name, make a new one.
-        if (isUndefined_1.default(branch)) {
-            yield Github_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
+        if (isNil_1.default(branch)) {
+            yield Github_1.createBranch(repo.name, baseBranchName, newBranchName, `.meta/${issue.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${issue.key}] [skip ci] Create pull request.`);
         }
         // 6. Create the pull request.
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
@@ -47475,8 +47475,6 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     const url = `https://github.com/${Constants_1.OrganizationName}/${repo.name}/pull/${pullRequestNumber}`;
     const message = `Here's your pull request: ${url}`;
     yield Slack_1.sendUserMessage(credentials.slack_id, message);
-    // Todo:
-    // - Add tests.
 });
 
 
@@ -57101,7 +57099,37 @@ exports.jar = function (store) {
 
 
 /***/ }),
-/* 977 */,
+/* 977 */
+/***/ (function(module) {
+
+/**
+ * Checks if `value` is `null` or `undefined`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is nullish, else `false`.
+ * @example
+ *
+ * _.isNil(null);
+ * // => true
+ *
+ * _.isNil(void 0);
+ * // => true
+ *
+ * _.isNil(NaN);
+ * // => false
+ */
+function isNil(value) {
+  return value == null;
+}
+
+module.exports = isNil;
+
+
+/***/ }),
 /* 978 */,
 /* 979 */
 /***/ (function(module, __unusedexports, __webpack_require__) {

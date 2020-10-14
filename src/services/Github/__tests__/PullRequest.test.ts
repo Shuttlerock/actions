@@ -13,6 +13,11 @@ import {
   assignOwners,
   createPullRequest,
 } from '@sr-services/Github/PullRequest'
+import {
+  mockGithubPullRequest,
+  mockIssuesAddAssigneesResponseData,
+  mockIssuesAddLabelsResponseData,
+} from '@sr-tests/Mocks'
 
 const repo = 'my-repo'
 
@@ -29,7 +34,7 @@ describe('PullRequest', () => {
             repo: Repository
           }) =>
             Promise.resolve({
-              data: [{ name: 'my-label' }],
+              data: mockIssuesAddLabelsResponseData,
             } as OctokitResponse<IssuesAddLabelsResponseData>)
         )
       const result = await addLabels(repo, 23, ['my-label'])
@@ -56,7 +61,7 @@ describe('PullRequest', () => {
             repo: Repository
           }) =>
             Promise.resolve({
-              data: { id: 1234 },
+              data: mockIssuesAddAssigneesResponseData,
             } as OctokitResponse<IssuesAddAssigneesResponseData>)
         )
       const result = await assignOwners(repo, 23, ['dperrett'])
@@ -89,7 +94,7 @@ describe('PullRequest', () => {
             title: string
           }) =>
             Promise.resolve({
-              data: { id: 1234 },
+              data: mockGithubPullRequest,
             } as OctokitResponse<PullsCreateResponseData>)
         )
       const result = await createPullRequest(

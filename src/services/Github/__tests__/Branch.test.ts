@@ -12,6 +12,7 @@ import * as Branch from '@sr-services/Github/Branch'
 import { client } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Repository from '@sr-services/Github/Repository'
+import { mockGithubBranch } from '@sr-tests/Mocks'
 
 interface GetBranchParams {
   owner: string
@@ -34,7 +35,7 @@ describe('Branch', () => {
         .spyOn(client.repos, 'getBranch')
         .mockImplementation((_args?: GetBranchParams) =>
           Promise.resolve({
-            data: { name: branch },
+            data: mockGithubBranch,
           } as OctokitResponse<ReposGetBranchResponseData>)
         )
       const result = await Branch.getBranch(repo, branch)
@@ -63,7 +64,7 @@ describe('Branch', () => {
         .mockImplementation((_repo: Git.Repository, fetchBranch: Git.Branch) =>
           Promise.resolve({
             name: fetchBranch,
-            commit: { sha: 'branch-sha ' },
+            commit: { sha: 'branch-sha' },
           } as ReposGetBranchResponseData)
         )
 
