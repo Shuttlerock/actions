@@ -10,10 +10,10 @@ interface User {
 
 export interface Issue {
   fields: {
-    assignee: User
+    assignee?: User
     description: string
     issuetype: {
-      name: 'Bug' | 'Chore' | 'Feature' | 'Story'
+      name: string
       subtask: boolean
     }
     subtasks: Issue[]
@@ -26,7 +26,7 @@ export interface Issue {
   names: {
     [name: string]: string
   }
-  subtask: boolean
+  subtask?: boolean
 }
 
 interface GithubPullRequest {

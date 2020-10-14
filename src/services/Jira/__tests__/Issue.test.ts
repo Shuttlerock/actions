@@ -1,9 +1,8 @@
 import fetch from 'node-fetch'
 
-import issue from '@sr-services/Jira/__tests__/fixtures/issue.json'
-import pullRequests from '@sr-services/Jira/__tests__/fixtures/pull-requests.json'
 import { client } from '@sr-services/Jira/Client'
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira/Issue'
+import { mockJiraIssue, mockJiraPullRequests } from '@sr-tests/Mocks'
 
 const { Response } = jest.requireActual('node-fetch')
 
@@ -15,7 +14,7 @@ describe('Issue', () => {
       const spy = jest
         .spyOn(client, 'findIssue')
         .mockImplementation((_key: string, _expand?: string) =>
-          Promise.resolve(issue)
+          Promise.resolve(mockJiraIssue)
         )
       const data = await getIssue('10000')
       expect(spy).toHaveBeenCalledWith('10000', 'names')
@@ -27,7 +26,7 @@ describe('Issue', () => {
       const spy = jest
         .spyOn(client, 'findIssue')
         .mockImplementation((_key: string, _expand?: string) =>
-          Promise.resolve(issue)
+          Promise.resolve(mockJiraIssue)
         )
       const data = await getIssue('10000')
       expect(data.fields.repository).toEqual('actions')
@@ -38,7 +37,7 @@ describe('Issue', () => {
   describe('getIssuePullRequestNumbers', () => {
     it('calls the Jira API', async () => {
       ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
-        new Response(JSON.stringify(pullRequests))
+        new Response(JSON.stringify(mockJiraPullRequests))
       )
       const numbers = await getIssuePullRequestNumbers('EXAMPLE-236')
       expect(numbers).toEqual([65])

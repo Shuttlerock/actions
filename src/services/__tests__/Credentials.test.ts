@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
 
 import { getCredentialsByEmail } from '@sr-services/Credentials'
+import { mockCredentials, mockForbiddenCredentials } from '@sr-tests/Mocks'
 
 const { Response } = jest.requireActual('node-fetch')
 
@@ -21,12 +22,10 @@ describe('Credentials', () => {
   describe('getCredentialsByEmail', () => {
     it('calls the credential API', async () => {
       ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ github_token: 'my-github-token', status: 'ok' })
-        )
+        new Response(JSON.stringify(mockCredentials))
       )
       const result = await getCredentialsByEmail(email)
-      expect(result.github_token).toEqual('my-github-token')
+      expect(result.github_token).toEqual(mockCredentials.github_token)
       expect(fetch).toHaveBeenCalledWith(url, {
         headers: { 'Shuttlerock-Signature': signature },
       })
@@ -34,7 +33,7 @@ describe('Credentials', () => {
 
     it('throws an error if the API returns an error', () => {
       ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
-        new Response(JSON.stringify({ status: 'forbidden' }))
+        new Response(JSON.stringify(mockForbiddenCredentials))
       )
       getCredentialsByEmail(email).catch(err => {
         expect(err.message).toEqual(

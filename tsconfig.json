@@ -35,6 +35,7 @@
       "src/*": ["./*"],
       "@sr-actions/*": ["actions/*"],
       "@sr-services/*": ["services/*"],
+      "@sr-tests/*": ["tests/*"],
       "@sr-triggers/*": ["triggers/*"]
     }
   },
