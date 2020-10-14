@@ -1,8 +1,8 @@
 import { join } from 'path'
 
-import { rebase } from '@sr-services/Ggithub/Rebase'
+import { rebase } from '@sr-services/Github/Rebase'
 
-jest.mock('@sr-services/Ggithub/Rebase')
+jest.mock('@sr-services/Github/Rebase')
 
 describe('rebase-epic-action', () => {
   afterAll(() => jest.restoreAllMocks())

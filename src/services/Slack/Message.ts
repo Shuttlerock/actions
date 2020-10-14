@@ -1,5 +1,5 @@
 import { SlackErrorChannelId } from '@sr-services/Constants'
-import { client } from '@sr-services/Sslack/Client'
+import { client } from '@sr-services/Slack/Client'
 
 /**
  * Sends an error message to the default slack group.

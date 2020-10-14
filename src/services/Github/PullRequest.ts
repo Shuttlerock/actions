@@ -5,8 +5,8 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { client, clientForToken } from '@sr-services/Ggithub/Client'
-import { Branch, Repository } from '@sr-services/Ggithub/Git'
+import { client, clientForToken } from '@sr-services/Github/Client'
+import { Branch, Repository } from '@sr-services/Github/Git'
 
 /**
  * Adds labels to the given issue or PR.

@@ -3,8 +3,8 @@ import { JsonResponse } from 'jira-client'
 import fetch from 'node-fetch'
 import { join } from 'path'
 
-import { client } from '@sr-services/Jjira/Client'
-import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jjira/Issue'
+import { client } from '@sr-services/Jira/Client'
+import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira/Issue'
 
 const { Response } = jest.requireActual('node-fetch')
 

@@ -14,9 +14,9 @@ import {
   createPullRequest,
   getBranch,
   getRepository,
-} from '@sr-services/Ggithub'
-import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jjira'
-import { sendUserMessage } from '@sr-services/Sslack'
+} from '@sr-services/Github'
+import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira'
+import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'
 import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
 

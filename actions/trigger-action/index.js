@@ -149,7 +149,7 @@ module.exports = function(Promise, Context,
 var async = Promise._async;
 var Warning = __webpack_require__(816).Warning;
 var util = __webpack_require__(448);
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 var canAttachTrace = util.canAttachTrace;
 var unhandledRejectionHandled;
 var possiblyUnhandledRejection;
@@ -1325,9 +1325,59 @@ Promise._SomePromiseArray = SomePromiseArray;
 /* 13 */,
 /* 14 */,
 /* 15 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-07/schema#","$id":"https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#","description":"Meta-schema for $data reference (JSON Schema extension proposal)","type":"object","required":["$data"],"properties":{"$data":{"type":"string","anyOf":[{"format":"relative-json-pointer"},{"format":"json-pointer"}]}},"additionalProperties":false};
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getRepository = exports.getNextPullRequestNumber = void 0;
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(818);
+/**
+ * Decides what number the next pull request will be.
+ *
+ * @param {Repository} repo The name of the repository that the PR will belong to.
+ * @returns {number}   The number of the next PR.
+ */
+exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.list({
+        direction: 'desc',
+        owner: Constants_1.OrganizationName,
+        page: 1,
+        per_page: 1,
+        repo,
+        sort: 'created',
+        state: 'all',
+    });
+    if (response.data.length === 0) {
+        return 1;
+    }
+    return response.data[0].number + 1;
+});
+/**
+ * Returns the repository with the given name.
+ *
+ * @param {Repository} repo The name of the repository to fetch.
+ *
+ * @returns {ReposGetResponseData} The repository data.
+ */
+exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.repos.get({
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+
 
 /***/ }),
 /* 16 */
@@ -2924,8 +2974,119 @@ function runJob(iterator, key, item, callback)
 /* 25 */,
 /* 26 */,
 /* 27 */,
-/* 28 */,
-/* 29 */,
+/* 28 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(818);
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addLabels({
+        issue_number: number,
+        labels,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {IssuesAddAssigneesResponseData} The PR data.
+ */
+exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addAssignees({
+        assignees: usernames,
+        issue_number: number,
+        owner: Constants_1.OrganizationName,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Creates a new pull request.
+ *
+ * @param {Repository} repo  The name of the repository that the PR will belong to.
+ * @param {Branch}     base  The base branch, which the PR will be merged into.
+ * @param {Branch}     head  The head branch, which the PR will be based on.
+ * @param {string}     title The title of the PR.
+ * @param {string}     body  The body of the PR.
+ * @param {string}     token The Github API token to use when creating the PR.
+ *
+ * @returns {PullsCreateResponseData} The PR data.
+ */
+exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.clientForToken(token).pulls.create({
+        base,
+        body,
+        draft: true,
+        head,
+        owner: Constants_1.OrganizationName,
+        repo,
+        title,
+    });
+    return response.data;
+});
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module) {
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+var byteToHex = [];
+for (var i = 0; i < 256; ++i) {
+  byteToHex[i] = (i + 0x100).toString(16).substr(1);
+}
+
+function bytesToUuid(buf, offset) {
+  var i = offset || 0;
+  var bth = byteToHex;
+  // join used to fix memory issue caused by concatenation: https://bugs.chromium.org/p/v8/issues/detail?id=3175#c4
+  return ([
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]]
+  ]).join('');
+}
+
+module.exports = bytesToUuid;
+
+
+/***/ }),
 /* 30 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -5947,109 +6108,7 @@ function serializer(replacer, cycleReplacer) {
 /***/ }),
 /* 74 */,
 /* 75 */,
-/* 76 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(476);
-exports.TreeModes = {
-    ModeFile: '100644',
-    ModeExe: '100755',
-    ModeDirectory: '040000',
-};
-exports.TreeTypes = {
-    Blob: 'blob',
-    Commit: 'commit',
-    Tree: 'tree',
-};
-/**
- * Creates a new blob, which can be used to make a tree.
- *
- * @param {string} repo    The name of the repository that the blob will belong to.
- * @param {string} content The content to put in the blob.
- *
- * @returns {GitCreateBlobResponseData} The blob data.
- */
-exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createBlob({
-        owner: Constants_1.OrganizationName,
-        repo,
-        content,
-    });
-    return response.data;
-});
-/**
- * Creates a new commit.
- *
- * @param {string} repo    The name of the repository that the commit will belong to.
- * @param {string} message The commit message.
- * @param {Sha}    tree    The tree to attach the commit to.
- * @param {Sha}    parent  The parent to attach the commit to.
- *
- * @returns {GitCreateCommitResponseData} The commit data.
- */
-exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createCommit({
-        owner: Constants_1.OrganizationName,
-        repo,
-        message,
-        tree,
-        parents: [parent],
-    });
-    return response.data;
-});
-/**
- * Creates a new branch.
- *
- * @param {string} repo   The name of the repository that the branch will belong to.
- * @param {Branch} branch The name of the branch to create.
- * @param {Sha}    sha    The commit sha to base the branch on.
- *
- * @returns {GitCreateRefResponseData} The branch data.
- */
-exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createRef({
-        owner: Constants_1.OrganizationName,
-        repo,
-        ref: `refs/heads/${branch}`,
-        sha,
-    });
-    return response.data;
-});
-/**
- * Creates a new tree, which can be used to make a commit.
- *
- * @param {string} repo     The name of the repository that the branch will belong to.
- * @param {Tree[]} tree     The data to use when creating the tree.
- * @param {Sha}    baseTree The tree to base the new tree on.
- *
- * @returns {GitCreateTreeResponseData} The branch data.
- */
-exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.git.createTree({
-        owner: Constants_1.OrganizationName,
-        repo,
-        tree,
-        base_tree: baseTree,
-    });
-    return response.data;
-});
-
-
-/***/ }),
+/* 76 */,
 /* 77 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6744,82 +6803,92 @@ module.exports = function generate_anyOf(it, $keyword, $ruleType) {
 /* 95 */,
 /* 96 */,
 /* 97 */,
-/* 98 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var createCompounder = __webpack_require__(702);
-
-/**
- * Converts `string` to
- * [snake case](https://en.wikipedia.org/wiki/Snake_case).
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category String
- * @param {string} [string=''] The string to convert.
- * @returns {string} Returns the snake cased string.
- * @example
- *
- * _.snakeCase('Foo Bar');
- * // => 'foo_bar'
- *
- * _.snakeCase('fooBar');
- * // => 'foo_bar'
- *
- * _.snakeCase('--FOO-BAR--');
- * // => 'foo_bar'
- */
-var snakeCase = createCompounder(function(result, word, index) {
-  return result + (index ? '_' : '') + word.toLowerCase();
-});
-
-module.exports = snakeCase;
-
-
-/***/ }),
+/* 98 */,
 /* 99 */,
 /* 100 */,
 /* 101 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
+var isES5 = (function(){
+    "use strict";
+    return this === undefined;
+})();
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendUserMessage = exports.sendErrorMessage = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(434);
-/**
- * Sends an error message to the default slack group.
- *
- * @param {string} message The message to send.
- *
- * @returns {void}
- */
-exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
-    yield Client_1.client.chat.postMessage({ channel: Constants_1.SlackErrorChannelId, text: message });
-});
-/**
- * Sends a slack message to the user with the given slack ID.
- *
- * @param {string} userId  The Slack user ID to send the message to.
- * @param {string} message The message to send.
- *
- * @returns {void}
- */
-exports.sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, function* () {
-    // See: https://api.slack.com/methods/chat.postMessage
-    yield Client_1.client.chat.postMessage({ channel: userId, text: message });
-});
+if (isES5) {
+    module.exports = {
+        freeze: Object.freeze,
+        defineProperty: Object.defineProperty,
+        getDescriptor: Object.getOwnPropertyDescriptor,
+        keys: Object.keys,
+        names: Object.getOwnPropertyNames,
+        getPrototypeOf: Object.getPrototypeOf,
+        isArray: Array.isArray,
+        isES5: isES5,
+        propertyIsWritable: function(obj, prop) {
+            var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+            return !!(!descriptor || descriptor.writable || descriptor.set);
+        }
+    };
+} else {
+    var has = {}.hasOwnProperty;
+    var str = {}.toString;
+    var proto = {}.constructor.prototype;
+
+    var ObjectKeys = function (o) {
+        var ret = [];
+        for (var key in o) {
+            if (has.call(o, key)) {
+                ret.push(key);
+            }
+        }
+        return ret;
+    };
+
+    var ObjectGetDescriptor = function(o, key) {
+        return {value: o[key]};
+    };
+
+    var ObjectDefineProperty = function (o, key, desc) {
+        o[key] = desc.value;
+        return o;
+    };
+
+    var ObjectFreeze = function (obj) {
+        return obj;
+    };
+
+    var ObjectGetPrototypeOf = function (obj) {
+        try {
+            return Object(obj).constructor.prototype;
+        }
+        catch (e) {
+            return proto;
+        }
+    };
+
+    var ArrayIsArray = function (obj) {
+        try {
+            return str.call(obj) === "[object Array]";
+        }
+        catch(e) {
+            return false;
+        }
+    };
+
+    module.exports = {
+        isArray: ArrayIsArray,
+        keys: ObjectKeys,
+        names: ObjectKeys,
+        defineProperty: ObjectDefineProperty,
+        getDescriptor: ObjectGetDescriptor,
+        freeze: ObjectFreeze,
+        getPrototypeOf: ObjectGetPrototypeOf,
+        isES5: isES5,
+        propertyIsWritable: function() {
+            return true;
+        }
+    };
+}
 
 
 /***/ }),
@@ -7766,7 +7835,7 @@ var isTypedArray = __webpack_require__(657).strict
 var helpers = __webpack_require__(845)
 var cookies = __webpack_require__(976)
 var getProxyFromURI = __webpack_require__(654)
-var Querystring = __webpack_require__(419).Querystring
+var Querystring = __webpack_require__(476).Querystring
 var Har = __webpack_require__(423).Har
 var Auth = __webpack_require__(624).Auth
 var OAuth = __webpack_require__(174).OAuth
@@ -7775,7 +7844,7 @@ var Multipart = __webpack_require__(531).Multipart
 var Redirect = __webpack_require__(451).Redirect
 var Tunnel = __webpack_require__(51).Tunnel
 var now = __webpack_require__(644)
-var Buffer = __webpack_require__(961).Buffer
+var Buffer = __webpack_require__(457).Buffer
 
 var safeStringify = helpers.safeStringify
 var isReadStream = helpers.isReadStream
@@ -9305,32 +9374,170 @@ module.exports = Request
 /* 125 */
 /***/ (function(module) {
 
-/**
- * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
- */
-var byteToHex = [];
-for (var i = 0; i < 256; ++i) {
-  byteToHex[i] = (i + 0x100).toString(16).substr(1);
-}
+"use strict";
 
-function bytesToUuid(buf, offset) {
-  var i = offset || 0;
-  var bth = byteToHex;
-  // join used to fix memory issue caused by concatenation: https://bugs.chromium.org/p/v8/issues/detail?id=3175#c4
-  return ([
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]]
-  ]).join('');
+module.exports = function generate__limit(it, $keyword, $ruleType) {
+  var out = ' ';
+  var $lvl = it.level;
+  var $dataLvl = it.dataLevel;
+  var $schema = it.schema[$keyword];
+  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
+  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
+  var $breakOnError = !it.opts.allErrors;
+  var $errorKeyword;
+  var $data = 'data' + ($dataLvl || '');
+  var $isData = it.opts.$data && $schema && $schema.$data,
+    $schemaValue;
+  if ($isData) {
+    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
+    $schemaValue = 'schema' + $lvl;
+  } else {
+    $schemaValue = $schema;
+  }
+  var $isMax = $keyword == 'maximum',
+    $exclusiveKeyword = $isMax ? 'exclusiveMaximum' : 'exclusiveMinimum',
+    $schemaExcl = it.schema[$exclusiveKeyword],
+    $isDataExcl = it.opts.$data && $schemaExcl && $schemaExcl.$data,
+    $op = $isMax ? '<' : '>',
+    $notOp = $isMax ? '>' : '<',
+    $errorKeyword = undefined;
+  if (!($isData || typeof $schema == 'number' || $schema === undefined)) {
+    throw new Error($keyword + ' must be number');
+  }
+  if (!($isDataExcl || $schemaExcl === undefined || typeof $schemaExcl == 'number' || typeof $schemaExcl == 'boolean')) {
+    throw new Error($exclusiveKeyword + ' must be number or boolean');
+  }
+  if ($isDataExcl) {
+    var $schemaValueExcl = it.util.getData($schemaExcl.$data, $dataLvl, it.dataPathArr),
+      $exclusive = 'exclusive' + $lvl,
+      $exclType = 'exclType' + $lvl,
+      $exclIsNumber = 'exclIsNumber' + $lvl,
+      $opExpr = 'op' + $lvl,
+      $opStr = '\' + ' + $opExpr + ' + \'';
+    out += ' var schemaExcl' + ($lvl) + ' = ' + ($schemaValueExcl) + '; ';
+    $schemaValueExcl = 'schemaExcl' + $lvl;
+    out += ' var ' + ($exclusive) + '; var ' + ($exclType) + ' = typeof ' + ($schemaValueExcl) + '; if (' + ($exclType) + ' != \'boolean\' && ' + ($exclType) + ' != \'undefined\' && ' + ($exclType) + ' != \'number\') { ';
+    var $errorKeyword = $exclusiveKeyword;
+    var $$outStack = $$outStack || [];
+    $$outStack.push(out);
+    out = ''; /* istanbul ignore else */
+    if (it.createErrors !== false) {
+      out += ' { keyword: \'' + ($errorKeyword || '_exclusiveLimit') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
+      if (it.opts.messages !== false) {
+        out += ' , message: \'' + ($exclusiveKeyword) + ' should be boolean\' ';
+      }
+      if (it.opts.verbose) {
+        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+      }
+      out += ' } ';
+    } else {
+      out += ' {} ';
+    }
+    var __err = out;
+    out = $$outStack.pop();
+    if (!it.compositeRule && $breakOnError) {
+      /* istanbul ignore if */
+      if (it.async) {
+        out += ' throw new ValidationError([' + (__err) + ']); ';
+      } else {
+        out += ' validate.errors = [' + (__err) + ']; return false; ';
+      }
+    } else {
+      out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+    }
+    out += ' } else if ( ';
+    if ($isData) {
+      out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
+    }
+    out += ' ' + ($exclType) + ' == \'number\' ? ( (' + ($exclusive) + ' = ' + ($schemaValue) + ' === undefined || ' + ($schemaValueExcl) + ' ' + ($op) + '= ' + ($schemaValue) + ') ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaValueExcl) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) : ( (' + ($exclusive) + ' = ' + ($schemaValueExcl) + ' === true) ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaValue) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) || ' + ($data) + ' !== ' + ($data) + ') { var op' + ($lvl) + ' = ' + ($exclusive) + ' ? \'' + ($op) + '\' : \'' + ($op) + '=\'; ';
+    if ($schema === undefined) {
+      $errorKeyword = $exclusiveKeyword;
+      $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
+      $schemaValue = $schemaValueExcl;
+      $isData = $isDataExcl;
+    }
+  } else {
+    var $exclIsNumber = typeof $schemaExcl == 'number',
+      $opStr = $op;
+    if ($exclIsNumber && $isData) {
+      var $opExpr = '\'' + $opStr + '\'';
+      out += ' if ( ';
+      if ($isData) {
+        out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
+      }
+      out += ' ( ' + ($schemaValue) + ' === undefined || ' + ($schemaExcl) + ' ' + ($op) + '= ' + ($schemaValue) + ' ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaExcl) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) || ' + ($data) + ' !== ' + ($data) + ') { ';
+    } else {
+      if ($exclIsNumber && $schema === undefined) {
+        $exclusive = true;
+        $errorKeyword = $exclusiveKeyword;
+        $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
+        $schemaValue = $schemaExcl;
+        $notOp += '=';
+      } else {
+        if ($exclIsNumber) $schemaValue = Math[$isMax ? 'min' : 'max']($schemaExcl, $schema);
+        if ($schemaExcl === ($exclIsNumber ? $schemaValue : true)) {
+          $exclusive = true;
+          $errorKeyword = $exclusiveKeyword;
+          $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
+          $notOp += '=';
+        } else {
+          $exclusive = false;
+          $opStr += '=';
+        }
+      }
+      var $opExpr = '\'' + $opStr + '\'';
+      out += ' if ( ';
+      if ($isData) {
+        out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
+      }
+      out += ' ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' || ' + ($data) + ' !== ' + ($data) + ') { ';
+    }
+  }
+  $errorKeyword = $errorKeyword || $keyword;
+  var $$outStack = $$outStack || [];
+  $$outStack.push(out);
+  out = ''; /* istanbul ignore else */
+  if (it.createErrors !== false) {
+    out += ' { keyword: \'' + ($errorKeyword || '_limit') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { comparison: ' + ($opExpr) + ', limit: ' + ($schemaValue) + ', exclusive: ' + ($exclusive) + ' } ';
+    if (it.opts.messages !== false) {
+      out += ' , message: \'should be ' + ($opStr) + ' ';
+      if ($isData) {
+        out += '\' + ' + ($schemaValue);
+      } else {
+        out += '' + ($schemaValue) + '\'';
+      }
+    }
+    if (it.opts.verbose) {
+      out += ' , schema:  ';
+      if ($isData) {
+        out += 'validate.schema' + ($schemaPath);
+      } else {
+        out += '' + ($schema);
+      }
+      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+    }
+    out += ' } ';
+  } else {
+    out += ' {} ';
+  }
+  var __err = out;
+  out = $$outStack.pop();
+  if (!it.compositeRule && $breakOnError) {
+    /* istanbul ignore if */
+    if (it.async) {
+      out += ' throw new ValidationError([' + (__err) + ']); ';
+    } else {
+      out += ' validate.errors = [' + (__err) + ']; return false; ';
+    }
+  } else {
+    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+  }
+  out += ' } ';
+  if ($breakOnError) {
+    out += ' else { ';
+  }
+  return out;
 }
-
-module.exports = bytesToUuid;
 
 
 /***/ }),
@@ -9556,7 +9763,7 @@ var net = __webpack_require__(631)
   , events = __webpack_require__(614)
   , assert = __webpack_require__(357)
   , util = __webpack_require__(669)
-  , Buffer = __webpack_require__(961).Buffer
+  , Buffer = __webpack_require__(457).Buffer
   ;
 
 exports.httpOverHttp = httpOverHttp
@@ -11432,7 +11639,7 @@ var caseless = __webpack_require__(684)
 var uuid = __webpack_require__(824)
 var oauth = __webpack_require__(468)
 var crypto = __webpack_require__(417)
-var Buffer = __webpack_require__(961).Buffer
+var Buffer = __webpack_require__(457).Buffer
 
 function OAuth (request) {
   this.request = request
@@ -13509,7 +13716,8 @@ exports.request = request;
 /* 235 */,
 /* 236 */,
 /* 237 */,
-/* 238 */
+/* 238 */,
+/* 239 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -13523,56 +13731,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getIssuePullRequestNumbers = exports.getIssue = void 0;
-const node_fetch_1 = __importDefault(__webpack_require__(467));
+exports.sendUserMessage = exports.sendErrorMessage = void 0;
 const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(656);
+const Client_1 = __webpack_require__(589);
 /**
- * Fetches the issue with the given key from Jira.
+ * Sends an error message to the default slack group.
  *
- * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ * @param {string} message The message to send.
  *
- * @returns {Issue} The issue data.
+ * @returns {void}
  */
-exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    const issue = (yield Client_1.client.findIssue(key, 'names'));
-    // Find the repository, and include it explicitly. This is a bit ugly due to the way
-    // Jira includes custom fields.
-    const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
-    if (fieldName) {
-        issue.fields.repository = issue.fields[fieldName].value;
-    }
-    return issue;
+exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Client_1.client.chat.postMessage({ channel: Constants_1.SlackErrorChannelId, text: message });
 });
 /**
- * Fetches the numbers of the pull requests attached to this issue. Note that
- * this is a **PRIVATE API**, and may break in the future.
+ * Sends a slack message to the user with the given slack ID.
  *
- * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ * @param {string} userId  The Slack user ID to send the message to.
+ * @param {string} message The message to send.
  *
- * @returns {number[]} The PR numbers.
+ * @returns {void}
  */
-exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
-    const host = `https://${Constants_1.JiraEmail}:${Constants_1.JiraToken}@${Constants_1.JiraHost}/`;
-    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
-    const response = yield node_fetch_1.default(url);
-    const data = (yield response.json());
-    const ids = data.detail
-        .map((detail) => detail.pullRequests
-        .filter((pr) => pr.status === 'OPEN')
-        .map((pr) => pr.id))
-        .flat()
-        .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
-    return ids;
+exports.sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, function* () {
+    // See: https://api.slack.com/methods/chat.postMessage
+    yield Client_1.client.chat.postMessage({ channel: userId, text: message });
 });
 
 
 /***/ }),
-/* 239 */,
 /* 240 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -14081,7 +14268,7 @@ module.exports = function(
     Promise, PromiseArray, tryConvertToPromise, apiRejection) {
 var util = __webpack_require__(448);
 var isObject = util.isObject;
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 var Es6Map;
 if (typeof Map === "function") Es6Map = Map;
 
@@ -15897,7 +16084,69 @@ function writeBitField(setBits, bitIndex) {
 
 
 /***/ }),
-/* 273 */,
+/* 273 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getIssuePullRequestNumbers = exports.getIssue = void 0;
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(861);
+/**
+ * Fetches the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ *
+ * @returns {Issue} The issue data.
+ */
+exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const issue = (yield Client_1.client.findIssue(key, 'names'));
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
+    if (fieldName) {
+        issue.fields.repository = issue.fields[fieldName].value;
+    }
+    return issue;
+});
+/**
+ * Fetches the numbers of the pull requests attached to this issue. Note that
+ * this is a **PRIVATE API**, and may break in the future.
+ *
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number[]} The PR numbers.
+ */
+exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
+    const host = `https://${Constants_1.JiraEmail}:${Constants_1.JiraToken}@${Constants_1.JiraHost}/`;
+    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    const ids = data.detail
+        .map((detail) => detail.pullRequests
+        .filter((pr) => pr.status === 'OPEN')
+        .map((pr) => pr.id))
+        .flat()
+        .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
+    return ids;
+});
+
+
+/***/ }),
 /* 274 */,
 /* 275 */,
 /* 276 */,
@@ -15997,26 +16246,7 @@ module.exports =
 
 /***/ }),
 /* 285 */,
-/* 286 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(101), exports);
-
-
-/***/ }),
+/* 286 */,
 /* 287 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -17533,7 +17763,30 @@ function _interopRequireDefault(obj) {
 module.exports = _interopRequireDefault;
 
 /***/ }),
-/* 299 */,
+/* 299 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parameterize = void 0;
+const snakeCase_1 = __importDefault(__webpack_require__(419));
+/**
+ * Converts strings to a format safe for use in URLs, branch names etc.
+ *
+ * @param {string} str The string to parameterize.
+ *
+ * @returns {string} The parameterized string.
+ */
+exports.parameterize = (str) => snakeCase_1.default(str.trim().toLowerCase())
+    .replace(/[^0-9a-z_ ]/g, '')
+    .replace(/[_\- ]+/g, '-');
+
+
+/***/ }),
 /* 300 */
 /***/ (function(module) {
 
@@ -18748,7 +19001,7 @@ var util = __webpack_require__(448);
 var maybeWrapAsError = util.maybeWrapAsError;
 var errors = __webpack_require__(816);
 var OperationalError = errors.OperationalError;
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 
 function isUntypedError(obj) {
     return obj instanceof Error &&
@@ -22951,31 +23204,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* 388 */,
 /* 389 */,
 /* 390 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-module.exports = {
-  afterRequest: __webpack_require__(582),
-  beforeRequest: __webpack_require__(606),
-  browser: __webpack_require__(120),
-  cache: __webpack_require__(327),
-  content: __webpack_require__(776),
-  cookie: __webpack_require__(312),
-  creator: __webpack_require__(397),
-  entry: __webpack_require__(18),
-  har: __webpack_require__(131),
-  header: __webpack_require__(584),
-  log: __webpack_require__(997),
-  page: __webpack_require__(570),
-  pageTimings: __webpack_require__(300),
-  postData: __webpack_require__(785),
-  query: __webpack_require__(517),
-  request: __webpack_require__(230),
-  response: __webpack_require__(597),
-  timings: __webpack_require__(8)
-}
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(866), exports);
+__exportStar(__webpack_require__(433), exports);
+__exportStar(__webpack_require__(28), exports);
+__exportStar(__webpack_require__(15), exports);
 
 
 /***/ }),
@@ -23614,172 +23861,22 @@ module.exports = isSymbol;
 
 /***/ }),
 /* 404 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-module.exports = function generate__limit(it, $keyword, $ruleType) {
-  var out = ' ';
-  var $lvl = it.level;
-  var $dataLvl = it.dataLevel;
-  var $schema = it.schema[$keyword];
-  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
-  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
-  var $breakOnError = !it.opts.allErrors;
-  var $errorKeyword;
-  var $data = 'data' + ($dataLvl || '');
-  var $isData = it.opts.$data && $schema && $schema.$data,
-    $schemaValue;
-  if ($isData) {
-    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
-    $schemaValue = 'schema' + $lvl;
-  } else {
-    $schemaValue = $schema;
-  }
-  var $isMax = $keyword == 'maximum',
-    $exclusiveKeyword = $isMax ? 'exclusiveMaximum' : 'exclusiveMinimum',
-    $schemaExcl = it.schema[$exclusiveKeyword],
-    $isDataExcl = it.opts.$data && $schemaExcl && $schemaExcl.$data,
-    $op = $isMax ? '<' : '>',
-    $notOp = $isMax ? '>' : '<',
-    $errorKeyword = undefined;
-  if (!($isData || typeof $schema == 'number' || $schema === undefined)) {
-    throw new Error($keyword + ' must be number');
-  }
-  if (!($isDataExcl || $schemaExcl === undefined || typeof $schemaExcl == 'number' || typeof $schemaExcl == 'boolean')) {
-    throw new Error($exclusiveKeyword + ' must be number or boolean');
-  }
-  if ($isDataExcl) {
-    var $schemaValueExcl = it.util.getData($schemaExcl.$data, $dataLvl, it.dataPathArr),
-      $exclusive = 'exclusive' + $lvl,
-      $exclType = 'exclType' + $lvl,
-      $exclIsNumber = 'exclIsNumber' + $lvl,
-      $opExpr = 'op' + $lvl,
-      $opStr = '\' + ' + $opExpr + ' + \'';
-    out += ' var schemaExcl' + ($lvl) + ' = ' + ($schemaValueExcl) + '; ';
-    $schemaValueExcl = 'schemaExcl' + $lvl;
-    out += ' var ' + ($exclusive) + '; var ' + ($exclType) + ' = typeof ' + ($schemaValueExcl) + '; if (' + ($exclType) + ' != \'boolean\' && ' + ($exclType) + ' != \'undefined\' && ' + ($exclType) + ' != \'number\') { ';
-    var $errorKeyword = $exclusiveKeyword;
-    var $$outStack = $$outStack || [];
-    $$outStack.push(out);
-    out = ''; /* istanbul ignore else */
-    if (it.createErrors !== false) {
-      out += ' { keyword: \'' + ($errorKeyword || '_exclusiveLimit') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: {} ';
-      if (it.opts.messages !== false) {
-        out += ' , message: \'' + ($exclusiveKeyword) + ' should be boolean\' ';
-      }
-      if (it.opts.verbose) {
-        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-      }
-      out += ' } ';
-    } else {
-      out += ' {} ';
-    }
-    var __err = out;
-    out = $$outStack.pop();
-    if (!it.compositeRule && $breakOnError) {
-      /* istanbul ignore if */
-      if (it.async) {
-        out += ' throw new ValidationError([' + (__err) + ']); ';
-      } else {
-        out += ' validate.errors = [' + (__err) + ']; return false; ';
-      }
-    } else {
-      out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-    }
-    out += ' } else if ( ';
-    if ($isData) {
-      out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
-    }
-    out += ' ' + ($exclType) + ' == \'number\' ? ( (' + ($exclusive) + ' = ' + ($schemaValue) + ' === undefined || ' + ($schemaValueExcl) + ' ' + ($op) + '= ' + ($schemaValue) + ') ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaValueExcl) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) : ( (' + ($exclusive) + ' = ' + ($schemaValueExcl) + ' === true) ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaValue) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) || ' + ($data) + ' !== ' + ($data) + ') { var op' + ($lvl) + ' = ' + ($exclusive) + ' ? \'' + ($op) + '\' : \'' + ($op) + '=\'; ';
-    if ($schema === undefined) {
-      $errorKeyword = $exclusiveKeyword;
-      $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
-      $schemaValue = $schemaValueExcl;
-      $isData = $isDataExcl;
-    }
-  } else {
-    var $exclIsNumber = typeof $schemaExcl == 'number',
-      $opStr = $op;
-    if ($exclIsNumber && $isData) {
-      var $opExpr = '\'' + $opStr + '\'';
-      out += ' if ( ';
-      if ($isData) {
-        out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
-      }
-      out += ' ( ' + ($schemaValue) + ' === undefined || ' + ($schemaExcl) + ' ' + ($op) + '= ' + ($schemaValue) + ' ? ' + ($data) + ' ' + ($notOp) + '= ' + ($schemaExcl) + ' : ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' ) || ' + ($data) + ' !== ' + ($data) + ') { ';
-    } else {
-      if ($exclIsNumber && $schema === undefined) {
-        $exclusive = true;
-        $errorKeyword = $exclusiveKeyword;
-        $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
-        $schemaValue = $schemaExcl;
-        $notOp += '=';
-      } else {
-        if ($exclIsNumber) $schemaValue = Math[$isMax ? 'min' : 'max']($schemaExcl, $schema);
-        if ($schemaExcl === ($exclIsNumber ? $schemaValue : true)) {
-          $exclusive = true;
-          $errorKeyword = $exclusiveKeyword;
-          $errSchemaPath = it.errSchemaPath + '/' + $exclusiveKeyword;
-          $notOp += '=';
-        } else {
-          $exclusive = false;
-          $opStr += '=';
-        }
-      }
-      var $opExpr = '\'' + $opStr + '\'';
-      out += ' if ( ';
-      if ($isData) {
-        out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'number\') || ';
-      }
-      out += ' ' + ($data) + ' ' + ($notOp) + ' ' + ($schemaValue) + ' || ' + ($data) + ' !== ' + ($data) + ') { ';
-    }
-  }
-  $errorKeyword = $errorKeyword || $keyword;
-  var $$outStack = $$outStack || [];
-  $$outStack.push(out);
-  out = ''; /* istanbul ignore else */
-  if (it.createErrors !== false) {
-    out += ' { keyword: \'' + ($errorKeyword || '_limit') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { comparison: ' + ($opExpr) + ', limit: ' + ($schemaValue) + ', exclusive: ' + ($exclusive) + ' } ';
-    if (it.opts.messages !== false) {
-      out += ' , message: \'should be ' + ($opStr) + ' ';
-      if ($isData) {
-        out += '\' + ' + ($schemaValue);
-      } else {
-        out += '' + ($schemaValue) + '\'';
-      }
-    }
-    if (it.opts.verbose) {
-      out += ' , schema:  ';
-      if ($isData) {
-        out += 'validate.schema' + ($schemaPath);
-      } else {
-        out += '' + ($schema);
-      }
-      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-    }
-    out += ' } ';
-  } else {
-    out += ' {} ';
-  }
-  var __err = out;
-  out = $$outStack.pop();
-  if (!it.compositeRule && $breakOnError) {
-    /* istanbul ignore if */
-    if (it.async) {
-      out += ' throw new ValidationError([' + (__err) + ']); ';
-    } else {
-      out += ' validate.errors = [' + (__err) + ']; return false; ';
-    }
-  } else {
-    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-  }
-  out += ' } ';
-  if ($breakOnError) {
-    out += ' else { ';
-  }
-  return out;
-}
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(273), exports);
 
 
 /***/ }),
@@ -27030,59 +27127,36 @@ module.exports = require("crypto");
 /***/ }),
 /* 418 */,
 /* 419 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var createCompounder = __webpack_require__(702);
 
+/**
+ * Converts `string` to
+ * [snake case](https://en.wikipedia.org/wiki/Snake_case).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the snake cased string.
+ * @example
+ *
+ * _.snakeCase('Foo Bar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('fooBar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('--FOO-BAR--');
+ * // => 'foo_bar'
+ */
+var snakeCase = createCompounder(function(result, word, index) {
+  return result + (index ? '_' : '') + word.toLowerCase();
+});
 
-var qs = __webpack_require__(760)
-var querystring = __webpack_require__(191)
-
-function Querystring (request) {
-  this.request = request
-  this.lib = null
-  this.useQuerystring = null
-  this.parseOptions = null
-  this.stringifyOptions = null
-}
-
-Querystring.prototype.init = function (options) {
-  if (this.lib) { return }
-
-  this.useQuerystring = options.useQuerystring
-  this.lib = (this.useQuerystring ? querystring : qs)
-
-  this.parseOptions = options.qsParseOptions || {}
-  this.stringifyOptions = options.qsStringifyOptions || {}
-}
-
-Querystring.prototype.stringify = function (obj) {
-  return (this.useQuerystring)
-    ? this.rfc3986(this.lib.stringify(obj,
-      this.stringifyOptions.sep || null,
-      this.stringifyOptions.eq || null,
-      this.stringifyOptions))
-    : this.lib.stringify(obj, this.stringifyOptions)
-}
-
-Querystring.prototype.parse = function (str) {
-  return (this.useQuerystring)
-    ? this.lib.parse(str,
-      this.parseOptions.sep || null,
-      this.parseOptions.eq || null,
-      this.parseOptions)
-    : this.lib.parse(str, this.parseOptions)
-}
-
-Querystring.prototype.rfc3986 = function (str) {
-  return str.replace(/[!'()*]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-Querystring.prototype.unescape = querystring.unescape
-
-exports.Querystring = Querystring
+module.exports = snakeCase;
 
 
 /***/ }),
@@ -28128,29 +28202,7 @@ module.exports = __webpack_require__(498)
 
 
 /***/ }),
-/* 427 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(936), exports);
-__exportStar(__webpack_require__(76), exports);
-__exportStar(__webpack_require__(803), exports);
-__exportStar(__webpack_require__(629), exports);
-
-
-/***/ }),
+/* 427 */,
 /* 428 */,
 /* 429 */
 /***/ (function(__unusedmodule, exports) {
@@ -28211,22 +28263,110 @@ __exportStar(__webpack_require__(571), exports);
 
 /***/ }),
 /* 432 */,
-/* 433 */,
-/* 434 */
+/* 433 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
-const web_api_1 = __webpack_require__(431);
+exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
 const Constants_1 = __webpack_require__(168);
-// We had to roll back the NCC version so that this would work.
-// See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
-exports.client = new web_api_1.WebClient(Constants_1.SlackToken);
+const Client_1 = __webpack_require__(818);
+exports.TreeModes = {
+    ModeFile: '100644',
+    ModeExe: '100755',
+    ModeDirectory: '040000',
+};
+exports.TreeTypes = {
+    Blob: 'blob',
+    Commit: 'commit',
+    Tree: 'tree',
+};
+/**
+ * Creates a new blob, which can be used to make a tree.
+ *
+ * @param {string} repo    The name of the repository that the blob will belong to.
+ * @param {string} content The content to put in the blob.
+ *
+ * @returns {GitCreateBlobResponseData} The blob data.
+ */
+exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createBlob({
+        owner: Constants_1.OrganizationName,
+        repo,
+        content,
+    });
+    return response.data;
+});
+/**
+ * Creates a new commit.
+ *
+ * @param {string} repo    The name of the repository that the commit will belong to.
+ * @param {string} message The commit message.
+ * @param {Sha}    tree    The tree to attach the commit to.
+ * @param {Sha}    parent  The parent to attach the commit to.
+ *
+ * @returns {GitCreateCommitResponseData} The commit data.
+ */
+exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createCommit({
+        owner: Constants_1.OrganizationName,
+        repo,
+        message,
+        tree,
+        parents: [parent],
+    });
+    return response.data;
+});
+/**
+ * Creates a new branch.
+ *
+ * @param {string} repo   The name of the repository that the branch will belong to.
+ * @param {Branch} branch The name of the branch to create.
+ * @param {Sha}    sha    The commit sha to base the branch on.
+ *
+ * @returns {GitCreateRefResponseData} The branch data.
+ */
+exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createRef({
+        owner: Constants_1.OrganizationName,
+        repo,
+        ref: `refs/heads/${branch}`,
+        sha,
+    });
+    return response.data;
+});
+/**
+ * Creates a new tree, which can be used to make a commit.
+ *
+ * @param {string} repo     The name of the repository that the branch will belong to.
+ * @param {Tree[]} tree     The data to use when creating the tree.
+ * @param {Sha}    baseTree The tree to base the new tree on.
+ *
+ * @returns {GitCreateTreeResponseData} The branch data.
+ */
+exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.git.createTree({
+        owner: Constants_1.OrganizationName,
+        repo,
+        tree,
+        base_tree: baseTree,
+    });
+    return response.data;
+});
 
 
 /***/ }),
+/* 434 */,
 /* 435 */,
 /* 436 */,
 /* 437 */,
@@ -29212,7 +29352,7 @@ Promise.prototype.asCallback = Promise.prototype.nodeify = function (nodeback,
 
 "use strict";
 
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 var canEvaluate = typeof navigator == "undefined";
 
 var errorObj = {e: {}};
@@ -30224,22 +30364,73 @@ module.exports = function parseHeaders(headers) {
 /***/ }),
 /* 456 */,
 /* 457 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(293)
+var Buffer = buffer.Buffer
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(238), exports);
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.prototype = Object.create(Buffer.prototype)
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
 
 
 /***/ }),
@@ -32521,20 +32712,103 @@ function state(list, sortMethod)
 
 
 /***/ }),
-/* 475 */,
+/* 475 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var Symbol = __webpack_require__(213),
+    arrayMap = __webpack_require__(356),
+    isArray = __webpack_require__(869),
+    isSymbol = __webpack_require__(403);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = baseToString;
+
+
+/***/ }),
 /* 476 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.clientForToken = exports.client = void 0;
-const rest_1 = __webpack_require__(375);
-const Constants_1 = __webpack_require__(168);
-exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
-exports.clientForToken = (token) => {
-    return new rest_1.Octokit({ auth: token });
-};
+
+var qs = __webpack_require__(760)
+var querystring = __webpack_require__(191)
+
+function Querystring (request) {
+  this.request = request
+  this.lib = null
+  this.useQuerystring = null
+  this.parseOptions = null
+  this.stringifyOptions = null
+}
+
+Querystring.prototype.init = function (options) {
+  if (this.lib) { return }
+
+  this.useQuerystring = options.useQuerystring
+  this.lib = (this.useQuerystring ? querystring : qs)
+
+  this.parseOptions = options.qsParseOptions || {}
+  this.stringifyOptions = options.qsStringifyOptions || {}
+}
+
+Querystring.prototype.stringify = function (obj) {
+  return (this.useQuerystring)
+    ? this.rfc3986(this.lib.stringify(obj,
+      this.stringifyOptions.sep || null,
+      this.stringifyOptions.eq || null,
+      this.stringifyOptions))
+    : this.lib.stringify(obj, this.stringifyOptions)
+}
+
+Querystring.prototype.parse = function (str) {
+  return (this.useQuerystring)
+    ? this.lib.parse(str,
+      this.parseOptions.sep || null,
+      this.parseOptions.eq || null,
+      this.parseOptions)
+    : this.lib.parse(str, this.parseOptions)
+}
+
+Querystring.prototype.rfc3986 = function (str) {
+  return str.replace(/[!'()*]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+Querystring.prototype.unescape = querystring.unescape
+
+exports.Querystring = Querystring
 
 
 /***/ }),
@@ -32790,26 +33064,112 @@ module.exports = {
 /***/ }),
 /* 480 */,
 /* 481 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parameterize = void 0;
-const snakeCase_1 = __importDefault(__webpack_require__(98));
-/**
- * Converts strings to a format safe for use in URLs, branch names etc.
- *
- * @param {string} str The string to parameterize.
- *
- * @returns {string} The parameterized string.
- */
-exports.parameterize = (str) => snakeCase_1.default(str.trim().toLowerCase())
-    .replace(/[^0-9a-z_ ]/g, '')
-    .replace(/[_\- ]+/g, '-');
+module.exports = function generate_if(it, $keyword, $ruleType) {
+  var out = ' ';
+  var $lvl = it.level;
+  var $dataLvl = it.dataLevel;
+  var $schema = it.schema[$keyword];
+  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
+  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
+  var $breakOnError = !it.opts.allErrors;
+  var $data = 'data' + ($dataLvl || '');
+  var $valid = 'valid' + $lvl;
+  var $errs = 'errs__' + $lvl;
+  var $it = it.util.copy(it);
+  $it.level++;
+  var $nextValid = 'valid' + $it.level;
+  var $thenSch = it.schema['then'],
+    $elseSch = it.schema['else'],
+    $thenPresent = $thenSch !== undefined && (it.opts.strictKeywords ? typeof $thenSch == 'object' && Object.keys($thenSch).length > 0 : it.util.schemaHasRules($thenSch, it.RULES.all)),
+    $elsePresent = $elseSch !== undefined && (it.opts.strictKeywords ? typeof $elseSch == 'object' && Object.keys($elseSch).length > 0 : it.util.schemaHasRules($elseSch, it.RULES.all)),
+    $currentBaseId = $it.baseId;
+  if ($thenPresent || $elsePresent) {
+    var $ifClause;
+    $it.createErrors = false;
+    $it.schema = $schema;
+    $it.schemaPath = $schemaPath;
+    $it.errSchemaPath = $errSchemaPath;
+    out += ' var ' + ($errs) + ' = errors; var ' + ($valid) + ' = true;  ';
+    var $wasComposite = it.compositeRule;
+    it.compositeRule = $it.compositeRule = true;
+    out += '  ' + (it.validate($it)) + ' ';
+    $it.baseId = $currentBaseId;
+    $it.createErrors = true;
+    out += '  errors = ' + ($errs) + '; if (vErrors !== null) { if (' + ($errs) + ') vErrors.length = ' + ($errs) + '; else vErrors = null; }  ';
+    it.compositeRule = $it.compositeRule = $wasComposite;
+    if ($thenPresent) {
+      out += ' if (' + ($nextValid) + ') {  ';
+      $it.schema = it.schema['then'];
+      $it.schemaPath = it.schemaPath + '.then';
+      $it.errSchemaPath = it.errSchemaPath + '/then';
+      out += '  ' + (it.validate($it)) + ' ';
+      $it.baseId = $currentBaseId;
+      out += ' ' + ($valid) + ' = ' + ($nextValid) + '; ';
+      if ($thenPresent && $elsePresent) {
+        $ifClause = 'ifClause' + $lvl;
+        out += ' var ' + ($ifClause) + ' = \'then\'; ';
+      } else {
+        $ifClause = '\'then\'';
+      }
+      out += ' } ';
+      if ($elsePresent) {
+        out += ' else { ';
+      }
+    } else {
+      out += ' if (!' + ($nextValid) + ') { ';
+    }
+    if ($elsePresent) {
+      $it.schema = it.schema['else'];
+      $it.schemaPath = it.schemaPath + '.else';
+      $it.errSchemaPath = it.errSchemaPath + '/else';
+      out += '  ' + (it.validate($it)) + ' ';
+      $it.baseId = $currentBaseId;
+      out += ' ' + ($valid) + ' = ' + ($nextValid) + '; ';
+      if ($thenPresent && $elsePresent) {
+        $ifClause = 'ifClause' + $lvl;
+        out += ' var ' + ($ifClause) + ' = \'else\'; ';
+      } else {
+        $ifClause = '\'else\'';
+      }
+      out += ' } ';
+    }
+    out += ' if (!' + ($valid) + ') {   var err =   '; /* istanbul ignore else */
+    if (it.createErrors !== false) {
+      out += ' { keyword: \'' + ('if') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { failingKeyword: ' + ($ifClause) + ' } ';
+      if (it.opts.messages !== false) {
+        out += ' , message: \'should match "\' + ' + ($ifClause) + ' + \'" schema\' ';
+      }
+      if (it.opts.verbose) {
+        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+      }
+      out += ' } ';
+    } else {
+      out += ' {} ';
+    }
+    out += ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+    if (!it.compositeRule && $breakOnError) {
+      /* istanbul ignore if */
+      if (it.async) {
+        out += ' throw new ValidationError(vErrors); ';
+      } else {
+        out += ' validate.errors = vErrors; return false; ';
+      }
+    }
+    out += ' }   ';
+    if ($breakOnError) {
+      out += ' else { ';
+    }
+  } else {
+    if ($breakOnError) {
+      out += ' if (true) { ';
+    }
+  }
+  return out;
+}
 
 
 /***/ }),
@@ -32819,7 +33179,88 @@ exports.parameterize = (str) => snakeCase_1.default(str.trim().toLowerCase())
 /* 485 */,
 /* 486 */,
 /* 487 */,
-/* 488 */,
+/* 488 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = function generate_pattern(it, $keyword, $ruleType) {
+  var out = ' ';
+  var $lvl = it.level;
+  var $dataLvl = it.dataLevel;
+  var $schema = it.schema[$keyword];
+  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
+  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
+  var $breakOnError = !it.opts.allErrors;
+  var $data = 'data' + ($dataLvl || '');
+  var $isData = it.opts.$data && $schema && $schema.$data,
+    $schemaValue;
+  if ($isData) {
+    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
+    $schemaValue = 'schema' + $lvl;
+  } else {
+    $schemaValue = $schema;
+  }
+  var $regexp = $isData ? '(new RegExp(' + $schemaValue + '))' : it.usePattern($schema);
+  out += 'if ( ';
+  if ($isData) {
+    out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'string\') || ';
+  }
+  out += ' !' + ($regexp) + '.test(' + ($data) + ') ) {   ';
+  var $$outStack = $$outStack || [];
+  $$outStack.push(out);
+  out = ''; /* istanbul ignore else */
+  if (it.createErrors !== false) {
+    out += ' { keyword: \'' + ('pattern') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { pattern:  ';
+    if ($isData) {
+      out += '' + ($schemaValue);
+    } else {
+      out += '' + (it.util.toQuotedString($schema));
+    }
+    out += '  } ';
+    if (it.opts.messages !== false) {
+      out += ' , message: \'should match pattern "';
+      if ($isData) {
+        out += '\' + ' + ($schemaValue) + ' + \'';
+      } else {
+        out += '' + (it.util.escapeQuotes($schema));
+      }
+      out += '"\' ';
+    }
+    if (it.opts.verbose) {
+      out += ' , schema:  ';
+      if ($isData) {
+        out += 'validate.schema' + ($schemaPath);
+      } else {
+        out += '' + (it.util.toQuotedString($schema));
+      }
+      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
+    }
+    out += ' } ';
+  } else {
+    out += ' {} ';
+  }
+  var __err = out;
+  out = $$outStack.pop();
+  if (!it.compositeRule && $breakOnError) {
+    /* istanbul ignore if */
+    if (it.async) {
+      out += ' throw new ValidationError([' + (__err) + ']); ';
+    } else {
+      out += ' validate.errors = [' + (__err) + ']; return false; ';
+    }
+  } else {
+    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
+  }
+  out += '} ';
+  if ($breakOnError) {
+    out += ' else { ';
+  }
+  return out;
+}
+
+
+/***/ }),
 /* 489 */,
 /* 490 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -33529,7 +33970,7 @@ module.exports = {"$id":"query.json#","$schema":"http://json-schema.org/draft-06
 var uuid = __webpack_require__(824)
 var CombinedStream = __webpack_require__(477)
 var isstream = __webpack_require__(362)
-var Buffer = __webpack_require__(961).Buffer
+var Buffer = __webpack_require__(457).Buffer
 
 function Multipart (request) {
   this.request = request
@@ -34341,7 +34782,26 @@ function generateECDSA(curve) {
 /***/ }),
 /* 539 */,
 /* 540 */,
-/* 541 */,
+/* 541 */
+/***/ (function(module) {
+
+/**
+ * The base implementation of `_.propertyOf` without support for deep paths.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyOf(object) {
+  return function(key) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = basePropertyOf;
+
+
+/***/ }),
 /* 542 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -36835,7 +37295,21 @@ module.exports = CancelToken;
 
 /***/ }),
 /* 588 */,
-/* 589 */,
+/* 589 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.client = void 0;
+const web_api_1 = __webpack_require__(431);
+const Constants_1 = __webpack_require__(168);
+// We had to roll back the NCC version so that this would work.
+// See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
+exports.client = new web_api_1.WebClient(Constants_1.SlackToken);
+
+
+/***/ }),
 /* 590 */,
 /* 591 */
 /***/ (function(module) {
@@ -37616,22 +38090,515 @@ module.exports = (
 /***/ }),
 /* 609 */,
 /* 610 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var compileSchema = __webpack_require__(442)
+  , resolve = __webpack_require__(896)
+  , Cache = __webpack_require__(679)
+  , SchemaObject = __webpack_require__(374)
+  , stableStringify = __webpack_require__(969)
+  , formats = __webpack_require__(627)
+  , rules = __webpack_require__(579)
+  , $dataMetaSchema = __webpack_require__(412)
+  , util = __webpack_require__(607);
+
+module.exports = Ajv;
+
+Ajv.prototype.validate = validate;
+Ajv.prototype.compile = compile;
+Ajv.prototype.addSchema = addSchema;
+Ajv.prototype.addMetaSchema = addMetaSchema;
+Ajv.prototype.validateSchema = validateSchema;
+Ajv.prototype.getSchema = getSchema;
+Ajv.prototype.removeSchema = removeSchema;
+Ajv.prototype.addFormat = addFormat;
+Ajv.prototype.errorsText = errorsText;
+
+Ajv.prototype._addSchema = _addSchema;
+Ajv.prototype._compile = _compile;
+
+Ajv.prototype.compileAsync = __webpack_require__(890);
+var customKeyword = __webpack_require__(297);
+Ajv.prototype.addKeyword = customKeyword.add;
+Ajv.prototype.getKeyword = customKeyword.get;
+Ajv.prototype.removeKeyword = customKeyword.remove;
+Ajv.prototype.validateKeyword = customKeyword.validate;
+
+var errorClasses = __webpack_require__(726);
+Ajv.ValidationError = errorClasses.Validation;
+Ajv.MissingRefError = errorClasses.MissingRef;
+Ajv.$dataMetaSchema = $dataMetaSchema;
+
+var META_SCHEMA_ID = 'http://json-schema.org/draft-07/schema';
+
+var META_IGNORE_OPTIONS = [ 'removeAdditional', 'useDefaults', 'coerceTypes', 'strictDefaults' ];
+var META_SUPPORT_DATA = ['/properties'];
 
 /**
- * The base implementation of `_.propertyOf` without support for deep paths.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Function} Returns the new accessor function.
+ * Creates validator instance.
+ * Usage: `Ajv(opts)`
+ * @param {Object} opts optional options
+ * @return {Object} ajv instance
  */
-function basePropertyOf(object) {
-  return function(key) {
-    return object == null ? undefined : object[key];
-  };
+function Ajv(opts) {
+  if (!(this instanceof Ajv)) return new Ajv(opts);
+  opts = this._opts = util.copy(opts) || {};
+  setLogger(this);
+  this._schemas = {};
+  this._refs = {};
+  this._fragments = {};
+  this._formats = formats(opts.format);
+
+  this._cache = opts.cache || new Cache;
+  this._loadingSchemas = {};
+  this._compilations = [];
+  this.RULES = rules();
+  this._getId = chooseGetId(opts);
+
+  opts.loopRequired = opts.loopRequired || Infinity;
+  if (opts.errorDataPath == 'property') opts._errorDataPathProperty = true;
+  if (opts.serialize === undefined) opts.serialize = stableStringify;
+  this._metaOpts = getMetaSchemaOptions(this);
+
+  if (opts.formats) addInitialFormats(this);
+  if (opts.keywords) addInitialKeywords(this);
+  addDefaultMetaSchema(this);
+  if (typeof opts.meta == 'object') this.addMetaSchema(opts.meta);
+  if (opts.nullable) this.addKeyword('nullable', {metaSchema: {type: 'boolean'}});
+  addInitialSchemas(this);
 }
 
-module.exports = basePropertyOf;
+
+
+/**
+ * Validate data using schema
+ * Schema will be compiled and cached (using serialized JSON as key. [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) is used to serialize.
+ * @this   Ajv
+ * @param  {String|Object} schemaKeyRef key, ref or schema object
+ * @param  {Any} data to be validated
+ * @return {Boolean} validation result. Errors from the last validation will be available in `ajv.errors` (and also in compiled schema: `schema.errors`).
+ */
+function validate(schemaKeyRef, data) {
+  var v;
+  if (typeof schemaKeyRef == 'string') {
+    v = this.getSchema(schemaKeyRef);
+    if (!v) throw new Error('no schema with key or ref "' + schemaKeyRef + '"');
+  } else {
+    var schemaObj = this._addSchema(schemaKeyRef);
+    v = schemaObj.validate || this._compile(schemaObj);
+  }
+
+  var valid = v(data);
+  if (v.$async !== true) this.errors = v.errors;
+  return valid;
+}
+
+
+/**
+ * Create validating function for passed schema.
+ * @this   Ajv
+ * @param  {Object} schema schema object
+ * @param  {Boolean} _meta true if schema is a meta-schema. Used internally to compile meta schemas of custom keywords.
+ * @return {Function} validating function
+ */
+function compile(schema, _meta) {
+  var schemaObj = this._addSchema(schema, undefined, _meta);
+  return schemaObj.validate || this._compile(schemaObj);
+}
+
+
+/**
+ * Adds schema to the instance.
+ * @this   Ajv
+ * @param {Object|Array} schema schema or array of schemas. If array is passed, `key` and other parameters will be ignored.
+ * @param {String} key Optional schema key. Can be passed to `validate` method instead of schema object or id/ref. One schema per instance can have empty `id` and `key`.
+ * @param {Boolean} _skipValidation true to skip schema validation. Used internally, option validateSchema should be used instead.
+ * @param {Boolean} _meta true if schema is a meta-schema. Used internally, addMetaSchema should be used instead.
+ * @return {Ajv} this for method chaining
+ */
+function addSchema(schema, key, _skipValidation, _meta) {
+  if (Array.isArray(schema)){
+    for (var i=0; i<schema.length; i++) this.addSchema(schema[i], undefined, _skipValidation, _meta);
+    return this;
+  }
+  var id = this._getId(schema);
+  if (id !== undefined && typeof id != 'string')
+    throw new Error('schema id must be string');
+  key = resolve.normalizeId(key || id);
+  checkUnique(this, key);
+  this._schemas[key] = this._addSchema(schema, _skipValidation, _meta, true);
+  return this;
+}
+
+
+/**
+ * Add schema that will be used to validate other schemas
+ * options in META_IGNORE_OPTIONS are alway set to false
+ * @this   Ajv
+ * @param {Object} schema schema object
+ * @param {String} key optional schema key
+ * @param {Boolean} skipValidation true to skip schema validation, can be used to override validateSchema option for meta-schema
+ * @return {Ajv} this for method chaining
+ */
+function addMetaSchema(schema, key, skipValidation) {
+  this.addSchema(schema, key, skipValidation, true);
+  return this;
+}
+
+
+/**
+ * Validate schema
+ * @this   Ajv
+ * @param {Object} schema schema to validate
+ * @param {Boolean} throwOrLogError pass true to throw (or log) an error if invalid
+ * @return {Boolean} true if schema is valid
+ */
+function validateSchema(schema, throwOrLogError) {
+  var $schema = schema.$schema;
+  if ($schema !== undefined && typeof $schema != 'string')
+    throw new Error('$schema must be a string');
+  $schema = $schema || this._opts.defaultMeta || defaultMeta(this);
+  if (!$schema) {
+    this.logger.warn('meta-schema not available');
+    this.errors = null;
+    return true;
+  }
+  var valid = this.validate($schema, schema);
+  if (!valid && throwOrLogError) {
+    var message = 'schema is invalid: ' + this.errorsText();
+    if (this._opts.validateSchema == 'log') this.logger.error(message);
+    else throw new Error(message);
+  }
+  return valid;
+}
+
+
+function defaultMeta(self) {
+  var meta = self._opts.meta;
+  self._opts.defaultMeta = typeof meta == 'object'
+                            ? self._getId(meta) || meta
+                            : self.getSchema(META_SCHEMA_ID)
+                              ? META_SCHEMA_ID
+                              : undefined;
+  return self._opts.defaultMeta;
+}
+
+
+/**
+ * Get compiled schema from the instance by `key` or `ref`.
+ * @this   Ajv
+ * @param  {String} keyRef `key` that was passed to `addSchema` or full schema reference (`schema.id` or resolved id).
+ * @return {Function} schema validating function (with property `schema`).
+ */
+function getSchema(keyRef) {
+  var schemaObj = _getSchemaObj(this, keyRef);
+  switch (typeof schemaObj) {
+    case 'object': return schemaObj.validate || this._compile(schemaObj);
+    case 'string': return this.getSchema(schemaObj);
+    case 'undefined': return _getSchemaFragment(this, keyRef);
+  }
+}
+
+
+function _getSchemaFragment(self, ref) {
+  var res = resolve.schema.call(self, { schema: {} }, ref);
+  if (res) {
+    var schema = res.schema
+      , root = res.root
+      , baseId = res.baseId;
+    var v = compileSchema.call(self, schema, root, undefined, baseId);
+    self._fragments[ref] = new SchemaObject({
+      ref: ref,
+      fragment: true,
+      schema: schema,
+      root: root,
+      baseId: baseId,
+      validate: v
+    });
+    return v;
+  }
+}
+
+
+function _getSchemaObj(self, keyRef) {
+  keyRef = resolve.normalizeId(keyRef);
+  return self._schemas[keyRef] || self._refs[keyRef] || self._fragments[keyRef];
+}
+
+
+/**
+ * Remove cached schema(s).
+ * If no parameter is passed all schemas but meta-schemas are removed.
+ * If RegExp is passed all schemas with key/id matching pattern but meta-schemas are removed.
+ * Even if schema is referenced by other schemas it still can be removed as other schemas have local references.
+ * @this   Ajv
+ * @param  {String|Object|RegExp} schemaKeyRef key, ref, pattern to match key/ref or schema object
+ * @return {Ajv} this for method chaining
+ */
+function removeSchema(schemaKeyRef) {
+  if (schemaKeyRef instanceof RegExp) {
+    _removeAllSchemas(this, this._schemas, schemaKeyRef);
+    _removeAllSchemas(this, this._refs, schemaKeyRef);
+    return this;
+  }
+  switch (typeof schemaKeyRef) {
+    case 'undefined':
+      _removeAllSchemas(this, this._schemas);
+      _removeAllSchemas(this, this._refs);
+      this._cache.clear();
+      return this;
+    case 'string':
+      var schemaObj = _getSchemaObj(this, schemaKeyRef);
+      if (schemaObj) this._cache.del(schemaObj.cacheKey);
+      delete this._schemas[schemaKeyRef];
+      delete this._refs[schemaKeyRef];
+      return this;
+    case 'object':
+      var serialize = this._opts.serialize;
+      var cacheKey = serialize ? serialize(schemaKeyRef) : schemaKeyRef;
+      this._cache.del(cacheKey);
+      var id = this._getId(schemaKeyRef);
+      if (id) {
+        id = resolve.normalizeId(id);
+        delete this._schemas[id];
+        delete this._refs[id];
+      }
+  }
+  return this;
+}
+
+
+function _removeAllSchemas(self, schemas, regex) {
+  for (var keyRef in schemas) {
+    var schemaObj = schemas[keyRef];
+    if (!schemaObj.meta && (!regex || regex.test(keyRef))) {
+      self._cache.del(schemaObj.cacheKey);
+      delete schemas[keyRef];
+    }
+  }
+}
+
+
+/* @this   Ajv */
+function _addSchema(schema, skipValidation, meta, shouldAddSchema) {
+  if (typeof schema != 'object' && typeof schema != 'boolean')
+    throw new Error('schema should be object or boolean');
+  var serialize = this._opts.serialize;
+  var cacheKey = serialize ? serialize(schema) : schema;
+  var cached = this._cache.get(cacheKey);
+  if (cached) return cached;
+
+  shouldAddSchema = shouldAddSchema || this._opts.addUsedSchema !== false;
+
+  var id = resolve.normalizeId(this._getId(schema));
+  if (id && shouldAddSchema) checkUnique(this, id);
+
+  var willValidate = this._opts.validateSchema !== false && !skipValidation;
+  var recursiveMeta;
+  if (willValidate && !(recursiveMeta = id && id == resolve.normalizeId(schema.$schema)))
+    this.validateSchema(schema, true);
+
+  var localRefs = resolve.ids.call(this, schema);
+
+  var schemaObj = new SchemaObject({
+    id: id,
+    schema: schema,
+    localRefs: localRefs,
+    cacheKey: cacheKey,
+    meta: meta
+  });
+
+  if (id[0] != '#' && shouldAddSchema) this._refs[id] = schemaObj;
+  this._cache.put(cacheKey, schemaObj);
+
+  if (willValidate && recursiveMeta) this.validateSchema(schema, true);
+
+  return schemaObj;
+}
+
+
+/* @this   Ajv */
+function _compile(schemaObj, root) {
+  if (schemaObj.compiling) {
+    schemaObj.validate = callValidate;
+    callValidate.schema = schemaObj.schema;
+    callValidate.errors = null;
+    callValidate.root = root ? root : callValidate;
+    if (schemaObj.schema.$async === true)
+      callValidate.$async = true;
+    return callValidate;
+  }
+  schemaObj.compiling = true;
+
+  var currentOpts;
+  if (schemaObj.meta) {
+    currentOpts = this._opts;
+    this._opts = this._metaOpts;
+  }
+
+  var v;
+  try { v = compileSchema.call(this, schemaObj.schema, root, schemaObj.localRefs); }
+  catch(e) {
+    delete schemaObj.validate;
+    throw e;
+  }
+  finally {
+    schemaObj.compiling = false;
+    if (schemaObj.meta) this._opts = currentOpts;
+  }
+
+  schemaObj.validate = v;
+  schemaObj.refs = v.refs;
+  schemaObj.refVal = v.refVal;
+  schemaObj.root = v.root;
+  return v;
+
+
+  /* @this   {*} - custom context, see passContext option */
+  function callValidate() {
+    /* jshint validthis: true */
+    var _validate = schemaObj.validate;
+    var result = _validate.apply(this, arguments);
+    callValidate.errors = _validate.errors;
+    return result;
+  }
+}
+
+
+function chooseGetId(opts) {
+  switch (opts.schemaId) {
+    case 'auto': return _get$IdOrId;
+    case 'id': return _getId;
+    default: return _get$Id;
+  }
+}
+
+/* @this   Ajv */
+function _getId(schema) {
+  if (schema.$id) this.logger.warn('schema $id ignored', schema.$id);
+  return schema.id;
+}
+
+/* @this   Ajv */
+function _get$Id(schema) {
+  if (schema.id) this.logger.warn('schema id ignored', schema.id);
+  return schema.$id;
+}
+
+
+function _get$IdOrId(schema) {
+  if (schema.$id && schema.id && schema.$id != schema.id)
+    throw new Error('schema $id is different from id');
+  return schema.$id || schema.id;
+}
+
+
+/**
+ * Convert array of error message objects to string
+ * @this   Ajv
+ * @param  {Array<Object>} errors optional array of validation errors, if not passed errors from the instance are used.
+ * @param  {Object} options optional options with properties `separator` and `dataVar`.
+ * @return {String} human readable string with all errors descriptions
+ */
+function errorsText(errors, options) {
+  errors = errors || this.errors;
+  if (!errors) return 'No errors';
+  options = options || {};
+  var separator = options.separator === undefined ? ', ' : options.separator;
+  var dataVar = options.dataVar === undefined ? 'data' : options.dataVar;
+
+  var text = '';
+  for (var i=0; i<errors.length; i++) {
+    var e = errors[i];
+    if (e) text += dataVar + e.dataPath + ' ' + e.message + separator;
+  }
+  return text.slice(0, -separator.length);
+}
+
+
+/**
+ * Add custom format
+ * @this   Ajv
+ * @param {String} name format name
+ * @param {String|RegExp|Function} format string is converted to RegExp; function should return boolean (true when valid)
+ * @return {Ajv} this for method chaining
+ */
+function addFormat(name, format) {
+  if (typeof format == 'string') format = new RegExp(format);
+  this._formats[name] = format;
+  return this;
+}
+
+
+function addDefaultMetaSchema(self) {
+  var $dataSchema;
+  if (self._opts.$data) {
+    $dataSchema = __webpack_require__(892);
+    self.addMetaSchema($dataSchema, $dataSchema.$id, true);
+  }
+  if (self._opts.meta === false) return;
+  var metaSchema = __webpack_require__(698);
+  if (self._opts.$data) metaSchema = $dataMetaSchema(metaSchema, META_SUPPORT_DATA);
+  self.addMetaSchema(metaSchema, META_SCHEMA_ID, true);
+  self._refs['http://json-schema.org/schema'] = META_SCHEMA_ID;
+}
+
+
+function addInitialSchemas(self) {
+  var optsSchemas = self._opts.schemas;
+  if (!optsSchemas) return;
+  if (Array.isArray(optsSchemas)) self.addSchema(optsSchemas);
+  else for (var key in optsSchemas) self.addSchema(optsSchemas[key], key);
+}
+
+
+function addInitialFormats(self) {
+  for (var name in self._opts.formats) {
+    var format = self._opts.formats[name];
+    self.addFormat(name, format);
+  }
+}
+
+
+function addInitialKeywords(self) {
+  for (var name in self._opts.keywords) {
+    var keyword = self._opts.keywords[name];
+    self.addKeyword(name, keyword);
+  }
+}
+
+
+function checkUnique(self, id) {
+  if (self._schemas[id] || self._refs[id])
+    throw new Error('schema with key or id "' + id + '" already exists');
+}
+
+
+function getMetaSchemaOptions(self) {
+  var metaOpts = util.copy(self._opts);
+  for (var i=0; i<META_IGNORE_OPTIONS.length; i++)
+    delete metaOpts[META_IGNORE_OPTIONS[i]];
+  return metaOpts;
+}
+
+
+function setLogger(self) {
+  var logger = self._opts.logger;
+  if (logger === false) {
+    self.logger = {log: noop, warn: noop, error: noop};
+  } else {
+    if (logger === undefined) logger = console;
+    if (!(typeof logger == 'object' && logger.log && logger.warn && logger.error))
+      throw new Error('logger must implement log, warn and error methods');
+    self.logger = logger;
+  }
+}
+
+
+function noop() {}
 
 
 /***/ }),
@@ -38533,62 +39500,7 @@ function regex(str) {
 
 /***/ }),
 /* 628 */,
-/* 629 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepository = exports.getNextPullRequestNumber = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(476);
-/**
- * Decides what number the next pull request will be.
- *
- * @param {Repository} repo The name of the repository that the PR will belong to.
- * @returns {number}   The number of the next PR.
- */
-exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.pulls.list({
-        direction: 'desc',
-        owner: Constants_1.OrganizationName,
-        page: 1,
-        per_page: 1,
-        repo,
-        sort: 'created',
-        state: 'all',
-    });
-    if (response.data.length === 0) {
-        return 1;
-    }
-    return response.data[0].number + 1;
-});
-/**
- * Returns the repository with the given name.
- *
- * @param {Repository} repo The name of the repository to fetch.
- *
- * @returns {ReposGetResponseData} The repository data.
- */
-exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.repos.get({
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
-
-
-/***/ }),
+/* 629 */,
 /* 630 */,
 /* 631 */
 /***/ (function(module) {
@@ -39670,29 +40582,7 @@ module.exports = getProxyFromURI
 
 /***/ }),
 /* 655 */,
-/* 656 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
-const jira_client_1 = __importDefault(__webpack_require__(411));
-const Constants_1 = __webpack_require__(168);
-exports.client = new jira_client_1.default({
-    apiVersion: '2',
-    host: Constants_1.JiraHost,
-    password: Constants_1.JiraToken,
-    protocol: 'https',
-    strictSSL: true,
-    username: Constants_1.JiraEmail,
-});
-
-
-/***/ }),
+/* 656 */,
 /* 657 */
 /***/ (function(module) {
 
@@ -42324,7 +43214,7 @@ var disableAsyncHooks = function() {
     util.notEnumerableProp(Promise, "_getContext", getContextDomain);
 };
 
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 var Async = __webpack_require__(61);
 var async = new Async();
 es5.defineProperty(Promise, "_async", {value: async});
@@ -43100,9 +43990,9 @@ __webpack_require__(862)(Promise, INTERNAL);
 /* 697 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var Ajv = __webpack_require__(745)
+var Ajv = __webpack_require__(610)
 var HARError = __webpack_require__(944)
-var schemas = __webpack_require__(390)
+var schemas = __webpack_require__(792)
 
 var ajv
 
@@ -46500,10 +47390,10 @@ const core_1 = __webpack_require__(186);
 const isUndefined_1 = __importDefault(__webpack_require__(825));
 const Constants_1 = __webpack_require__(168);
 const Credentials_1 = __webpack_require__(543);
-const Ggithub_1 = __webpack_require__(427);
-const Jjira_1 = __webpack_require__(457);
-const Sslack_1 = __webpack_require__(286);
-const String_1 = __webpack_require__(481);
+const Github_1 = __webpack_require__(390);
+const Jira_1 = __webpack_require__(404);
+const Slack_1 = __webpack_require__(745);
+const String_1 = __webpack_require__(299);
 const Template_1 = __webpack_require__(920);
 /**
  * To trigger this event manually:
@@ -46523,13 +47413,13 @@ const Template_1 = __webpack_require__(920);
  */
 exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
     // 1. Fetch the Jira issue details.
-    const issue = yield Jjira_1.getIssue(issueKey);
+    const issue = yield Jira_1.getIssue(issueKey);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
     // 2. Find out who the PR should belong to.
     if (issue.fields.assignee === null) {
         const credentials = yield Credentials_1.getCredentialsByEmail(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
-        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
     }
@@ -46537,20 +47427,20 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
     if (issue.fields.subtasks.length > 0) {
         const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`;
-        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.info(message);
         return;
     }
     if (isUndefined_1.default(issue.fields.repository)) {
         const message = `No repository was set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
-        yield Sslack_1.sendUserMessage(credentials.slack_id, message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
     }
     // 3. Check if a PR already exists for the issue.
     let pullRequestNumber;
-    const repo = yield Ggithub_1.getRepository(issue.fields.repository);
-    const pullRequestNumbers = yield Jjira_1.getIssuePullRequestNumbers(issue.id);
+    const repo = yield Github_1.getRepository(issue.fields.repository);
+    const pullRequestNumbers = yield Jira_1.getIssuePullRequestNumbers(issue.id);
     if (pullRequestNumbers.length > 0) {
         ;
         [pullRequestNumber] = pullRequestNumbers;
@@ -46559,10 +47449,10 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         // 4. Try to find an existing branch.
         const baseBranchName = repo.default_branch;
         const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
-        const branch = yield Ggithub_1.getBranch(repo.name, newBranchName);
+        const branch = yield Github_1.getBranch(repo.name, newBranchName);
         // 5. If no branch exists with the right name, make a new one.
         if (isUndefined_1.default(branch)) {
-            yield Ggithub_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
+            yield Github_1.createBranch(repo.name, baseBranchName, newBranchName, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `.meta/${issue.key}.md`, `[${issue.key}] [skip ci] Create pull request.`);
         }
         // 6. Create the pull request.
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
@@ -46572,19 +47462,19 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
             jiraUrl,
         };
         const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
-        const pullRequest = yield Ggithub_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
+        const pullRequest = yield Github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
         pullRequestNumber = pullRequest.number;
     }
     // 7. Mark the pull request as in-progress.
-    yield Ggithub_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
+    yield Github_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
     // 8. Assign the pull request to the appropriate user.
-    yield Ggithub_1.assignOwners(repo.name, pullRequestNumber, [
+    yield Github_1.assignOwners(repo.name, pullRequestNumber, [
         credentials.github_username,
     ]);
     // 9. Tell the user.
     const url = `https://github.com/${Constants_1.OrganizationName}/${repo.name}/pull/${pullRequestNumber}`;
     const message = `Here's your pull request: ${url}`;
-    yield Sslack_1.sendUserMessage(credentials.slack_id, message);
+    yield Slack_1.sendUserMessage(credentials.slack_id, message);
     // Todo:
     // - Add tests.
 });
@@ -46600,515 +47490,22 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
 /* 743 */,
 /* 744 */,
 /* 745 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-var compileSchema = __webpack_require__(442)
-  , resolve = __webpack_require__(896)
-  , Cache = __webpack_require__(679)
-  , SchemaObject = __webpack_require__(374)
-  , stableStringify = __webpack_require__(969)
-  , formats = __webpack_require__(627)
-  , rules = __webpack_require__(579)
-  , $dataMetaSchema = __webpack_require__(412)
-  , util = __webpack_require__(607);
-
-module.exports = Ajv;
-
-Ajv.prototype.validate = validate;
-Ajv.prototype.compile = compile;
-Ajv.prototype.addSchema = addSchema;
-Ajv.prototype.addMetaSchema = addMetaSchema;
-Ajv.prototype.validateSchema = validateSchema;
-Ajv.prototype.getSchema = getSchema;
-Ajv.prototype.removeSchema = removeSchema;
-Ajv.prototype.addFormat = addFormat;
-Ajv.prototype.errorsText = errorsText;
-
-Ajv.prototype._addSchema = _addSchema;
-Ajv.prototype._compile = _compile;
-
-Ajv.prototype.compileAsync = __webpack_require__(890);
-var customKeyword = __webpack_require__(297);
-Ajv.prototype.addKeyword = customKeyword.add;
-Ajv.prototype.getKeyword = customKeyword.get;
-Ajv.prototype.removeKeyword = customKeyword.remove;
-Ajv.prototype.validateKeyword = customKeyword.validate;
-
-var errorClasses = __webpack_require__(726);
-Ajv.ValidationError = errorClasses.Validation;
-Ajv.MissingRefError = errorClasses.MissingRef;
-Ajv.$dataMetaSchema = $dataMetaSchema;
-
-var META_SCHEMA_ID = 'http://json-schema.org/draft-07/schema';
-
-var META_IGNORE_OPTIONS = [ 'removeAdditional', 'useDefaults', 'coerceTypes', 'strictDefaults' ];
-var META_SUPPORT_DATA = ['/properties'];
-
-/**
- * Creates validator instance.
- * Usage: `Ajv(opts)`
- * @param {Object} opts optional options
- * @return {Object} ajv instance
- */
-function Ajv(opts) {
-  if (!(this instanceof Ajv)) return new Ajv(opts);
-  opts = this._opts = util.copy(opts) || {};
-  setLogger(this);
-  this._schemas = {};
-  this._refs = {};
-  this._fragments = {};
-  this._formats = formats(opts.format);
-
-  this._cache = opts.cache || new Cache;
-  this._loadingSchemas = {};
-  this._compilations = [];
-  this.RULES = rules();
-  this._getId = chooseGetId(opts);
-
-  opts.loopRequired = opts.loopRequired || Infinity;
-  if (opts.errorDataPath == 'property') opts._errorDataPathProperty = true;
-  if (opts.serialize === undefined) opts.serialize = stableStringify;
-  this._metaOpts = getMetaSchemaOptions(this);
-
-  if (opts.formats) addInitialFormats(this);
-  if (opts.keywords) addInitialKeywords(this);
-  addDefaultMetaSchema(this);
-  if (typeof opts.meta == 'object') this.addMetaSchema(opts.meta);
-  if (opts.nullable) this.addKeyword('nullable', {metaSchema: {type: 'boolean'}});
-  addInitialSchemas(this);
-}
-
-
-
-/**
- * Validate data using schema
- * Schema will be compiled and cached (using serialized JSON as key. [fast-json-stable-stringify](https://github.com/epoberezkin/fast-json-stable-stringify) is used to serialize.
- * @this   Ajv
- * @param  {String|Object} schemaKeyRef key, ref or schema object
- * @param  {Any} data to be validated
- * @return {Boolean} validation result. Errors from the last validation will be available in `ajv.errors` (and also in compiled schema: `schema.errors`).
- */
-function validate(schemaKeyRef, data) {
-  var v;
-  if (typeof schemaKeyRef == 'string') {
-    v = this.getSchema(schemaKeyRef);
-    if (!v) throw new Error('no schema with key or ref "' + schemaKeyRef + '"');
-  } else {
-    var schemaObj = this._addSchema(schemaKeyRef);
-    v = schemaObj.validate || this._compile(schemaObj);
-  }
-
-  var valid = v(data);
-  if (v.$async !== true) this.errors = v.errors;
-  return valid;
-}
-
-
-/**
- * Create validating function for passed schema.
- * @this   Ajv
- * @param  {Object} schema schema object
- * @param  {Boolean} _meta true if schema is a meta-schema. Used internally to compile meta schemas of custom keywords.
- * @return {Function} validating function
- */
-function compile(schema, _meta) {
-  var schemaObj = this._addSchema(schema, undefined, _meta);
-  return schemaObj.validate || this._compile(schemaObj);
-}
-
-
-/**
- * Adds schema to the instance.
- * @this   Ajv
- * @param {Object|Array} schema schema or array of schemas. If array is passed, `key` and other parameters will be ignored.
- * @param {String} key Optional schema key. Can be passed to `validate` method instead of schema object or id/ref. One schema per instance can have empty `id` and `key`.
- * @param {Boolean} _skipValidation true to skip schema validation. Used internally, option validateSchema should be used instead.
- * @param {Boolean} _meta true if schema is a meta-schema. Used internally, addMetaSchema should be used instead.
- * @return {Ajv} this for method chaining
- */
-function addSchema(schema, key, _skipValidation, _meta) {
-  if (Array.isArray(schema)){
-    for (var i=0; i<schema.length; i++) this.addSchema(schema[i], undefined, _skipValidation, _meta);
-    return this;
-  }
-  var id = this._getId(schema);
-  if (id !== undefined && typeof id != 'string')
-    throw new Error('schema id must be string');
-  key = resolve.normalizeId(key || id);
-  checkUnique(this, key);
-  this._schemas[key] = this._addSchema(schema, _skipValidation, _meta, true);
-  return this;
-}
-
-
-/**
- * Add schema that will be used to validate other schemas
- * options in META_IGNORE_OPTIONS are alway set to false
- * @this   Ajv
- * @param {Object} schema schema object
- * @param {String} key optional schema key
- * @param {Boolean} skipValidation true to skip schema validation, can be used to override validateSchema option for meta-schema
- * @return {Ajv} this for method chaining
- */
-function addMetaSchema(schema, key, skipValidation) {
-  this.addSchema(schema, key, skipValidation, true);
-  return this;
-}
-
-
-/**
- * Validate schema
- * @this   Ajv
- * @param {Object} schema schema to validate
- * @param {Boolean} throwOrLogError pass true to throw (or log) an error if invalid
- * @return {Boolean} true if schema is valid
- */
-function validateSchema(schema, throwOrLogError) {
-  var $schema = schema.$schema;
-  if ($schema !== undefined && typeof $schema != 'string')
-    throw new Error('$schema must be a string');
-  $schema = $schema || this._opts.defaultMeta || defaultMeta(this);
-  if (!$schema) {
-    this.logger.warn('meta-schema not available');
-    this.errors = null;
-    return true;
-  }
-  var valid = this.validate($schema, schema);
-  if (!valid && throwOrLogError) {
-    var message = 'schema is invalid: ' + this.errorsText();
-    if (this._opts.validateSchema == 'log') this.logger.error(message);
-    else throw new Error(message);
-  }
-  return valid;
-}
-
-
-function defaultMeta(self) {
-  var meta = self._opts.meta;
-  self._opts.defaultMeta = typeof meta == 'object'
-                            ? self._getId(meta) || meta
-                            : self.getSchema(META_SCHEMA_ID)
-                              ? META_SCHEMA_ID
-                              : undefined;
-  return self._opts.defaultMeta;
-}
-
-
-/**
- * Get compiled schema from the instance by `key` or `ref`.
- * @this   Ajv
- * @param  {String} keyRef `key` that was passed to `addSchema` or full schema reference (`schema.id` or resolved id).
- * @return {Function} schema validating function (with property `schema`).
- */
-function getSchema(keyRef) {
-  var schemaObj = _getSchemaObj(this, keyRef);
-  switch (typeof schemaObj) {
-    case 'object': return schemaObj.validate || this._compile(schemaObj);
-    case 'string': return this.getSchema(schemaObj);
-    case 'undefined': return _getSchemaFragment(this, keyRef);
-  }
-}
-
-
-function _getSchemaFragment(self, ref) {
-  var res = resolve.schema.call(self, { schema: {} }, ref);
-  if (res) {
-    var schema = res.schema
-      , root = res.root
-      , baseId = res.baseId;
-    var v = compileSchema.call(self, schema, root, undefined, baseId);
-    self._fragments[ref] = new SchemaObject({
-      ref: ref,
-      fragment: true,
-      schema: schema,
-      root: root,
-      baseId: baseId,
-      validate: v
-    });
-    return v;
-  }
-}
-
-
-function _getSchemaObj(self, keyRef) {
-  keyRef = resolve.normalizeId(keyRef);
-  return self._schemas[keyRef] || self._refs[keyRef] || self._fragments[keyRef];
-}
-
-
-/**
- * Remove cached schema(s).
- * If no parameter is passed all schemas but meta-schemas are removed.
- * If RegExp is passed all schemas with key/id matching pattern but meta-schemas are removed.
- * Even if schema is referenced by other schemas it still can be removed as other schemas have local references.
- * @this   Ajv
- * @param  {String|Object|RegExp} schemaKeyRef key, ref, pattern to match key/ref or schema object
- * @return {Ajv} this for method chaining
- */
-function removeSchema(schemaKeyRef) {
-  if (schemaKeyRef instanceof RegExp) {
-    _removeAllSchemas(this, this._schemas, schemaKeyRef);
-    _removeAllSchemas(this, this._refs, schemaKeyRef);
-    return this;
-  }
-  switch (typeof schemaKeyRef) {
-    case 'undefined':
-      _removeAllSchemas(this, this._schemas);
-      _removeAllSchemas(this, this._refs);
-      this._cache.clear();
-      return this;
-    case 'string':
-      var schemaObj = _getSchemaObj(this, schemaKeyRef);
-      if (schemaObj) this._cache.del(schemaObj.cacheKey);
-      delete this._schemas[schemaKeyRef];
-      delete this._refs[schemaKeyRef];
-      return this;
-    case 'object':
-      var serialize = this._opts.serialize;
-      var cacheKey = serialize ? serialize(schemaKeyRef) : schemaKeyRef;
-      this._cache.del(cacheKey);
-      var id = this._getId(schemaKeyRef);
-      if (id) {
-        id = resolve.normalizeId(id);
-        delete this._schemas[id];
-        delete this._refs[id];
-      }
-  }
-  return this;
-}
-
-
-function _removeAllSchemas(self, schemas, regex) {
-  for (var keyRef in schemas) {
-    var schemaObj = schemas[keyRef];
-    if (!schemaObj.meta && (!regex || regex.test(keyRef))) {
-      self._cache.del(schemaObj.cacheKey);
-      delete schemas[keyRef];
-    }
-  }
-}
-
-
-/* @this   Ajv */
-function _addSchema(schema, skipValidation, meta, shouldAddSchema) {
-  if (typeof schema != 'object' && typeof schema != 'boolean')
-    throw new Error('schema should be object or boolean');
-  var serialize = this._opts.serialize;
-  var cacheKey = serialize ? serialize(schema) : schema;
-  var cached = this._cache.get(cacheKey);
-  if (cached) return cached;
-
-  shouldAddSchema = shouldAddSchema || this._opts.addUsedSchema !== false;
-
-  var id = resolve.normalizeId(this._getId(schema));
-  if (id && shouldAddSchema) checkUnique(this, id);
-
-  var willValidate = this._opts.validateSchema !== false && !skipValidation;
-  var recursiveMeta;
-  if (willValidate && !(recursiveMeta = id && id == resolve.normalizeId(schema.$schema)))
-    this.validateSchema(schema, true);
-
-  var localRefs = resolve.ids.call(this, schema);
-
-  var schemaObj = new SchemaObject({
-    id: id,
-    schema: schema,
-    localRefs: localRefs,
-    cacheKey: cacheKey,
-    meta: meta
-  });
-
-  if (id[0] != '#' && shouldAddSchema) this._refs[id] = schemaObj;
-  this._cache.put(cacheKey, schemaObj);
-
-  if (willValidate && recursiveMeta) this.validateSchema(schema, true);
-
-  return schemaObj;
-}
-
-
-/* @this   Ajv */
-function _compile(schemaObj, root) {
-  if (schemaObj.compiling) {
-    schemaObj.validate = callValidate;
-    callValidate.schema = schemaObj.schema;
-    callValidate.errors = null;
-    callValidate.root = root ? root : callValidate;
-    if (schemaObj.schema.$async === true)
-      callValidate.$async = true;
-    return callValidate;
-  }
-  schemaObj.compiling = true;
-
-  var currentOpts;
-  if (schemaObj.meta) {
-    currentOpts = this._opts;
-    this._opts = this._metaOpts;
-  }
-
-  var v;
-  try { v = compileSchema.call(this, schemaObj.schema, root, schemaObj.localRefs); }
-  catch(e) {
-    delete schemaObj.validate;
-    throw e;
-  }
-  finally {
-    schemaObj.compiling = false;
-    if (schemaObj.meta) this._opts = currentOpts;
-  }
-
-  schemaObj.validate = v;
-  schemaObj.refs = v.refs;
-  schemaObj.refVal = v.refVal;
-  schemaObj.root = v.root;
-  return v;
-
-
-  /* @this   {*} - custom context, see passContext option */
-  function callValidate() {
-    /* jshint validthis: true */
-    var _validate = schemaObj.validate;
-    var result = _validate.apply(this, arguments);
-    callValidate.errors = _validate.errors;
-    return result;
-  }
-}
-
-
-function chooseGetId(opts) {
-  switch (opts.schemaId) {
-    case 'auto': return _get$IdOrId;
-    case 'id': return _getId;
-    default: return _get$Id;
-  }
-}
-
-/* @this   Ajv */
-function _getId(schema) {
-  if (schema.$id) this.logger.warn('schema $id ignored', schema.$id);
-  return schema.id;
-}
-
-/* @this   Ajv */
-function _get$Id(schema) {
-  if (schema.id) this.logger.warn('schema id ignored', schema.id);
-  return schema.$id;
-}
-
-
-function _get$IdOrId(schema) {
-  if (schema.$id && schema.id && schema.$id != schema.id)
-    throw new Error('schema $id is different from id');
-  return schema.$id || schema.id;
-}
-
-
-/**
- * Convert array of error message objects to string
- * @this   Ajv
- * @param  {Array<Object>} errors optional array of validation errors, if not passed errors from the instance are used.
- * @param  {Object} options optional options with properties `separator` and `dataVar`.
- * @return {String} human readable string with all errors descriptions
- */
-function errorsText(errors, options) {
-  errors = errors || this.errors;
-  if (!errors) return 'No errors';
-  options = options || {};
-  var separator = options.separator === undefined ? ', ' : options.separator;
-  var dataVar = options.dataVar === undefined ? 'data' : options.dataVar;
-
-  var text = '';
-  for (var i=0; i<errors.length; i++) {
-    var e = errors[i];
-    if (e) text += dataVar + e.dataPath + ' ' + e.message + separator;
-  }
-  return text.slice(0, -separator.length);
-}
-
-
-/**
- * Add custom format
- * @this   Ajv
- * @param {String} name format name
- * @param {String|RegExp|Function} format string is converted to RegExp; function should return boolean (true when valid)
- * @return {Ajv} this for method chaining
- */
-function addFormat(name, format) {
-  if (typeof format == 'string') format = new RegExp(format);
-  this._formats[name] = format;
-  return this;
-}
-
-
-function addDefaultMetaSchema(self) {
-  var $dataSchema;
-  if (self._opts.$data) {
-    $dataSchema = __webpack_require__(15);
-    self.addMetaSchema($dataSchema, $dataSchema.$id, true);
-  }
-  if (self._opts.meta === false) return;
-  var metaSchema = __webpack_require__(698);
-  if (self._opts.$data) metaSchema = $dataMetaSchema(metaSchema, META_SUPPORT_DATA);
-  self.addMetaSchema(metaSchema, META_SCHEMA_ID, true);
-  self._refs['http://json-schema.org/schema'] = META_SCHEMA_ID;
-}
-
-
-function addInitialSchemas(self) {
-  var optsSchemas = self._opts.schemas;
-  if (!optsSchemas) return;
-  if (Array.isArray(optsSchemas)) self.addSchema(optsSchemas);
-  else for (var key in optsSchemas) self.addSchema(optsSchemas[key], key);
-}
-
-
-function addInitialFormats(self) {
-  for (var name in self._opts.formats) {
-    var format = self._opts.formats[name];
-    self.addFormat(name, format);
-  }
-}
-
-
-function addInitialKeywords(self) {
-  for (var name in self._opts.keywords) {
-    var keyword = self._opts.keywords[name];
-    self.addKeyword(name, keyword);
-  }
-}
-
-
-function checkUnique(self, id) {
-  if (self._schemas[id] || self._refs[id])
-    throw new Error('schema with key or id "' + id + '" already exists');
-}
-
-
-function getMetaSchemaOptions(self) {
-  var metaOpts = util.copy(self._opts);
-  for (var i=0; i<META_IGNORE_OPTIONS.length; i++)
-    delete metaOpts[META_IGNORE_OPTIONS[i]];
-  return metaOpts;
-}
-
-
-function setLogger(self) {
-  var logger = self._opts.logger;
-  if (logger === false) {
-    self.logger = {log: noop, warn: noop, error: noop};
-  } else {
-    if (logger === undefined) logger = console;
-    if (!(typeof logger == 'object' && logger.log && logger.warn && logger.error))
-      throw new Error('logger must implement log, warn and error methods');
-    self.logger = logger;
-  }
-}
-
-
-function noop() {}
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(239), exports);
 
 
 /***/ }),
@@ -47138,7 +47535,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const core_1 = __webpack_require__(186);
 const github_1 = __webpack_require__(438);
-const Sslack_1 = __webpack_require__(286);
+const Slack_1 = __webpack_require__(745);
 const index_1 = __webpack_require__(464);
 /**
  * Extracts the payload and decides what action to run as a result.
@@ -47156,7 +47553,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.error(err);
-    yield Sslack_1.sendErrorMessage(err.message);
+    yield Slack_1.sendErrorMessage(err.message);
     core_1.setFailed(err.message);
 }));
 
@@ -48114,43 +48511,29 @@ return tryConvertToPromise;
 /* 792 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var Symbol = __webpack_require__(213),
-    arrayMap = __webpack_require__(356),
-    isArray = __webpack_require__(869),
-    isSymbol = __webpack_require__(403);
+"use strict";
 
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0;
 
-/** Used to convert symbols to primitives and strings. */
-var symbolProto = Symbol ? Symbol.prototype : undefined,
-    symbolToString = symbolProto ? symbolProto.toString : undefined;
-
-/**
- * The base implementation of `_.toString` which doesn't convert nullish
- * values to empty strings.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- */
-function baseToString(value) {
-  // Exit early for strings to avoid a performance hit in some environments.
-  if (typeof value == 'string') {
-    return value;
-  }
-  if (isArray(value)) {
-    // Recursively convert values (susceptible to call stack limits).
-    return arrayMap(value, baseToString) + '';
-  }
-  if (isSymbol(value)) {
-    return symbolToString ? symbolToString.call(value) : '';
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+module.exports = {
+  afterRequest: __webpack_require__(582),
+  beforeRequest: __webpack_require__(606),
+  browser: __webpack_require__(120),
+  cache: __webpack_require__(327),
+  content: __webpack_require__(776),
+  cookie: __webpack_require__(312),
+  creator: __webpack_require__(397),
+  entry: __webpack_require__(18),
+  har: __webpack_require__(131),
+  header: __webpack_require__(584),
+  log: __webpack_require__(997),
+  page: __webpack_require__(570),
+  pageTimings: __webpack_require__(300),
+  postData: __webpack_require__(785),
+  query: __webpack_require__(517),
+  request: __webpack_require__(230),
+  response: __webpack_require__(597),
+  timings: __webpack_require__(8)
 }
-
-module.exports = baseToString;
 
 
 /***/ }),
@@ -48245,87 +48628,7 @@ module.exports = isFunction;
 /* 800 */,
 /* 801 */,
 /* 802 */,
-/* 803 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(476);
-/**
- * Adds labels to the given issue or PR.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The labels to add.
- *
- * @returns {IssuesAddLabelsResponseData} The PR data.
- */
-exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addLabels({
-        issue_number: number,
-        labels,
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
-/**
- * Assigns owners to the given issue or PR.
- *
- * @param {Repository} repo      The name of the repository that the PR belongs to.
- * @param {number}     number    The PR number.
- * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
- * @returns {IssuesAddAssigneesResponseData} The PR data.
- */
-exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addAssignees({
-        assignees: usernames,
-        issue_number: number,
-        owner: Constants_1.OrganizationName,
-        repo,
-    });
-    return response.data;
-});
-/**
- * Creates a new pull request.
- *
- * @param {Repository} repo  The name of the repository that the PR will belong to.
- * @param {Branch}     base  The base branch, which the PR will be merged into.
- * @param {Branch}     head  The head branch, which the PR will be based on.
- * @param {string}     title The title of the PR.
- * @param {string}     body  The body of the PR.
- * @param {string}     token The Github API token to use when creating the PR.
- *
- * @returns {PullsCreateResponseData} The PR data.
- */
-exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.clientForToken(token).pulls.create({
-        base,
-        body,
-        draft: true,
-        head,
-        owner: Constants_1.OrganizationName,
-        repo,
-        title,
-    });
-    return response.data;
-});
-
-
-/***/ }),
+/* 803 */,
 /* 804 */,
 /* 805 */,
 /* 806 */,
@@ -48349,10 +48652,10 @@ module.exports = {
   dependencies: __webpack_require__(591),
   'enum': __webpack_require__(163),
   format: __webpack_require__(847),
-  'if': __webpack_require__(866),
+  'if': __webpack_require__(481),
   items: __webpack_require__(408),
-  maximum: __webpack_require__(404),
-  minimum: __webpack_require__(404),
+  maximum: __webpack_require__(125),
+  minimum: __webpack_require__(125),
   maxItems: __webpack_require__(683),
   minItems: __webpack_require__(683),
   maxLength: __webpack_require__(48),
@@ -48362,7 +48665,7 @@ module.exports = {
   multipleOf: __webpack_require__(772),
   not: __webpack_require__(750),
   oneOf: __webpack_require__(106),
-  pattern: __webpack_require__(818),
+  pattern: __webpack_require__(488),
   properties: __webpack_require__(119),
   propertyNames: __webpack_require__(195),
   required: __webpack_require__(420),
@@ -48712,7 +49015,7 @@ module.exports = require("punycode");
 
 "use strict";
 
-var es5 = __webpack_require__(837);
+var es5 = __webpack_require__(101);
 var Objectfreeze = es5.freeze;
 var util = __webpack_require__(448);
 var inherits = util.inherits;
@@ -48832,84 +49135,18 @@ module.exports = {
 /***/ }),
 /* 817 */,
 /* 818 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-module.exports = function generate_pattern(it, $keyword, $ruleType) {
-  var out = ' ';
-  var $lvl = it.level;
-  var $dataLvl = it.dataLevel;
-  var $schema = it.schema[$keyword];
-  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
-  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
-  var $breakOnError = !it.opts.allErrors;
-  var $data = 'data' + ($dataLvl || '');
-  var $isData = it.opts.$data && $schema && $schema.$data,
-    $schemaValue;
-  if ($isData) {
-    out += ' var schema' + ($lvl) + ' = ' + (it.util.getData($schema.$data, $dataLvl, it.dataPathArr)) + '; ';
-    $schemaValue = 'schema' + $lvl;
-  } else {
-    $schemaValue = $schema;
-  }
-  var $regexp = $isData ? '(new RegExp(' + $schemaValue + '))' : it.usePattern($schema);
-  out += 'if ( ';
-  if ($isData) {
-    out += ' (' + ($schemaValue) + ' !== undefined && typeof ' + ($schemaValue) + ' != \'string\') || ';
-  }
-  out += ' !' + ($regexp) + '.test(' + ($data) + ') ) {   ';
-  var $$outStack = $$outStack || [];
-  $$outStack.push(out);
-  out = ''; /* istanbul ignore else */
-  if (it.createErrors !== false) {
-    out += ' { keyword: \'' + ('pattern') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { pattern:  ';
-    if ($isData) {
-      out += '' + ($schemaValue);
-    } else {
-      out += '' + (it.util.toQuotedString($schema));
-    }
-    out += '  } ';
-    if (it.opts.messages !== false) {
-      out += ' , message: \'should match pattern "';
-      if ($isData) {
-        out += '\' + ' + ($schemaValue) + ' + \'';
-      } else {
-        out += '' + (it.util.escapeQuotes($schema));
-      }
-      out += '"\' ';
-    }
-    if (it.opts.verbose) {
-      out += ' , schema:  ';
-      if ($isData) {
-        out += 'validate.schema' + ($schemaPath);
-      } else {
-        out += '' + (it.util.toQuotedString($schema));
-      }
-      out += '         , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-    }
-    out += ' } ';
-  } else {
-    out += ' {} ';
-  }
-  var __err = out;
-  out = $$outStack.pop();
-  if (!it.compositeRule && $breakOnError) {
-    /* istanbul ignore if */
-    if (it.async) {
-      out += ' throw new ValidationError([' + (__err) + ']); ';
-    } else {
-      out += ' validate.errors = [' + (__err) + ']; return false; ';
-    }
-  } else {
-    out += ' var err = ' + (__err) + ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-  }
-  out += '} ';
-  if ($breakOnError) {
-    out += ' else { ';
-  }
-  return out;
-}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.clientForToken = exports.client = void 0;
+const rest_1 = __webpack_require__(375);
+const Constants_1 = __webpack_require__(168);
+exports.client = new rest_1.Octokit({ auth: Constants_1.GithubWriteToken });
+exports.clientForToken = (token) => {
+    return new rest_1.Octokit({ auth: token });
+};
 
 
 /***/ }),
@@ -48944,7 +49181,7 @@ function removeHook (state, name, method) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 var rng = __webpack_require__(859);
-var bytesToUuid = __webpack_require__(125);
+var bytesToUuid = __webpack_require__(29);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -49731,92 +49968,7 @@ module.exports = require("url");
 
 /***/ }),
 /* 836 */,
-/* 837 */
-/***/ (function(module) {
-
-var isES5 = (function(){
-    "use strict";
-    return this === undefined;
-})();
-
-if (isES5) {
-    module.exports = {
-        freeze: Object.freeze,
-        defineProperty: Object.defineProperty,
-        getDescriptor: Object.getOwnPropertyDescriptor,
-        keys: Object.keys,
-        names: Object.getOwnPropertyNames,
-        getPrototypeOf: Object.getPrototypeOf,
-        isArray: Array.isArray,
-        isES5: isES5,
-        propertyIsWritable: function(obj, prop) {
-            var descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-            return !!(!descriptor || descriptor.writable || descriptor.set);
-        }
-    };
-} else {
-    var has = {}.hasOwnProperty;
-    var str = {}.toString;
-    var proto = {}.constructor.prototype;
-
-    var ObjectKeys = function (o) {
-        var ret = [];
-        for (var key in o) {
-            if (has.call(o, key)) {
-                ret.push(key);
-            }
-        }
-        return ret;
-    };
-
-    var ObjectGetDescriptor = function(o, key) {
-        return {value: o[key]};
-    };
-
-    var ObjectDefineProperty = function (o, key, desc) {
-        o[key] = desc.value;
-        return o;
-    };
-
-    var ObjectFreeze = function (obj) {
-        return obj;
-    };
-
-    var ObjectGetPrototypeOf = function (obj) {
-        try {
-            return Object(obj).constructor.prototype;
-        }
-        catch (e) {
-            return proto;
-        }
-    };
-
-    var ArrayIsArray = function (obj) {
-        try {
-            return str.call(obj) === "[object Array]";
-        }
-        catch(e) {
-            return false;
-        }
-    };
-
-    module.exports = {
-        isArray: ArrayIsArray,
-        keys: ObjectKeys,
-        names: ObjectKeys,
-        defineProperty: ObjectDefineProperty,
-        getDescriptor: ObjectGetDescriptor,
-        freeze: ObjectFreeze,
-        getPrototypeOf: ObjectGetPrototypeOf,
-        isES5: isES5,
-        propertyIsWritable: function() {
-            return true;
-        }
-    };
-}
-
-
-/***/ }),
+/* 837 */,
 /* 838 */
 /***/ (function(module) {
 
@@ -50190,7 +50342,7 @@ module.exports = Writer;
 
 var jsonSafeStringify = __webpack_require__(73)
 var crypto = __webpack_require__(417)
-var Buffer = __webpack_require__(961).Buffer
+var Buffer = __webpack_require__(457).Buffer
 
 var defer = typeof setImmediate === 'undefined'
   ? process.nextTick
@@ -50985,7 +51137,29 @@ module.exports = function nodeRNG() {
 
 /***/ }),
 /* 860 */,
-/* 861 */,
+/* 861 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.client = void 0;
+const jira_client_1 = __importDefault(__webpack_require__(411));
+const Constants_1 = __webpack_require__(168);
+exports.client = new jira_client_1.default({
+    apiVersion: '2',
+    host: Constants_1.JiraHost,
+    password: Constants_1.JiraToken,
+    protocol: 'https',
+    strictSSL: true,
+    username: Constants_1.JiraEmail,
+});
+
+
+/***/ }),
 /* 862 */
 /***/ (function(module) {
 
@@ -51072,112 +51246,73 @@ exports.ECKey = function(curve, key, isPublic)
 
 /***/ }),
 /* 866 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-module.exports = function generate_if(it, $keyword, $ruleType) {
-  var out = ' ';
-  var $lvl = it.level;
-  var $dataLvl = it.dataLevel;
-  var $schema = it.schema[$keyword];
-  var $schemaPath = it.schemaPath + it.util.getProperty($keyword);
-  var $errSchemaPath = it.errSchemaPath + '/' + $keyword;
-  var $breakOnError = !it.opts.allErrors;
-  var $data = 'data' + ($dataLvl || '');
-  var $valid = 'valid' + $lvl;
-  var $errs = 'errs__' + $lvl;
-  var $it = it.util.copy(it);
-  $it.level++;
-  var $nextValid = 'valid' + $it.level;
-  var $thenSch = it.schema['then'],
-    $elseSch = it.schema['else'],
-    $thenPresent = $thenSch !== undefined && (it.opts.strictKeywords ? typeof $thenSch == 'object' && Object.keys($thenSch).length > 0 : it.util.schemaHasRules($thenSch, it.RULES.all)),
-    $elsePresent = $elseSch !== undefined && (it.opts.strictKeywords ? typeof $elseSch == 'object' && Object.keys($elseSch).length > 0 : it.util.schemaHasRules($elseSch, it.RULES.all)),
-    $currentBaseId = $it.baseId;
-  if ($thenPresent || $elsePresent) {
-    var $ifClause;
-    $it.createErrors = false;
-    $it.schema = $schema;
-    $it.schemaPath = $schemaPath;
-    $it.errSchemaPath = $errSchemaPath;
-    out += ' var ' + ($errs) + ' = errors; var ' + ($valid) + ' = true;  ';
-    var $wasComposite = it.compositeRule;
-    it.compositeRule = $it.compositeRule = true;
-    out += '  ' + (it.validate($it)) + ' ';
-    $it.baseId = $currentBaseId;
-    $it.createErrors = true;
-    out += '  errors = ' + ($errs) + '; if (vErrors !== null) { if (' + ($errs) + ') vErrors.length = ' + ($errs) + '; else vErrors = null; }  ';
-    it.compositeRule = $it.compositeRule = $wasComposite;
-    if ($thenPresent) {
-      out += ' if (' + ($nextValid) + ') {  ';
-      $it.schema = it.schema['then'];
-      $it.schemaPath = it.schemaPath + '.then';
-      $it.errSchemaPath = it.errSchemaPath + '/then';
-      out += '  ' + (it.validate($it)) + ' ';
-      $it.baseId = $currentBaseId;
-      out += ' ' + ($valid) + ' = ' + ($nextValid) + '; ';
-      if ($thenPresent && $elsePresent) {
-        $ifClause = 'ifClause' + $lvl;
-        out += ' var ' + ($ifClause) + ' = \'then\'; ';
-      } else {
-        $ifClause = '\'then\'';
-      }
-      out += ' } ';
-      if ($elsePresent) {
-        out += ' else { ';
-      }
-    } else {
-      out += ' if (!' + ($nextValid) + ') { ';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createBranch = exports.getBranch = void 0;
+const isUndefined_1 = __importDefault(__webpack_require__(825));
+const Constants_1 = __webpack_require__(168);
+const Client_1 = __webpack_require__(818);
+const Git_1 = __webpack_require__(433);
+const Repository_1 = __webpack_require__(15);
+/**
+ * Fetches a branch from the Github API.
+ *
+ * @param {Repository} repo   The name of the repository that the branch belongs to.
+ * @param {Branch}     branch The name of the branch to fetch.
+ *
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield Client_1.client.repos.getBranch({
+            owner: Constants_1.OrganizationName,
+            repo,
+            branch,
+        });
+        return response.data;
     }
-    if ($elsePresent) {
-      $it.schema = it.schema['else'];
-      $it.schemaPath = it.schemaPath + '.else';
-      $it.errSchemaPath = it.errSchemaPath + '/else';
-      out += '  ' + (it.validate($it)) + ' ';
-      $it.baseId = $currentBaseId;
-      out += ' ' + ($valid) + ' = ' + ($nextValid) + '; ';
-      if ($thenPresent && $elsePresent) {
-        $ifClause = 'ifClause' + $lvl;
-        out += ' var ' + ($ifClause) + ' = \'else\'; ';
-      } else {
-        $ifClause = '\'else\'';
-      }
-      out += ' } ';
+    catch (err) {
+        if (err.message === 'Branch not found') {
+            return undefined;
+        }
+        throw err;
     }
-    out += ' if (!' + ($valid) + ') {   var err =   '; /* istanbul ignore else */
-    if (it.createErrors !== false) {
-      out += ' { keyword: \'' + ('if') + '\' , dataPath: (dataPath || \'\') + ' + (it.errorPath) + ' , schemaPath: ' + (it.util.toQuotedString($errSchemaPath)) + ' , params: { failingKeyword: ' + ($ifClause) + ' } ';
-      if (it.opts.messages !== false) {
-        out += ' , message: \'should match "\' + ' + ($ifClause) + ' + \'" schema\' ';
-      }
-      if (it.opts.verbose) {
-        out += ' , schema: validate.schema' + ($schemaPath) + ' , parentSchema: validate.schema' + (it.schemaPath) + ' , data: ' + ($data) + ' ';
-      }
-      out += ' } ';
-    } else {
-      out += ' {} ';
+    return undefined;
+});
+exports.createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
+    const baseBranch = yield exports.getBranch(repo, baseBranchName);
+    if (isUndefined_1.default(baseBranch)) {
+        throw new Error(`Base branch not found for repository '${repo}'`);
     }
-    out += ';  if (vErrors === null) vErrors = [err]; else vErrors.push(err); errors++; ';
-    if (!it.compositeRule && $breakOnError) {
-      /* istanbul ignore if */
-      if (it.async) {
-        out += ' throw new ValidationError(vErrors); ';
-      } else {
-        out += ' validate.errors = vErrors; return false; ';
-      }
-    }
-    out += ' }   ';
-    if ($breakOnError) {
-      out += ' else { ';
-    }
-  } else {
-    if ($breakOnError) {
-      out += ' if (true) { ';
-    }
-  }
-  return out;
-}
+    const prNumber = yield Repository_1.getNextPullRequestNumber(repo);
+    const blob = yield Git_1.createGitBlob(repo, fileContent);
+    const treeData = [
+        {
+            path: filePath,
+            mode: Git_1.TreeModes.ModeFile,
+            type: Git_1.TreeTypes.Blob,
+            sha: blob.sha,
+        },
+    ];
+    const tree = yield Git_1.createGitTree(repo, treeData, baseBranch.commit.sha);
+    const commit = yield Git_1.createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
+    return Git_1.createGitBranch(repo, newBranchName, commit.sha);
+});
 
 
 /***/ }),
@@ -51225,7 +51360,7 @@ module.exports = isArray;
 /* 872 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var basePropertyOf = __webpack_require__(610);
+var basePropertyOf = __webpack_require__(541);
 
 /** Used to map Latin Unicode letters to basic Latin letters. */
 var deburredLetters = {
@@ -51806,7 +51941,12 @@ function compileAsync(schema, meta, callback) {
 
 /***/ }),
 /* 891 */,
-/* 892 */,
+/* 892 */
+/***/ (function(module) {
+
+module.exports = {"$schema":"http://json-schema.org/draft-07/schema#","$id":"https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#","description":"Meta-schema for $data reference (JSON Schema extension proposal)","type":"object","required":["$data"],"properties":{"$data":{"type":"string","anyOf":[{"format":"relative-json-pointer"},{"format":"json-pointer"}]}},"additionalProperties":false};
+
+/***/ }),
 /* 893 */,
 /* 894 */,
 /* 895 */
@@ -53905,7 +54045,7 @@ function write(key, options) {
 /* 931 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var baseToString = __webpack_require__(792);
+var baseToString = __webpack_require__(475);
 
 /**
  * Converts `value` to a string. An empty string is returned for `null`
@@ -53992,77 +54132,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 
 /***/ }),
 /* 935 */,
-/* 936 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createBranch = exports.getBranch = void 0;
-const isUndefined_1 = __importDefault(__webpack_require__(825));
-const Constants_1 = __webpack_require__(168);
-const Client_1 = __webpack_require__(476);
-const Git_1 = __webpack_require__(76);
-const Repository_1 = __webpack_require__(629);
-/**
- * Fetches a branch from the Github API.
- *
- * @param {Repository} repo   The name of the repository that the branch belongs to.
- * @param {Branch}     branch The name of the branch to fetch.
- *
- * @returns {ReposGetBranchResponseData} The branch data.
- */
-exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield Client_1.client.repos.getBranch({
-            owner: Constants_1.OrganizationName,
-            repo,
-            branch,
-        });
-        return response.data;
-    }
-    catch (err) {
-        if (err.message === 'Branch not found') {
-            return undefined;
-        }
-        throw err;
-    }
-    return undefined;
-});
-exports.createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
-    const baseBranch = yield exports.getBranch(repo, baseBranchName);
-    if (isUndefined_1.default(baseBranch)) {
-        throw new Error(`Base branch not found for repository '${repo}'`);
-    }
-    const prNumber = yield Repository_1.getNextPullRequestNumber(repo);
-    const blob = yield Git_1.createGitBlob(repo, fileContent);
-    const treeData = [
-        {
-            path: filePath,
-            mode: Git_1.TreeModes.ModeFile,
-            type: Git_1.TreeTypes.Blob,
-            sha: blob.sha,
-        },
-    ];
-    const tree = yield Git_1.createGitTree(repo, treeData, baseBranch.commit.sha);
-    const commit = yield Git_1.createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
-    return Git_1.createGitBranch(repo, newBranchName, commit.sha);
-});
-
-
-/***/ }),
+/* 936 */,
 /* 937 */,
 /* 938 */
 /***/ (function(module) {
@@ -56181,77 +56251,7 @@ function gotValue(value) {
 
 /***/ }),
 /* 960 */,
-/* 961 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(293)
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.prototype = Object.create(Buffer.prototype)
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-
-/***/ }),
+/* 961 */,
 /* 962 */,
 /* 963 */,
 /* 964 */
@@ -57205,7 +57205,7 @@ module.exports = {
 
 module.exports = function(NEXT_FILTER) {
 var util = __webpack_require__(448);
-var getKeys = __webpack_require__(837).keys;
+var getKeys = __webpack_require__(101).keys;
 var tryCatch = util.tryCatch;
 var errorObj = util.errorObj;
 

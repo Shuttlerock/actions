@@ -5,7 +5,7 @@ import {
   CredentialsApiPrefix,
   CredentialsApiSecret,
 } from '@sr-services/Constants'
-import { Repository } from '@sr-services/Ggithub'
+import { Repository } from '@sr-services/Github'
 
 export interface Credentials {
   github_token: string

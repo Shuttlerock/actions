@@ -5,12 +5,12 @@ import {
 } from '@octokit/types'
 
 import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/Ggithub/Client'
-import { Repository } from '@sr-services/Ggithub/Git'
+import { client } from '@sr-services/Github/Client'
+import { Repository } from '@sr-services/Github/Git'
 import {
   getNextPullRequestNumber,
   getRepository,
-} from '@sr-services/Ggithub/Repository'
+} from '@sr-services/Github/Repository'
 
 const repo = 'my-repo'
 
