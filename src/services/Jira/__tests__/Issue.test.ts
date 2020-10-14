@@ -1,23 +1,13 @@
-import { readFileSync } from 'fs'
-import { JsonResponse } from 'jira-client'
 import fetch from 'node-fetch'
-import { join } from 'path'
 
+import issue from '@sr-services/Jira/__tests__/fixtures/issue.json'
+import pullRequests from '@sr-services/Jira/__tests__/fixtures/pull-requests.json'
 import { client } from '@sr-services/Jira/Client'
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira/Issue'
 
 const { Response } = jest.requireActual('node-fetch')
 
 jest.mock('node-fetch', () => jest.fn())
-
-const loadFIxture = (path: string): JsonResponse =>
-  JSON.parse(readFileSync(path, 'utf8')) as JsonResponse
-
-const issue = loadFIxture(join(__dirname, 'fixtures', 'issue.json'))
-
-const pullRequests = loadFIxture(
-  join(__dirname, 'fixtures', 'pull-requests.json')
-)
 
 describe('Issue', () => {
   describe('getIssue', () => {
