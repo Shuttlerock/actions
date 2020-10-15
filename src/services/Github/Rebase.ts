@@ -3,9 +3,11 @@
 
 import { info } from '@actions/core'
 
+import { Repository } from '@sr-services/Github/Git'
+
 export const rebase = (
   owner: string,
-  repo: string,
+  repo: Repository,
   head: string,
   base: string
 ): void => {

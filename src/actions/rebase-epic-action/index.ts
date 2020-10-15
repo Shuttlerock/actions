@@ -1,9 +1,8 @@
-import { error, setFailed } from '@actions/core'
+import { error, info, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { rebase } from '@sr-services/github/Rebase'
-import { debug } from '@sr-services/Log'
+import { rebase } from '@sr-services/Github/Rebase'
 
 /**
  * Runs whenever a commit is added to a pull request.
@@ -18,7 +17,7 @@ export const run = async (): Promise<void> => {
   }
 
   if (!pull_request.title.startsWith('[Epic] ')) {
-    debug(
+    info(
       `${repository.name}#${pull_request.number} is not an epic PR - ignoring`
     )
     return
