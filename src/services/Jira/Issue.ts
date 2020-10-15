@@ -60,7 +60,7 @@ export const getIssue = async (key: string): Promise<Issue> => {
   if (fieldName) {
     issue.fields.repository = ((issue.fields as unknown) as {
       [customField: string]: { value: string }
-    })[fieldName].value
+    })[fieldName]?.value
   }
 
   return issue

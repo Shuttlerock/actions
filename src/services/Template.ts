@@ -18,7 +18,7 @@ export const render = (template: string, vars: TemplateVars): string =>
 export const PullRequestForIssueTemplate = `
 ## {{summary}}
 
-[Jira Issue]({{jiraUrl}})
+[Jira Issue]({{&jiraUrl}})
 
 {{description}}
 

@@ -110,9 +110,9 @@ describe('Branch', () => {
         repo,
         'master',
         branch,
-        '.meta/STUDIO-236.md',
-        'https://example.atlassian.net/browse/STUDIO-236',
-        '[STUDIO-236] [skip ci] Create pull request.'
+        '.meta/ISSUE-236.md',
+        'https://example.atlassian.net/browse/ISSUE-236',
+        '[ISSUE-236] [skip ci] Create pull request.'
       )
 
       expect(spyCreateGitBranch).toHaveBeenCalledWith(
@@ -142,9 +142,9 @@ describe('Branch', () => {
           repo,
           'master',
           branch,
-          '.meta/STUDIO-236.md',
-          'https://example.atlassian.net/browse/STUDIO-236',
-          '[STUDIO-236] [skip ci] Create pull request.'
+          '.meta/ISSUE-236.md',
+          'https://example.atlassian.net/browse/ISSUE-236',
+          '[ISSUE-236] [skip ci] Create pull request.'
         )
       ).rejects.toEqual(
         new Error("Base branch not found for repository 'my-repo'")
