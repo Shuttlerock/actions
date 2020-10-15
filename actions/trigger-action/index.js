@@ -16114,12 +16114,13 @@ const Client_1 = __webpack_require__(861);
  * @returns {Issue} The issue data.
  */
 exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const issue = (yield Client_1.client.findIssue(key, 'names'));
     // Find the repository, and include it explicitly. This is a bit ugly due to the way
     // Jira includes custom fields.
     const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
     if (fieldName) {
-        issue.fields.repository = issue.fields[fieldName].value;
+        issue.fields.repository = (_a = issue.fields[fieldName]) === null || _a === void 0 ? void 0 : _a.value;
     }
     return issue;
 });
