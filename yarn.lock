@@ -707,10 +707,10 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks@^7.13.0":
-  version "7.13.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-7.13.0.tgz#f6bad029a71cdbb295399bbe1386363ba0a79ad6"
-  integrity sha512-v+020Zf4kFmGnQS5I3pvzJM3g8tQncCJHczhKqCI5WB2p+kIbb3PnNxNsuQ62DGNHDcE1CLUpARLaDSvh5lCOA==
+"@octokit/webhooks@^7.13.1":
+  version "7.13.1"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-7.13.1.tgz#74d27ae438b947700e5d2589d782eb6bbd78e9ab"
+  integrity sha512-BgoVUPNbvRD0EggAtuO2SBhMnyPHyV2Yu5nKAlmOoGLse0EcsJyLsP0T9ad7vl5hiMfCASXgnfXVIA4r2/LwMA==
   dependencies:
     "@octokit/request-error" "^2.0.2"
     "@pika/plugin-ts-standard-pkg" "^0.9.2"
