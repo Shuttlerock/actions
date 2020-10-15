@@ -47415,6 +47415,7 @@ const Template_1 = __webpack_require__(920);
 exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.info('Fetching the Jira issue details...');
     const issue = yield Jira_1.getIssue(issueKey);
+    const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Finding out who the pull request should belong to...');
@@ -47451,8 +47452,10 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     }
     else {
         core_1.info('There is no open pull request for this issue');
+        core_1.info("Notifying the user that we're maing a pull request...");
+        const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`;
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         const baseBranchName = repo.default_branch;
-        const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
         const branch = yield Github_1.getBranch(repo.name, newBranchName);
         core_1.info(`Checking if the branch '${newBranchName}' already exists...`);
         if (isNil_1.default(branch)) {
@@ -47480,7 +47483,11 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     ]);
     core_1.info(`Notifying Slack user ${credentials.slack_id}...`);
     const url = `https://github.com/${Constants_1.OrganizationName}/${repo.name}/pull/${pullRequestNumber}`;
-    const message = `Here's your pull request: ${url}\nPlease prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\``;
+    const message = `Here's your pull request: ${url}
+    Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
+    Checkout the new branch with:
+    \`git checkout --track origin/${newBranchName}\`
+  `.replace(/[ ]+/g, ' ');
     yield Slack_1.sendUserMessage(credentials.slack_id, message);
     core_1.info(`Finished creating pull request ${url} for Jira issue ${issue.key}`);
 });

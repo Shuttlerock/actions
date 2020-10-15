@@ -42,6 +42,7 @@ export const createPullRequestForJiraIssue = async (
 ): Promise<void> => {
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
+  const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
   info(`The Jira URL is ${jiraUrl}`)
 
@@ -81,8 +82,11 @@ export const createPullRequestForJiraIssue = async (
     info(`Pull request #${pullRequestNumber} already exists`)
   } else {
     info('There is no open pull request for this issue')
+    info("Notifying the user that we're maing a pull request...")
+    const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`
+    await sendUserMessage(credentials.slack_id, message)
+
     const baseBranchName = repo.default_branch
-    const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
     const branch = await getBranch(repo.name, newBranchName)
 
     info(`Checking if the branch '${newBranchName}' already exists...`)
@@ -132,7 +136,11 @@ export const createPullRequestForJiraIssue = async (
 
   info(`Notifying Slack user ${credentials.slack_id}...`)
   const url = `https://github.com/${OrganizationName}/${repo.name}/pull/${pullRequestNumber}`
-  const message = `Here's your pull request: ${url}\nPlease prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\``
+  const message = `Here's your pull request: ${url}
+    Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
+    Checkout the new branch with:
+    \`git checkout --track origin/${newBranchName}\`
+  `.replace(/[ ]+/g, ' ')
   await sendUserMessage(credentials.slack_id, message)
   info(`Finished creating pull request ${url} for Jira issue ${issue.key}`)
 }
