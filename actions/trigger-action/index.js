@@ -47412,10 +47412,11 @@ const Template_1 = __webpack_require__(920);
  * @param {string} issueKey The key of the Jira issue we will base the pull request on.
  */
 exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
-    // 1. Fetch the Jira issue details.
+    core_1.info('Fetching the Jira issue details...');
     const issue = yield Jira_1.getIssue(issueKey);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
-    // 2. Find out who the PR should belong to.
+    core_1.info(`The Jira URL is ${jiraUrl}`);
+    core_1.info('Finding out who the pull request should belong to...');
     if (isNil_1.default(issue.fields.assignee)) {
         const credentials = yield Credentials_1.getCredentialsByEmail(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
@@ -47425,36 +47426,39 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     }
     const assigneeEmail = issue.fields.assignee.emailAddress;
     const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
+    core_1.info(`The pull request will be assigned to @${credentials.github_username}`);
     if (issue.fields.subtasks.length > 0) {
         const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`;
-        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.info(message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         return;
     }
     if (isNil_1.default(issue.fields.repository)) {
         const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
-        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
         return;
     }
-    // 3. Check if a PR already exists for the issue.
+    core_1.info('Checking if there is an open pull request for this issue...');
     let pullRequestNumber;
     const repo = yield Github_1.getRepository(issue.fields.repository);
     const pullRequestNumbers = yield Jira_1.getIssuePullRequestNumbers(issue.id);
     if (pullRequestNumbers.length > 0) {
         ;
         [pullRequestNumber] = pullRequestNumbers;
+        core_1.info(`Pull request #${pullRequestNumber} already exists`);
     }
     else {
-        // 4. Try to find an existing branch.
+        core_1.info('There is no open pull request for this issue');
         const baseBranchName = repo.default_branch;
         const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
         const branch = yield Github_1.getBranch(repo.name, newBranchName);
-        // 5. If no branch exists with the right name, make a new one.
+        core_1.info(`Checking if the branch '${newBranchName}' already exists...`);
         if (isNil_1.default(branch)) {
+            core_1.info(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
             yield Github_1.createBranch(repo.name, baseBranchName, newBranchName, `.meta/${issue.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${issue.key}] [skip ci] Create pull request.`);
         }
-        // 6. Create the pull request.
+        core_1.info('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
         const templateVars = {
             description: issue.fields.description,
@@ -47464,17 +47468,20 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         const prBody = Template_1.render(Template_1.PullRequestForIssueTemplate, templateVars);
         const pullRequest = yield Github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, credentials.github_token);
         pullRequestNumber = pullRequest.number;
+        core_1.info(`Created pull request #${pullRequestNumber}`);
     }
     // 7. Mark the pull request as in-progress.
+    core_1.info('Adding labels...');
     yield Github_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
-    // 8. Assign the pull request to the appropriate user.
+    core_1.info(`Assigning @${credentials.github_username} as the owner...`);
     yield Github_1.assignOwners(repo.name, pullRequestNumber, [
         credentials.github_username,
     ]);
-    // 9. Tell the user.
+    core_1.info(`Notifying Slack user ${credentials.slack_id}...`);
     const url = `https://github.com/${Constants_1.OrganizationName}/${repo.name}/pull/${pullRequestNumber}`;
-    const message = `Here's your pull request: ${url}`;
+    const message = `Here's your pull request: ${url}\nPlease prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\``;
     yield Slack_1.sendUserMessage(credentials.slack_id, message);
+    core_1.info(`Finished creating pull request ${url} for Jira issue ${issue.key}`);
 });
 
 
@@ -47551,6 +47558,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.error(err);
+    core_1.error(err.stack);
     yield Slack_1.sendErrorMessage(err.message);
     core_1.setFailed(err.message);
 }));

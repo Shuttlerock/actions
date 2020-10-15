@@ -24,6 +24,5 @@ test('test runs', () => {
   const options: ExecSyncOptions = {
     env: process.env,
   }
-  // eslint-disable-next-line no-console
-  console.log(execSync(`node ${ip}`, options).toString())
+  execSync(`node ${ip}`, options).toString()
 })

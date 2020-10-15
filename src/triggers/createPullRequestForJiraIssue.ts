@@ -40,11 +40,12 @@ export const createPullRequestForJiraIssue = async (
   email: string,
   issueKey: string
 ): Promise<void> => {
-  // 1. Fetch the Jira issue details.
+  info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
+  info(`The Jira URL is ${jiraUrl}`)
 
-  // 2. Find out who the PR should belong to.
+  info('Finding out who the pull request should belong to...')
   if (isNil(issue.fields.assignee)) {
     const credentials = await getCredentialsByEmail(email)
     const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
@@ -54,36 +55,41 @@ export const createPullRequestForJiraIssue = async (
   }
   const assigneeEmail = issue.fields.assignee.emailAddress
   const credentials = await getCredentialsByEmail(assigneeEmail)
+  info(`The pull request will be assigned to @${credentials.github_username}`)
 
   if (issue.fields.subtasks.length > 0) {
     const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`
-    await sendUserMessage(credentials.slack_id, message)
     info(message)
+    await sendUserMessage(credentials.slack_id, message)
     return
   }
 
   if (isNil(issue.fields.repository)) {
     const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`
-    await sendUserMessage(credentials.slack_id, message)
     error(message)
+    await sendUserMessage(credentials.slack_id, message)
     return
   }
 
-  // 3. Check if a PR already exists for the issue.
+  info('Checking if there is an open pull request for this issue...')
   let pullRequestNumber
   const repo = await getRepository(issue.fields.repository)
   const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
 
   if (pullRequestNumbers.length > 0) {
     ;[pullRequestNumber] = pullRequestNumbers
+    info(`Pull request #${pullRequestNumber} already exists`)
   } else {
-    // 4. Try to find an existing branch.
+    info('There is no open pull request for this issue')
     const baseBranchName = repo.default_branch
     const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
     const branch = await getBranch(repo.name, newBranchName)
 
-    // 5. If no branch exists with the right name, make a new one.
+    info(`Checking if the branch '${newBranchName}' already exists...`)
     if (isNil(branch)) {
+      info(
+        `The branch '${newBranchName}' does not exist yet: creating a new branch...`
+      )
       await createBranch(
         repo.name,
         baseBranchName,
@@ -94,7 +100,7 @@ export const createPullRequestForJiraIssue = async (
       )
     }
 
-    // 6. Create the pull request.
+    info('Creating the pull request...')
     const prTitle = `[${issue.key}] ${issue.fields.summary}`
     const templateVars = {
       description: issue.fields.description,
@@ -112,18 +118,21 @@ export const createPullRequestForJiraIssue = async (
     )
 
     pullRequestNumber = pullRequest.number
+    info(`Created pull request #${pullRequestNumber}`)
   }
 
   // 7. Mark the pull request as in-progress.
+  info('Adding labels...')
   await addLabels(repo.name, pullRequestNumber, [InProgressLabel])
 
-  // 8. Assign the pull request to the appropriate user.
+  info(`Assigning @${credentials.github_username} as the owner...`)
   await assignOwners(repo.name, pullRequestNumber, [
     credentials.github_username,
   ])
 
-  // 9. Tell the user.
+  info(`Notifying Slack user ${credentials.slack_id}...`)
   const url = `https://github.com/${OrganizationName}/${repo.name}/pull/${pullRequestNumber}`
-  const message = `Here's your pull request: ${url}`
+  const message = `Here's your pull request: ${url}\nPlease prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\``
   await sendUserMessage(credentials.slack_id, message)
+  info(`Finished creating pull request ${url} for Jira issue ${issue.key}`)
 }

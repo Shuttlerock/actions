@@ -36,6 +36,7 @@ export const run = async (): Promise<void> => {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 run().catch(async err => {
   error(err)
+  error(err.stack)
   await sendErrorMessage(err.message)
   setFailed(err.message)
 })
