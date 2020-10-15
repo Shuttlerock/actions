@@ -146,16 +146,18 @@ describe('createPullRequestForJiraIssue', () => {
   it('returns an existing PR if there is one', async () => {
     jiraPrsSpy.mockImplementation((_issueId: string) => Promise.resolve([123]))
     await createPullRequestForJiraIssue(email, issueKey)
-    const message =
-      "Here's your pull request: https://github.com/octokit/webhooks/pull/123\nPlease prefix your commits with `[#123] [ISSUE-236]`"
+    const message = expect.stringMatching(
+      /^Here's your pull request: https:\/\/github.com\/octokit\/webhooks\/pull\/123/
+    )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
     expect(githubCreatePullRequestSpy.mock.calls.length).toBe(0)
   })
 
   it('creates a new PR', async () => {
     await createPullRequestForJiraIssue(email, issueKey)
-    const message =
-      "Here's your pull request: https://github.com/octokit/webhooks/pull/123\nPlease prefix your commits with `[#123] [ISSUE-236]`"
+    const message = expect.stringMatching(
+      /^Here's your pull request: https:\/\/github.com\/octokit\/webhooks\/pull\/123/
+    )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
     expect(githubCreatePullRequestSpy).toHaveBeenCalled()
   })
