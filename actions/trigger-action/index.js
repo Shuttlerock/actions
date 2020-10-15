@@ -53092,7 +53092,7 @@ exports.render = (template, vars) => mustache_1.render(template, vars);
 exports.PullRequestForIssueTemplate = `
 ## {{summary}}
 
-[Jira Issue]({{jiraUrl}})
+[Jira Issue]({{&jiraUrl}})
 
 {{description}}
 
