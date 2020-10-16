@@ -47466,6 +47466,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
         const templateVars = {
             description: issue.fields.description,
+            issueType: issue.fields.issuetype.name,
             summary: issue.fields.summary,
             jiraUrl,
         };
@@ -53099,7 +53100,7 @@ exports.render = (template, vars) => mustache_1.render(template, vars);
 exports.PullRequestForIssueTemplate = `
 ## {{summary}}
 
-[Jira Issue]({{&jiraUrl}})
+[Jira {{issueType}}]({{&jiraUrl}})
 
 {{description}}
 
