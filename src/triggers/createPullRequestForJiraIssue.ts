@@ -108,6 +108,7 @@ export const createPullRequestForJiraIssue = async (
     const prTitle = `[${issue.key}] ${issue.fields.summary}`
     const templateVars = {
       description: issue.fields.description,
+      issueType: issue.fields.issuetype.name,
       summary: issue.fields.summary,
       jiraUrl,
     }
