@@ -42,7 +42,6 @@ export const createPullRequestForJiraIssue = async (
 ): Promise<void> => {
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
-  const newBranchName = parameterize(`${issue.key}-${issue.fields.summary}`)
   const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
   info(`The Jira URL is ${jiraUrl}`)
 
@@ -56,6 +55,10 @@ export const createPullRequestForJiraIssue = async (
   }
   const assigneeEmail = issue.fields.assignee.emailAddress
   const credentials = await getCredentialsByEmail(assigneeEmail)
+  const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1') // Grab the first name from the email address.
+  const newBranchName = `${parameterize(assigneeName)}/${parameterize(
+    issue.key
+  )}-${parameterize(issue.fields.summary)}`
   info(`The pull request will be assigned to @${credentials.github_username}`)
 
   if (issue.fields.subtasks.length > 0) {

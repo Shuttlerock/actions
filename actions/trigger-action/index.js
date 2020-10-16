@@ -47415,7 +47415,6 @@ const Template_1 = __webpack_require__(920);
 exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.info('Fetching the Jira issue details...');
     const issue = yield Jira_1.getIssue(issueKey);
-    const newBranchName = String_1.parameterize(`${issue.key}-${issue.fields.summary}`);
     const jiraUrl = `https://${Constants_1.JiraHost}/browse/${issue.key}`;
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Finding out who the pull request should belong to...');
@@ -47428,6 +47427,8 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     }
     const assigneeEmail = issue.fields.assignee.emailAddress;
     const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
+    const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1'); // Grab the first name from the email address.
+    const newBranchName = `${String_1.parameterize(assigneeName)}/${String_1.parameterize(issue.key)}-${String_1.parameterize(issue.fields.summary)}`;
     core_1.info(`The pull request will be assigned to @${credentials.github_username}`);
     if (issue.fields.subtasks.length > 0) {
         const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`;
