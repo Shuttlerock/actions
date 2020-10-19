@@ -2,8 +2,8 @@ import { createHmac } from 'crypto'
 import fetch from 'node-fetch'
 
 import {
-  CredentialsApiPrefix,
-  CredentialsApiSecret,
+  credentialsApiPrefix,
+  credentialsApiSecret,
 } from '@sr-services/Constants'
 import { Repository } from '@sr-services/Github'
 
@@ -27,10 +27,10 @@ export const getCredentialsByEmail = async (
   email: string
 ): Promise<Credentials> => {
   const id = Buffer.from(email).toString('base64')
-  const signature = createHmac('sha256', CredentialsApiSecret)
+  const signature = createHmac('sha256', credentialsApiSecret())
     .update(email)
     .digest('hex')
-  const url = `${CredentialsApiPrefix}${id}`
+  const url = `${credentialsApiPrefix()}${id}`
 
   const response = await fetch(url, {
     headers: { 'Shuttlerock-Signature': `sha256=${signature}` },

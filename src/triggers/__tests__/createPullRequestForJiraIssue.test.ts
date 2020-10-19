@@ -1,4 +1,4 @@
-import { JiraHost } from '@sr-services/Constants'
+import { jiraHost } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
@@ -6,7 +6,7 @@ import * as Slack from '@sr-services/Slack'
 import {
   mockCredentials,
   mockGithubBranch,
-  mockGithubPullRequest,
+  mockGithubPullRequestCreateResponse,
   mockGithubRepository,
   mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
@@ -67,7 +67,7 @@ describe('createPullRequestForJiraIssue', () => {
           _title: string,
           _body: string,
           _token: string
-        ) => Promise.resolve(mockGithubPullRequest)
+        ) => Promise.resolve(mockGithubPullRequestCreateResponse)
       )
     githubGetBranchSpy = jest
       .spyOn(Github, 'getBranch')
@@ -113,7 +113,7 @@ describe('createPullRequestForJiraIssue', () => {
       Promise.resolve(noAssignee)
     )
     await createPullRequestForJiraIssue(email, issueKey)
-    const message = `Issue <https://${JiraHost}/browse/${issueKey}|${issueKey}> is not assigned to anyone, so no pull request was created`
+    const message = `Issue <https://${jiraHost()}/browse/${issueKey}|${issueKey}> is not assigned to anyone, so no pull request was created`
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
 
@@ -126,7 +126,7 @@ describe('createPullRequestForJiraIssue', () => {
       Promise.resolve(noSubtasks)
     )
     await createPullRequestForJiraIssue(email, issueKey)
-    const message = `Issue <https://${JiraHost}/browse/${issueKey}|${issueKey}> has subtasks, so no pull request was created`
+    const message = `Issue <https://${jiraHost()}/browse/${issueKey}|${issueKey}> has subtasks, so no pull request was created`
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
 
@@ -139,7 +139,7 @@ describe('createPullRequestForJiraIssue', () => {
       Promise.resolve(noRepository)
     )
     await createPullRequestForJiraIssue(email, issueKey)
-    const message = `No repository is set for issue <https://${JiraHost}/browse/${issueKey}|${issueKey}>, so no pull request was created`
+    const message = `No repository is set for issue <https://${jiraHost()}/browse/${issueKey}|${issueKey}>, so no pull request was created`
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
 

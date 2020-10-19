@@ -4,17 +4,19 @@ import {
   OctokitResponse,
   PullsCreateResponseData,
 } from '@octokit/types'
+import { EventPayloads } from '@octokit/webhooks'
 
-import { OrganizationName } from '@sr-services/Constants'
+import { organizationName } from '@sr-services/Constants'
 import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
   addLabels,
   assignOwners,
   createPullRequest,
+  getIssueKey,
 } from '@sr-services/Github/PullRequest'
 import {
-  mockGithubPullRequest,
+  mockGithubPullRequestCreateResponse,
   mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
 } from '@sr-tests/Mocks'
@@ -41,7 +43,7 @@ describe('PullRequest', () => {
       expect(spy).toHaveBeenCalledWith({
         issue_number: 23,
         labels: ['my-label'],
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
       })
       expect(result[0].name).toEqual('my-label')
@@ -68,7 +70,7 @@ describe('PullRequest', () => {
       expect(spy).toHaveBeenCalledWith({
         assignees: ['dperrett'],
         issue_number: 23,
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
       })
       expect(result.id).toEqual(1234)
@@ -94,7 +96,7 @@ describe('PullRequest', () => {
             title: string
           }) =>
             Promise.resolve({
-              data: mockGithubPullRequest,
+              data: mockGithubPullRequestCreateResponse,
             } as OctokitResponse<PullsCreateResponseData>)
         )
       const result = await createPullRequest(
@@ -110,13 +112,41 @@ describe('PullRequest', () => {
         body: 'Some description',
         draft: true,
         head: 'feature/add-a-widget',
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
         title: 'Add a Widget',
       })
       expect(result.id).toEqual(1234)
       clientSpy.mockRestore()
       spy.mockRestore()
+    })
+  })
+
+  describe('getIssueKey', () => {
+    it('gets the key from the title if possible', () => {
+      const pullRequest = ({
+        body:
+          '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
+        title: '[ISSUE-456] My Issue',
+      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      expect(getIssueKey(pullRequest)).toEqual('ISSUE-456')
+    })
+
+    it('gets the key from the body if possible', () => {
+      const pullRequest = ({
+        body:
+          '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
+        title: 'My Issue',
+      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      expect(getIssueKey(pullRequest)).toEqual('ISSUE-789')
+    })
+
+    it("returns undefined if the key can't be found", () => {
+      const pullRequest = ({
+        body: 'My body',
+        title: 'My Issue',
+      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      expect(getIssueKey(pullRequest)).toBeUndefined()
     })
   })
 })

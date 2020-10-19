@@ -4,8 +4,8 @@ import {
 } from '@octokit/types'
 import isUndefined from 'lodash/isUndefined'
 
-import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/Github/Client'
+import { organizationName } from '@sr-services/Constants'
+import { readClient } from '@sr-services/Github/Client'
 import {
   Branch,
   createGitBlob,
@@ -31,8 +31,8 @@ export const getBranch = async (
   branch: Branch
 ): Promise<ReposGetBranchResponseData | undefined> => {
   try {
-    const response = await client.repos.getBranch({
-      owner: OrganizationName,
+    const response = await readClient.repos.getBranch({
+      owner: organizationName(),
       repo,
       branch,
     })

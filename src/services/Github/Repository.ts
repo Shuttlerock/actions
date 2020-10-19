@@ -1,7 +1,7 @@
 import { ReposGetResponseData } from '@octokit/types'
 
-import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/Github/Client'
+import { organizationName } from '@sr-services/Constants'
+import { readClient } from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
 
 /**
@@ -13,9 +13,9 @@ import { Repository } from '@sr-services/Github/Git'
 export const getNextPullRequestNumber = async (
   repo: Repository
 ): Promise<number> => {
-  const response = await client.pulls.list({
+  const response = await readClient.pulls.list({
     direction: 'desc',
-    owner: OrganizationName,
+    owner: organizationName(),
     page: 1,
     per_page: 1,
     repo,
@@ -40,8 +40,8 @@ export const getNextPullRequestNumber = async (
 export const getRepository = async (
   repo: Repository
 ): Promise<ReposGetResponseData> => {
-  const response = await client.repos.get({
-    owner: OrganizationName,
+  const response = await readClient.repos.get({
+    owner: organizationName(),
     repo,
   })
   return response.data

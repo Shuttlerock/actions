@@ -6,7 +6,7 @@ import {
   OctokitResponse,
 } from '@octokit/types'
 
-import { OrganizationName } from '@sr-services/Constants'
+import { organizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/Github/Client'
 import {
   Branch,
@@ -36,7 +36,7 @@ describe('Git', () => {
         )
       const result = await createGitBlob(repo, 'my-content')
       expect(spy).toHaveBeenCalledWith({
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
         content: 'my-content',
       })
@@ -68,7 +68,7 @@ describe('Git', () => {
         'parent-sha'
       )
       expect(spy).toHaveBeenCalledWith({
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
         message: 'my-message',
         tree: 'master',
@@ -96,7 +96,7 @@ describe('Git', () => {
         )
       const result = await createGitBranch(repo, 'my-branch', 'my-sha')
       expect(spy).toHaveBeenCalledWith({
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
         ref: 'refs/heads/my-branch',
         sha: 'my-sha',
@@ -131,7 +131,7 @@ describe('Git', () => {
       ]
       const result = await createGitTree(repo, tree, 'my-sha')
       expect(spy).toHaveBeenCalledWith({
-        owner: OrganizationName,
+        owner: organizationName(),
         repo,
         tree,
         base_tree: 'my-sha',

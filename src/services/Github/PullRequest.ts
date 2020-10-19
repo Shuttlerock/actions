@@ -3,8 +3,9 @@ import {
   IssuesAddLabelsResponseData,
   PullsCreateResponseData,
 } from '@octokit/types'
+import { EventPayloads } from '@octokit/webhooks'
 
-import { OrganizationName } from '@sr-services/Constants'
+import { jiraHost, organizationName } from '@sr-services/Constants'
 import { client, clientForToken } from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 
@@ -25,7 +26,7 @@ export const addLabels = async (
   const response = await client.issues.addLabels({
     issue_number: number,
     labels,
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
   })
 
@@ -49,7 +50,7 @@ export const assignOwners = async (
   const response = await client.issues.addAssignees({
     assignees: usernames,
     issue_number: number,
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
   })
 
@@ -81,10 +82,33 @@ export const createPullRequest = async (
     body,
     draft: true,
     head,
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
     title,
   })
 
   return response.data
+}
+
+export const getIssueKey = (
+  pr: EventPayloads.WebhookPayloadPullRequestPullRequest
+): string | undefined => {
+  // Try to get the key from the title.
+  let matches = /^\[([A-Z]+-[\d]+)\] .*$/.exec(pr.title)
+  if (matches?.length === 2) {
+    return matches[1]
+  }
+
+  // Try to get the key from a link in the body.
+  const regex = new RegExp(
+    // eslint-disable-next-line no-useless-escape
+    `${jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`,
+    'm'
+  )
+  matches = regex.exec(pr.body)
+  if (matches?.length === 2) {
+    return matches[1]
+  }
+
+  return undefined
 }
