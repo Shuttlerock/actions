@@ -1,4 +1,4 @@
-import { SlackErrorChannelId } from '@sr-services/Constants'
+import { slackErrorChannelId } from '@sr-services/Constants'
 import { client } from '@sr-services/Slack/Client'
 
 /**
@@ -9,7 +9,10 @@ import { client } from '@sr-services/Slack/Client'
  * @returns {void}
  */
 export const sendErrorMessage = async (message: string): Promise<void> => {
-  await client.chat.postMessage({ channel: SlackErrorChannelId, text: message })
+  await client.chat.postMessage({
+    channel: slackErrorChannelId(),
+    text: message,
+  })
 }
 
 /**

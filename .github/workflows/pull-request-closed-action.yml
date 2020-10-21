@@ -1,0 +1,17 @@
+name: 'Pull Request Closed'
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  pull_request_closed_action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./actions/pull-request-closed-action
+        with:
+          jira-email:  ${{ secrets.JIRA_EMAIL }}
+          jira-host:   ${{ secrets.JIRA_HOST }}
+          jira-token:  ${{ secrets.JIRA_TOKEN }}
+          repo-token:  ${{ secrets.GITHUB_TOKEN }}
+          write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}

@@ -5,7 +5,7 @@ import {
   GitCreateTreeResponseData,
 } from '@octokit/types'
 
-import { OrganizationName } from '@sr-services/Constants'
+import { organizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/Github/Client'
 
 export type Branch = string
@@ -52,7 +52,7 @@ export const createGitBlob = async (
   content: string
 ): Promise<GitCreateBlobResponseData> => {
   const response = await client.git.createBlob({
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
     content,
   })
@@ -77,7 +77,7 @@ export const createGitCommit = async (
   parent: Sha
 ): Promise<GitCreateCommitResponseData> => {
   const response = await client.git.createCommit({
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
     message,
     tree,
@@ -102,7 +102,7 @@ export const createGitBranch = async (
   sha: Sha
 ): Promise<GitCreateRefResponseData> => {
   const response = await client.git.createRef({
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
     ref: `refs/heads/${branch}`,
     sha,
@@ -126,7 +126,7 @@ export const createGitTree = async (
   baseTree: Sha
 ): Promise<GitCreateTreeResponseData> => {
   const response = await client.git.createTree({
-    owner: OrganizationName,
+    owner: organizationName(),
     repo,
     tree,
     base_tree: baseTree,

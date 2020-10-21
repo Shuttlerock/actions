@@ -1,0 +1,12 @@
+{
+  "action": "closed",
+  "pull_request": {
+    "body": "## When a PR is merged, move to `Validated`\n\n[Jira Tech task](https://shuttlerock.atlassian.net/browse/STUDIO-539)\n\n## How to test the PR",
+    "merged": true,
+    "number": 94,
+    "title": "[STUDIO-539] When a PR is merged, move it to `Validated`"
+  },
+  "repository": {
+    "name": "actions"
+  }
+}

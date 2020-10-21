@@ -7,9 +7,9 @@ import {
   ReposGetBranchResponseData,
 } from '@octokit/types'
 
-import { OrganizationName } from '@sr-services/Constants'
+import { organizationName } from '@sr-services/Constants'
 import * as Branch from '@sr-services/Github/Branch'
-import { client } from '@sr-services/Github/Client'
+import { readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Repository from '@sr-services/Github/Repository'
 import { mockGithubBranch } from '@sr-tests/Mocks'
@@ -23,7 +23,7 @@ interface GetBranchParams {
 const repo = 'my-repo'
 const branch = 'my-branch'
 const fetchBranchParams = {
-  owner: OrganizationName,
+  owner: organizationName(),
   repo,
   branch,
 }
@@ -32,7 +32,7 @@ describe('Branch', () => {
   describe('getBranch', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.repos, 'getBranch')
+        .spyOn(readClient.repos, 'getBranch')
         .mockImplementation((_args?: GetBranchParams) =>
           Promise.resolve({
             data: mockGithubBranch,
@@ -46,7 +46,7 @@ describe('Branch', () => {
 
     it("returns undefined if the branch can't be found", async () => {
       const spy = jest
-        .spyOn(client.repos, 'getBranch')
+        .spyOn(readClient.repos, 'getBranch')
         .mockImplementation((_args?: GetBranchParams) => {
           throw new Error('Branch not found')
         })

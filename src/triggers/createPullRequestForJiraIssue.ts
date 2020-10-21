@@ -3,8 +3,8 @@ import isNil from 'lodash/isNil'
 
 import {
   InProgressLabel,
-  JiraHost,
-  OrganizationName,
+  jiraHost,
+  organizationName,
 } from '@sr-services/Constants'
 import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
@@ -42,7 +42,15 @@ export const createPullRequestForJiraIssue = async (
 ): Promise<void> => {
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
-  const jiraUrl = `https://${JiraHost}/browse/${issue.key}`
+  if (isNil(issue)) {
+    const credentials = await getCredentialsByEmail(email)
+    const message = `Issue ${issueKey}> could not be found, so no pull request was created`
+    await sendUserMessage(credentials.slack_id, message)
+    error(message)
+    return
+  }
+
+  const jiraUrl = `https://${jiraHost()}/browse/${issue.key}`
   info(`The Jira URL is ${jiraUrl}`)
 
   info('Finding out who the pull request should belong to...')
@@ -139,7 +147,9 @@ export const createPullRequestForJiraIssue = async (
   ])
 
   info(`Notifying Slack user ${credentials.slack_id}...`)
-  const url = `https://github.com/${OrganizationName}/${repo.name}/pull/${pullRequestNumber}`
+  const url = `https://github.com/${organizationName()}/${
+    repo.name
+  }/pull/${pullRequestNumber}`
   const message = `Here's your pull request: ${url}
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:

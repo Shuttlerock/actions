@@ -4,8 +4,8 @@ import {
   ReposGetResponseData,
 } from '@octokit/types'
 
-import { OrganizationName } from '@sr-services/Constants'
-import { client } from '@sr-services/Github/Client'
+import { organizationName } from '@sr-services/Constants'
+import { readClient } from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
 import {
   getNextPullRequestNumber,
@@ -19,7 +19,7 @@ describe('Repository', () => {
   describe('getNextPullRequestNumber', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.pulls, 'list')
+        .spyOn(readClient.pulls, 'list')
         .mockImplementation(
           (_args?: {
             direction?: string
@@ -41,7 +41,7 @@ describe('Repository', () => {
       const result = await getNextPullRequestNumber(repo)
       expect(spy).toHaveBeenCalledWith({
         direction: 'desc',
-        owner: OrganizationName,
+        owner: organizationName(),
         page: 1,
         per_page: 1,
         repo,
@@ -55,14 +55,14 @@ describe('Repository', () => {
   describe('getRepository', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.repos, 'get')
+        .spyOn(readClient.repos, 'get')
         .mockImplementation((_args?: { owner: string; repo: Repository }) =>
           Promise.resolve({
             data: mockGithubRepository,
           } as OctokitResponse<ReposGetResponseData>)
         )
       const result = await getRepository(repo)
-      expect(spy).toHaveBeenCalledWith({ owner: OrganizationName, repo })
+      expect(spy).toHaveBeenCalledWith({ owner: organizationName(), repo })
       expect(result.name).toEqual(repo)
       spy.mockRestore()
     })

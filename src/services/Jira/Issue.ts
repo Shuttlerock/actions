@@ -1,6 +1,8 @@
+import { TransitionObject } from 'jira-client'
+import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { JiraEmail, JiraHost, JiraToken } from '@sr-services/Constants'
+import { jiraEmail, jiraHost, jiraToken } from '@sr-services/Constants'
 import { client } from '@sr-services/Jira/Client'
 
 interface User {
@@ -18,6 +20,9 @@ export interface Issue {
     }
     subtasks: Issue[]
     summary: string
+    status: {
+      name: string
+    }
     // Added by us.
     repository?: string
   }
@@ -42,6 +47,10 @@ interface GithubDetails {
   detail: GithubDetail[]
 }
 
+// Jira statuses.
+export const JiraStatusInDevelopment = 'In development'
+export const JiraStatusValidated = 'Validated'
+
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -49,21 +58,29 @@ interface GithubDetails {
  *
  * @returns {Issue} The issue data.
  */
-export const getIssue = async (key: string): Promise<Issue> => {
-  const issue = (await client.findIssue(key, 'names')) as Issue
+export const getIssue = async (key: string): Promise<Issue | undefined> => {
+  try {
+    const issue = (await client.findIssue(key, 'names')) as Issue
 
-  // Find the repository, and include it explicitly. This is a bit ugly due to the way
-  // Jira includes custom fields.
-  const fieldName = Object.keys(issue.names).find(
-    name => issue.names[name] === 'Repository'
-  )
-  if (fieldName) {
-    issue.fields.repository = ((issue.fields as unknown) as {
-      [customField: string]: { value: string }
-    })[fieldName]?.value
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    const fieldName = Object.keys(issue.names).find(
+      name => issue.names[name] === 'Repository'
+    )
+    if (fieldName) {
+      issue.fields.repository = ((issue.fields as unknown) as {
+        [customField: string]: { value: string }
+      })[fieldName]?.value
+    }
+
+    return issue
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return undefined
+    }
+
+    throw err
   }
-
-  return issue
 }
 
 /**
@@ -77,7 +94,7 @@ export const getIssue = async (key: string): Promise<Issue> => {
 export const getIssuePullRequestNumbers = async (
   issueId: string
 ): Promise<number[]> => {
-  const host = `https://${JiraEmail}:${JiraToken}@${JiraHost}/`
+  const host = `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`
   const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`
   const response = await fetch(url)
   const data = (await response.json()) as GithubDetails
@@ -91,4 +108,27 @@ export const getIssuePullRequestNumbers = async (
     .map((id: string) => parseInt(id.replace(/[^\d]/, ''), 10))
 
   return ids
+}
+
+/**
+ * Transitions the given issue to the given status.
+ *
+ * @param {string} issueId The issue to transition.
+ * @param {string} status  The status to transition to.
+ */
+export const setIssueStatus = async (
+  issueId: string,
+  status: string
+): Promise<void> => {
+  const { transitions } = await client.listTransitions(issueId)
+  const transition = transitions.find(
+    (trans: TransitionObject) => trans.name === status
+  )
+  if (isNil(transition)) {
+    throw new Error(
+      `Cannot set status of issue ${issueId} - status '${status}' could not be found`
+    )
+  }
+
+  await client.transitionIssue(issueId, { transition })
 }

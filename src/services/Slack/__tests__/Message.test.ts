@@ -1,6 +1,6 @@
 import { ChatPostMessageArguments } from '@slack/web-api'
 
-import { SlackErrorChannelId } from '@sr-services/Constants'
+import { slackErrorChannelId } from '@sr-services/Constants'
 import { client } from '@sr-services/Slack/Client'
 import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack/Message'
 
@@ -14,7 +14,7 @@ describe('Message', () => {
         )
       await sendErrorMessage('my message')
       expect(spy).toHaveBeenCalledWith({
-        channel: SlackErrorChannelId,
+        channel: slackErrorChannelId(),
         text: 'my message',
       })
       spy.mockRestore()

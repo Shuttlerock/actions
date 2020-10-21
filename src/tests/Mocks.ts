@@ -5,12 +5,16 @@ import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
+import { EventPayloads } from '@octokit/webhooks'
+import { TransitionObject } from 'jira-client'
 
 import { Credentials } from '@sr-services/Credentials'
 import { Issue } from '@sr-services/Jira/Issue'
+import pullRequestPayload from '@sr-tests/fixtures/github-pull-request-payload.json'
 import repository from '@sr-tests/fixtures/github-repository.json'
 import issue from '@sr-tests/fixtures/jira-issue.json'
 import pullRequests from '@sr-tests/fixtures/jira-pull-requests.json'
+import transitions from '@sr-tests/fixtures/jira-transitions.json'
 
 export const mockCredentials = {
   github_token: 'my-github-token',
@@ -31,10 +35,12 @@ export const mockGithubBranch = ({
   sha: 'branch-sha',
 } as unknown) as ReposGetBranchResponseData
 
-export const mockGithubPullRequest = ({
+export const mockGithubPullRequestCreateResponse = ({
   id: 1234,
   number: 123,
 } as unknown) as PullsCreateResponseData
+
+export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
 
 export const mockGithubRepository = (repository as unknown) as ReposGetResponseData
 
@@ -47,5 +53,7 @@ export const mockIssuesAddLabelsResponseData = [
 ] as IssuesAddLabelsResponseData
 
 export const mockJiraIssue = issue as Issue
+
+export const mockJiraTransitions = transitions as TransitionObject[]
 
 export const mockJiraPullRequests = pullRequests
