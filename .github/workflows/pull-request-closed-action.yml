@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Shuttlerock/actions/actions/pull-request-closed-action
+      - uses: Shuttlerock/actions/actions/pull-request-closed-action@master
         with:
           jira-email:  ${{ secrets.JIRA_EMAIL }}
           jira-host:   ${{ secrets.JIRA_HOST }}

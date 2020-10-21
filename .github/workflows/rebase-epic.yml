@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Shuttlerock/actions/actions/rebase-epic-action
+      - uses: Shuttlerock/actions/actions/rebase-epic-action@master
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           actions-write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}
