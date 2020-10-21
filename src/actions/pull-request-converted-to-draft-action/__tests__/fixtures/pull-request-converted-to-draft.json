@@ -1,0 +1,10 @@
+{
+  "action": "converted_to_draft",
+  "pull_request": {
+    "number": 108,
+    "title": "[STUDIO-537] When a PR is set to 'Draft', add the `in-progress` label, and move to `In development`"
+  },
+  "repository": {
+    "name": "actions"
+  }
+}
