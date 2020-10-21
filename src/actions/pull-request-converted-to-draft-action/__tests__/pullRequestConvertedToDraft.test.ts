@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
-import { PleaseReviewLabel } from '@sr-services/Constants'
+import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-to-draft-action/pullRequestConvertedToDraft'
+import { InProgressLabel } from '@sr-services/Constants'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
 import {
@@ -20,11 +20,11 @@ jest.mock('@sr-services/Github', () => ({
   getIssueKey: jest.fn(),
 }))
 
-describe('pull-request-ready-for-review-action', () => {
-  describe('pullRequestReadyForReview', () => {
+describe('pull-request-converted-to-draft-action', () => {
+  describe('pullRequestConvertedToDraft', () => {
     const payload = {
       ...mockGithubPullRequestPayload,
-      action: 'ready_for_review',
+      action: 'converted_to_draft',
     }
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
@@ -70,19 +70,19 @@ describe('pull-request-ready-for-review-action', () => {
     })
 
     it('sets the status of the Jira issue', async () => {
-      await pullRequestReadyForReview(payload)
+      await pullRequestConvertedToDraft(payload)
       expect(setIssueStatusSpy).toHaveBeenCalledWith(
         mockJiraIssue.id,
-        Jira.JiraStatusTechReview
+        Jira.JiraStatusInDevelopment
       )
     })
 
-    it(`adds the '${PleaseReviewLabel}' label`, async () => {
-      await pullRequestReadyForReview(payload)
+    it(`adds the '${InProgressLabel}' label`, async () => {
+      await pullRequestConvertedToDraft(payload)
       expect(addLabelsSpy).toHaveBeenCalledWith(
         payload.repository.name,
         payload.pull_request.number,
-        [PleaseReviewLabel]
+        [InProgressLabel]
       )
     })
 
@@ -91,7 +91,7 @@ describe('pull-request-ready-for-review-action', () => {
         (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
           undefined
       )
-      await pullRequestReadyForReview(payload)
+      await pullRequestConvertedToDraft(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
@@ -99,7 +99,7 @@ describe('pull-request-ready-for-review-action', () => {
 
     it('does nothing if the Jira issue cannot be found', async () => {
       getIssueSpy.mockImplementation((_issueKey: string) => undefined)
-      await pullRequestReadyForReview(payload)
+      await pullRequestConvertedToDraft(payload)
       const message = `Couldn't find a Jira issue for ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
@@ -112,15 +112,15 @@ describe('pull-request-ready-for-review-action', () => {
           ...mockJiraIssue.fields,
           status: {
             ...mockJiraIssue.fields.status,
-            name: Jira.JiraStatusTechReview,
+            name: Jira.JiraStatusInDevelopment,
           },
         },
       }
       getIssueSpy.mockImplementation((_issueKey: string) =>
         Promise.resolve(validatedIssue)
       )
-      await pullRequestReadyForReview(payload)
-      const message = `Jira issue ${mockJiraIssue.key} is already in '${Jira.JiraStatusTechReview}' - ignoring`
+      await pullRequestConvertedToDraft(payload)
+      const message = `Jira issue ${mockJiraIssue.key} is already in '${Jira.JiraStatusInDevelopment}' - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     })

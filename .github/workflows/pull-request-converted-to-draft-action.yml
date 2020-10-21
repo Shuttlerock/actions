@@ -1,0 +1,18 @@
+name: 'Pull request converted to draft'
+on:
+  pull_request:
+    types: [converted_to_draft]
+
+jobs:
+  pull_request_converted_to_draft_action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Shuttlerock/actions/actions/pull-request-converted-to-draft-action@master
+        with:
+          jira-email:        ${{ secrets.JIRA_EMAIL }}
+          jira-host:         ${{ secrets.JIRA_HOST }}
+          jira-token:        ${{ secrets.JIRA_TOKEN }}
+          organization-name: ${{ secrets.ORGANIZATION_NAME }}
+          repo-token:        ${{ secrets.GITHUB_TOKEN }}
+          write-token:       ${{ secrets.ACTIONS_WRITE_TOKEN }}
