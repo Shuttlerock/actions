@@ -5,7 +5,7 @@ jest.spyOn(Core, 'debug').mockImplementation((_message: unknown) => undefined)
 jest.spyOn(Core, 'error').mockImplementation((_message: unknown) => undefined)
 jest.spyOn(Core, 'info').mockImplementation((_message: unknown) => undefined)
 
-jest.mock('@sr-services/Constants', () => ({
+jest.mock('@sr-services/Inputs', () => ({
   __esModule: true,
   credentialsApiPrefix: () =>
     'https://users.example.com/api/private/credentials/',

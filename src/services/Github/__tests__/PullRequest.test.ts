@@ -6,7 +6,6 @@ import {
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { organizationName } from '@sr-services/Constants'
 import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
@@ -15,6 +14,7 @@ import {
   createPullRequest,
   getIssueKey,
 } from '@sr-services/Github/PullRequest'
+import { organizationName } from '@sr-services/Inputs'
 import {
   mockGithubPullRequestCreateResponse,
   mockIssuesAddAssigneesResponseData,

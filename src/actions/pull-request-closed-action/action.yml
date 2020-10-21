@@ -1,5 +1,5 @@
-name: 'Pull Request Closed Action'
-description: 'Organizes project stories after a pull request is closed '
+name: 'Pull request closed'
+description: 'Organizes project stories after a pull request is closed'
 author: 'Shuttlerock'
 runs:
   using: 'node12'

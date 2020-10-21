@@ -2,7 +2,7 @@ import { TransitionObject } from 'jira-client'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { jiraEmail, jiraHost, jiraToken } from '@sr-services/Constants'
+import { jiraEmail, jiraHost, jiraToken } from '@sr-services/Inputs'
 import { client } from '@sr-services/Jira/Client'
 
 interface User {
@@ -49,6 +49,7 @@ interface GithubDetails {
 
 // Jira statuses.
 export const JiraStatusInDevelopment = 'In development'
+export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
 
 /**

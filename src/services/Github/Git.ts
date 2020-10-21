@@ -5,8 +5,8 @@ import {
   GitCreateTreeResponseData,
 } from '@octokit/types'
 
-import { organizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/Github/Client'
+import { organizationName } from '@sr-services/Inputs'
 
 export type Branch = string
 export type Sha = string

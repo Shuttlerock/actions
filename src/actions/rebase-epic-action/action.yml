@@ -1,4 +1,4 @@
-name: 'Rebase Epic Action'
+name: 'Rebase epic'
 description: 'Rebases [Epic] pull requests when a commit is pushed'
 author: 'Shuttlerock'
 runs:

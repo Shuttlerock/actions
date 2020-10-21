@@ -1,11 +1,8 @@
 import { createHmac } from 'crypto'
 import fetch from 'node-fetch'
 
-import {
-  credentialsApiPrefix,
-  credentialsApiSecret,
-} from '@sr-services/Constants'
 import { Repository } from '@sr-services/Github'
+import { credentialsApiPrefix, credentialsApiSecret } from '@sr-services/Inputs'
 
 export interface Credentials {
   github_token: string

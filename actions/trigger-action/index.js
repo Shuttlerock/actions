@@ -1340,8 +1340,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRepository = exports.getNextPullRequestNumber = void 0;
-const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(818);
+const Inputs_1 = __webpack_require__(968);
 /**
  * Decides what number the next pull request will be.
  *
@@ -1351,7 +1351,7 @@ const Client_1 = __webpack_require__(818);
 exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.readClient.pulls.list({
         direction: 'desc',
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         page: 1,
         per_page: 1,
         repo,
@@ -1372,7 +1372,7 @@ exports.getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, f
  */
 exports.getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.readClient.repos.get({
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
     });
     return response.data;
@@ -2990,8 +2990,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getIssueKey = exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
-const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(818);
+const Inputs_1 = __webpack_require__(968);
 /**
  * Adds labels to the given issue or PR.
  *
@@ -3005,7 +3005,7 @@ exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, 
     const response = yield Client_1.client.issues.addLabels({
         issue_number: number,
         labels,
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
     });
     return response.data;
@@ -3023,7 +3023,7 @@ exports.assignOwners = (repo, number, usernames) => __awaiter(void 0, void 0, vo
     const response = yield Client_1.client.issues.addAssignees({
         assignees: usernames,
         issue_number: number,
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
     });
     return response.data;
@@ -3046,7 +3046,7 @@ exports.createPullRequest = (repo, base, head, title, body, token) => __awaiter(
         body,
         draft: true,
         head,
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
         title,
     });
@@ -3061,7 +3061,7 @@ exports.getIssueKey = (pr) => {
     // Try to get the key from a link in the body.
     const regex = new RegExp(
     // eslint-disable-next-line no-useless-escape
-    `${Constants_1.jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`, 'm');
+    `${Inputs_1.jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`, 'm');
     matches = regex.exec(pr.body);
     if ((matches === null || matches === void 0 ? void 0 : matches.length) === 2) {
         return matches[1];
@@ -10782,35 +10782,15 @@ module.exports = function generate_enum(it, $keyword, $ruleType) {
 /* 166 */,
 /* 167 */,
 /* 168 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InProgressLabel = exports.slackToken = exports.slackErrorChannelId = exports.organizationName = exports.jiraToken = exports.jiraHost = exports.jiraEmail = exports.githubWriteToken = exports.githubReadToken = exports.credentialsApiSecret = exports.credentialsApiPrefix = void 0;
-const core_1 = __webpack_require__(186);
-// The host to use when connecting to the Jira API.
-exports.credentialsApiPrefix = () => core_1.getInput('credentials-api-prefix', { required: true });
-// The host to use when connecting to the Jira API.
-exports.credentialsApiSecret = () => core_1.getInput('credentials-api-secret', { required: true });
-// Token with read access to Github - provided by Github.
-exports.githubReadToken = () => core_1.getInput('repo-token', { required: true });
-// Token with write access to Github - set in organization secrets.
-exports.githubWriteToken = () => core_1.getInput('write-token', { required: true });
-// The email address to use when connecting to the Jira API.
-exports.jiraEmail = () => core_1.getInput('jira-email', { required: true });
-// The host to use when connecting to the Jira API.
-exports.jiraHost = () => core_1.getInput('jira-host', { required: true });
-// The API token to use when connecting to the Jira API.
-exports.jiraToken = () => core_1.getInput('jira-token', { required: true });
-// The Github organization name.
-exports.organizationName = () => core_1.getInput('organization-name', { required: true });
-// ID of the Slack channel to post errors to, if we don't know where else to send them.
-exports.slackErrorChannelId = () => core_1.getInput('slack-error-channel-id', { required: true });
-// Token with write access to Slack.
-exports.slackToken = () => core_1.getInput('slack-token', { required: true });
+exports.PleaseReviewLabel = exports.InProgressLabel = void 0;
 // Labels.
 exports.InProgressLabel = 'in-progress';
+exports.PleaseReviewLabel = 'please-review';
 
 
 /***/ }),
@@ -13743,7 +13723,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendUserMessage = exports.sendErrorMessage = void 0;
-const Constants_1 = __webpack_require__(168);
+const Inputs_1 = __webpack_require__(968);
 const Client_1 = __webpack_require__(589);
 /**
  * Sends an error message to the default slack group.
@@ -13754,7 +13734,7 @@ const Client_1 = __webpack_require__(589);
  */
 exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
     yield Client_1.client.chat.postMessage({
-        channel: Constants_1.slackErrorChannelId(),
+        channel: Inputs_1.slackErrorChannelId(),
         text: message,
     });
 });
@@ -16115,13 +16095,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.getIssuePullRequestNumbers = exports.getIssue = exports.JiraStatusValidated = exports.JiraStatusInDevelopment = void 0;
+exports.setIssueStatus = exports.getIssuePullRequestNumbers = exports.getIssue = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = void 0;
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
-const Constants_1 = __webpack_require__(168);
+const Inputs_1 = __webpack_require__(968);
 const Client_1 = __webpack_require__(861);
 // Jira statuses.
 exports.JiraStatusInDevelopment = 'In development';
+exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
 /**
  * Fetches the issue with the given key from Jira.
@@ -16158,7 +16139,7 @@ exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
  * @returns {number[]} The PR numbers.
  */
 exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
-    const host = `https://${Constants_1.jiraEmail()}:${Constants_1.jiraToken()}@${Constants_1.jiraHost()}/`;
+    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
     const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
     const response = yield node_fetch_1.default(url);
     const data = (yield response.json());
@@ -28319,8 +28300,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
-const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(818);
+const Inputs_1 = __webpack_require__(968);
 exports.TreeModes = {
     ModeFile: '100644',
     ModeExe: '100755',
@@ -28341,7 +28322,7 @@ exports.TreeTypes = {
  */
 exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createBlob({
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
         content,
     });
@@ -28359,7 +28340,7 @@ exports.createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, fun
  */
 exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createCommit({
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
         message,
         tree,
@@ -28378,7 +28359,7 @@ exports.createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, voi
  */
 exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createRef({
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
         ref: `refs/heads/${branch}`,
         sha,
@@ -28396,7 +28377,7 @@ exports.createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 
  */
 exports.createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield Client_1.client.git.createTree({
-        owner: Constants_1.organizationName(),
+        owner: Inputs_1.organizationName(),
         repo,
         tree,
         base_tree: baseTree,
@@ -35064,7 +35045,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCredentialsByEmail = void 0;
 const crypto_1 = __webpack_require__(417);
 const node_fetch_1 = __importDefault(__webpack_require__(467));
-const Constants_1 = __webpack_require__(168);
+const Inputs_1 = __webpack_require__(968);
 /**
  * Fetches the user credentials from the remote credential service for the given email address.
  *
@@ -35074,10 +35055,10 @@ const Constants_1 = __webpack_require__(168);
  */
 exports.getCredentialsByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const id = Buffer.from(email).toString('base64');
-    const signature = crypto_1.createHmac('sha256', Constants_1.credentialsApiSecret())
+    const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
         .update(email)
         .digest('hex');
-    const url = `${Constants_1.credentialsApiPrefix()}${id}`;
+    const url = `${Inputs_1.credentialsApiPrefix()}${id}`;
     const response = yield node_fetch_1.default(url, {
         headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
     });
@@ -37343,10 +37324,10 @@ module.exports = CancelToken;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.client = void 0;
 const web_api_1 = __webpack_require__(431);
-const Constants_1 = __webpack_require__(168);
+const Inputs_1 = __webpack_require__(968);
 // We had to roll back the NCC version so that this would work.
 // See https://github.com/vercel/ncc/issues/590#issuecomment-694539022
-exports.client = new web_api_1.WebClient(Constants_1.slackToken());
+exports.client = new web_api_1.WebClient(Inputs_1.slackToken());
 
 
 /***/ }),
@@ -47431,6 +47412,7 @@ const isNil_1 = __importDefault(__webpack_require__(977));
 const Constants_1 = __webpack_require__(168);
 const Credentials_1 = __webpack_require__(543);
 const Github_1 = __webpack_require__(390);
+const Inputs_1 = __webpack_require__(968);
 const Jira_1 = __webpack_require__(404);
 const Slack_1 = __webpack_require__(745);
 const String_1 = __webpack_require__(299);
@@ -47461,7 +47443,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         core_1.error(message);
         return;
     }
-    const jiraUrl = `https://${Constants_1.jiraHost()}/browse/${issue.key}`;
+    const jiraUrl = `https://${Inputs_1.jiraHost()}/browse/${issue.key}`;
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Finding out who the pull request should belong to...');
     if (isNil_1.default(issue.fields.assignee)) {
@@ -47530,7 +47512,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         credentials.github_username,
     ]);
     core_1.info(`Notifying Slack user ${credentials.slack_id}...`);
-    const url = `https://github.com/${Constants_1.organizationName()}/${repo.name}/pull/${pullRequestNumber}`;
+    const url = `https://github.com/${Inputs_1.organizationName()}/${repo.name}/pull/${pullRequestNumber}`;
     const message = `Here's your pull request: ${url}
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:
@@ -49204,9 +49186,9 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientForToken = exports.readClient = exports.client = void 0;
 const rest_1 = __webpack_require__(375);
-const Constants_1 = __webpack_require__(168);
-exports.client = new rest_1.Octokit({ auth: Constants_1.githubWriteToken() });
-exports.readClient = new rest_1.Octokit({ auth: Constants_1.githubReadToken() });
+const Inputs_1 = __webpack_require__(968);
+exports.client = new rest_1.Octokit({ auth: Inputs_1.githubWriteToken() });
+exports.readClient = new rest_1.Octokit({ auth: Inputs_1.githubReadToken() });
 exports.clientForToken = (token) => {
     return new rest_1.Octokit({ auth: token });
 };
@@ -51211,14 +51193,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.client = void 0;
 const jira_client_1 = __importDefault(__webpack_require__(411));
-const Constants_1 = __webpack_require__(168);
+const Inputs_1 = __webpack_require__(968);
 exports.client = new jira_client_1.default({
     apiVersion: '2',
-    host: Constants_1.jiraHost(),
-    password: Constants_1.jiraToken(),
+    host: Inputs_1.jiraHost(),
+    password: Inputs_1.jiraToken(),
     protocol: 'https',
     strictSSL: true,
-    username: Constants_1.jiraEmail(),
+    username: Inputs_1.jiraEmail(),
 });
 
 
@@ -51328,10 +51310,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createBranch = exports.getBranch = void 0;
 const isUndefined_1 = __importDefault(__webpack_require__(825));
-const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(818);
 const Git_1 = __webpack_require__(433);
 const Repository_1 = __webpack_require__(15);
+const Inputs_1 = __webpack_require__(968);
 /**
  * Fetches a branch from the Github API.
  *
@@ -51343,7 +51325,7 @@ const Repository_1 = __webpack_require__(15);
 exports.getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const response = yield Client_1.readClient.repos.getBranch({
-            owner: Constants_1.organizationName(),
+            owner: Inputs_1.organizationName(),
             repo,
             branch,
         });
@@ -56408,7 +56390,37 @@ module.exports = function generate_contains(it, $keyword, $ruleType) {
 /* 965 */,
 /* 966 */,
 /* 967 */,
-/* 968 */,
+/* 968 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.slackToken = exports.slackErrorChannelId = exports.organizationName = exports.jiraToken = exports.jiraHost = exports.jiraEmail = exports.githubWriteToken = exports.githubReadToken = exports.credentialsApiSecret = exports.credentialsApiPrefix = void 0;
+const core_1 = __webpack_require__(186);
+// The host to use when connecting to the Jira API.
+exports.credentialsApiPrefix = () => core_1.getInput('credentials-api-prefix', { required: true });
+// The host to use when connecting to the Jira API.
+exports.credentialsApiSecret = () => core_1.getInput('credentials-api-secret', { required: true });
+// Token with read access to Github - provided by Github.
+exports.githubReadToken = () => core_1.getInput('repo-token', { required: true });
+// Token with write access to Github - set in organization secrets.
+exports.githubWriteToken = () => core_1.getInput('write-token', { required: true });
+// The email address to use when connecting to the Jira API.
+exports.jiraEmail = () => core_1.getInput('jira-email', { required: true });
+// The host to use when connecting to the Jira API.
+exports.jiraHost = () => core_1.getInput('jira-host', { required: true });
+// The API token to use when connecting to the Jira API.
+exports.jiraToken = () => core_1.getInput('jira-token', { required: true });
+// The Github organization name.
+exports.organizationName = () => core_1.getInput('organization-name', { required: true });
+// ID of the Slack channel to post errors to, if we don't know where else to send them.
+exports.slackErrorChannelId = () => core_1.getInput('slack-error-channel-id', { required: true });
+// Token with write access to Slack.
+exports.slackToken = () => core_1.getInput('slack-token', { required: true });
+
+
+/***/ }),
 /* 969 */
 /***/ (function(module) {
 

@@ -1,4 +1,4 @@
-import { slackErrorChannelId } from '@sr-services/Constants'
+import { slackErrorChannelId } from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 
 /**
