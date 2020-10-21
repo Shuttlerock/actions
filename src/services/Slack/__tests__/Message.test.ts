@@ -1,6 +1,6 @@
 import { ChatPostMessageArguments } from '@slack/web-api'
 
-import { slackErrorChannelId } from '@sr-services/Constants'
+import { slackErrorChannelId } from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack/Message'
 

@@ -6,7 +6,6 @@ import {
   OctokitResponse,
 } from '@octokit/types'
 
-import { organizationName } from '@sr-services/Constants'
 import { client } from '@sr-services/Github/Client'
 import {
   Branch,
@@ -20,6 +19,7 @@ import {
   TreeModes,
   TreeTypes,
 } from '@sr-services/Github/Git'
+import { organizationName } from '@sr-services/Inputs'
 
 const repo = 'my-repo'
 

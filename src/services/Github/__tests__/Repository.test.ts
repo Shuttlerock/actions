@@ -4,13 +4,13 @@ import {
   ReposGetResponseData,
 } from '@octokit/types'
 
-import { organizationName } from '@sr-services/Constants'
 import { readClient } from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
 import {
   getNextPullRequestNumber,
   getRepository,
 } from '@sr-services/Github/Repository'
+import { organizationName } from '@sr-services/Inputs'
 import { mockGithubRepository } from '@sr-tests/Mocks'
 
 const repo = mockGithubRepository.name

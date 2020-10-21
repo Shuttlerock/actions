@@ -5,9 +5,9 @@ import {
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { jiraHost, organizationName } from '@sr-services/Constants'
 import { client, clientForToken } from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
+import { jiraHost, organizationName } from '@sr-services/Inputs'
 
 /**
  * Adds labels to the given issue or PR.

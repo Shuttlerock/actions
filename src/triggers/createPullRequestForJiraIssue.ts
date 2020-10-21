@@ -1,11 +1,7 @@
 import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
 
-import {
-  InProgressLabel,
-  jiraHost,
-  organizationName,
-} from '@sr-services/Constants'
+import { InProgressLabel } from '@sr-services/Constants'
 import { getCredentialsByEmail } from '@sr-services/Credentials'
 import {
   addLabels,
@@ -15,6 +11,7 @@ import {
   getBranch,
   getRepository,
 } from '@sr-services/Github'
+import { jiraHost, organizationName } from '@sr-services/Inputs'
 import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira'
 import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'

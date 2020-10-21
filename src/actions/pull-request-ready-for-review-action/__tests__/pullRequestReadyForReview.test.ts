@@ -1,26 +1,45 @@
 import * as core from '@actions/core'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
+import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
+import { PleaseReviewLabel } from '@sr-services/Constants'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
-import { mockGithubPullRequestPayload, mockJiraIssue } from '@sr-tests/Mocks'
+import {
+  mockGithubPullRequestPayload,
+  mockIssuesAddLabelsResponseData,
+  mockJiraIssue,
+} from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
   getIssue: jest.fn(),
   setIssueStatus: jest.fn(),
 }))
-jest.mock('@sr-services/Github', () => ({ getIssueKey: jest.fn() }))
+jest.mock('@sr-services/Github', () => ({
+  addLabels: jest.fn(),
+  getIssueKey: jest.fn(),
+}))
 
-describe('pull-request-closed-action', () => {
-  describe('pullRequestClosed', () => {
-    const prName = `${mockGithubPullRequestPayload.repository.name}#${mockGithubPullRequestPayload.pull_request.number}`
+describe('pull-request-ready-for-review-action', () => {
+  describe('pullRequestReadyForReview', () => {
+    const payload = {
+      ...mockGithubPullRequestPayload,
+      action: 'ready_for_review',
+    }
+    const prName = `${payload.repository.name}#${payload.pull_request.number}`
+    let addLabelsSpy: jest.SpyInstance
     let getIssueSpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let setIssueStatusSpy: jest.SpyInstance
 
     beforeEach(() => {
+      addLabelsSpy = jest
+        .spyOn(Github, 'addLabels')
+        .mockImplementation(
+          (_repo: Github.Repository, _number: number, _labels: string[]) =>
+            Promise.resolve(mockIssuesAddLabelsResponseData)
+        )
       getIssueSpy = jest
         .spyOn(Jira, 'getIssue')
         .mockImplementation((_issueKey: string) =>
@@ -43,6 +62,7 @@ describe('pull-request-closed-action', () => {
     })
 
     afterEach(() => {
+      addLabelsSpy.mockRestore()
       getIssueSpy.mockRestore()
       getIssueKeySpy.mockRestore()
       infoSpy.mockRestore()
@@ -50,10 +70,19 @@ describe('pull-request-closed-action', () => {
     })
 
     it('sets the status of the Jira issue', async () => {
-      await pullRequestClosed(mockGithubPullRequestPayload)
+      await pullRequestReadyForReview(payload)
       expect(setIssueStatusSpy).toHaveBeenCalledWith(
         mockJiraIssue.id,
-        Jira.JiraStatusValidated
+        Jira.JiraStatusTechReview
+      )
+    })
+
+    it("adds the 'please-review' label", async () => {
+      await pullRequestReadyForReview(payload)
+      expect(addLabelsSpy).toHaveBeenCalledWith(
+        payload.repository.name,
+        payload.pull_request.number,
+        [PleaseReviewLabel]
       )
     })
 
@@ -62,7 +91,7 @@ describe('pull-request-closed-action', () => {
         (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
           undefined
       )
-      await pullRequestClosed(mockGithubPullRequestPayload)
+      await pullRequestReadyForReview(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
@@ -70,7 +99,7 @@ describe('pull-request-closed-action', () => {
 
     it('does nothing if the Jira issue cannot be found', async () => {
       getIssueSpy.mockImplementation((_issueKey: string) => undefined)
-      await pullRequestClosed(mockGithubPullRequestPayload)
+      await pullRequestReadyForReview(payload)
       const message = `Couldn't find a Jira issue for ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
@@ -83,15 +112,15 @@ describe('pull-request-closed-action', () => {
           ...mockJiraIssue.fields,
           status: {
             ...mockJiraIssue.fields.status,
-            name: Jira.JiraStatusValidated,
+            name: Jira.JiraStatusTechReview,
           },
         },
       }
       getIssueSpy.mockImplementation((_issueKey: string) =>
         Promise.resolve(validatedIssue)
       )
-      await pullRequestClosed(mockGithubPullRequestPayload)
-      const message = `Jira issue ${mockJiraIssue.key} is already in '${Jira.JiraStatusValidated}' - ignoring`
+      await pullRequestReadyForReview(payload)
+      const message = `Jira issue ${mockJiraIssue.key} is already in '${Jira.JiraStatusTechReview}' - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
       expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     })

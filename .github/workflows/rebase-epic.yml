@@ -1,4 +1,4 @@
-name: 'rebase-epic'
+name: 'Rebase epic'
 on:
   pull_request:
     types: [synchronize]

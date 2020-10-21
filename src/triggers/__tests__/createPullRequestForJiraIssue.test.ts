@@ -1,6 +1,6 @@
-import { jiraHost } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
+import { jiraHost } from '@sr-services/Inputs'
 import * as Jira from '@sr-services/Jira'
 import * as Slack from '@sr-services/Slack'
 import {

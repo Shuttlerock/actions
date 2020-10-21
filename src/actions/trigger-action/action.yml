@@ -1,4 +1,4 @@
-name: 'Trigger Action'
+name: 'Trigger action'
 description: 'Trigger an action via a HTTP request'
 author: 'Shuttlerock'
 runs:

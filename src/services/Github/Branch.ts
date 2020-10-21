@@ -4,7 +4,6 @@ import {
 } from '@octokit/types'
 import isUndefined from 'lodash/isUndefined'
 
-import { organizationName } from '@sr-services/Constants'
 import { readClient } from '@sr-services/Github/Client'
 import {
   Branch,
@@ -17,6 +16,7 @@ import {
   TreeTypes,
 } from '@sr-services/Github/Git'
 import { getNextPullRequestNumber } from '@sr-services/Github/Repository'
+import { organizationName } from '@sr-services/Inputs'
 
 /**
  * Fetches a branch from the Github API.

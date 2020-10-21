@@ -2,30 +2,26 @@ import { info } from '@actions/core'
 import { EventPayloads } from '@octokit/webhooks'
 import isNil from 'lodash/isNil'
 
-import { getIssueKey } from '@sr-services/Github'
+import { PleaseReviewLabel } from '@sr-services/Constants'
+import { addLabels, getIssueKey } from '@sr-services/Github'
 import {
   getIssue,
-  JiraStatusValidated,
+  JiraStatusTechReview,
   setIssueStatus,
 } from '@sr-services/Jira'
 
 /**
- * Runs whenever a pull request is closed (not necessarily merged).
+ * Runs whenever a pull request is marked as 'ready for review'.
  *
- * @param {} payload The JSON payload from Github sent when a pull request is closed.
+ * @param {} payload The JSON payload from Github sent when a pull request is updated.
  */
-export const pullRequestClosed = async (
+export const pullRequestReadyForReview = async (
   payload: EventPayloads.WebhookPayloadPullRequest
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
 
   // Used for log messages.
   const prName = `${repository.name}#${pullRequest.number}`
-
-  if (!pullRequest.merged) {
-    info(`${prName} is not merged - ignoring`)
-    return
-  }
 
   info(`Getting the Jira key from the pull request ${prName}...`)
   const issueKey = getIssueKey(pullRequest)
@@ -41,13 +37,16 @@ export const pullRequestClosed = async (
     return
   }
 
-  if (issue.fields.status.name === JiraStatusValidated) {
+  if (issue.fields.status.name === JiraStatusTechReview) {
     info(
-      `Jira issue ${issueKey} is already in '${JiraStatusValidated}' - ignoring`
+      `Jira issue ${issueKey} is already in '${JiraStatusTechReview}' - ignoring`
     )
     return
   }
 
-  info(`Moving Jira issue ${issueKey} to '${JiraStatusValidated}'...`)
-  await setIssueStatus(issue.id, JiraStatusValidated)
+  info(`Moving Jira issue ${issueKey} to '${JiraStatusTechReview}'...`)
+  await setIssueStatus(issue.id, JiraStatusTechReview)
+
+  info(`Adding the '${PleaseReviewLabel}' label...`)
+  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
 }

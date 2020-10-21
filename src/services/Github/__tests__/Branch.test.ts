@@ -7,11 +7,11 @@ import {
   ReposGetBranchResponseData,
 } from '@octokit/types'
 
-import { organizationName } from '@sr-services/Constants'
 import * as Branch from '@sr-services/Github/Branch'
 import { readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Repository from '@sr-services/Github/Repository'
+import { organizationName } from '@sr-services/Inputs'
 import { mockGithubBranch } from '@sr-tests/Mocks'
 
 interface GetBranchParams {

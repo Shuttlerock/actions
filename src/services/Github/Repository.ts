@@ -1,8 +1,8 @@
 import { ReposGetResponseData } from '@octokit/types'
 
-import { organizationName } from '@sr-services/Constants'
 import { readClient } from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
+import { organizationName } from '@sr-services/Inputs'
 
 /**
  * Decides what number the next pull request will be.

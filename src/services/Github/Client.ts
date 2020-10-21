@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 
-import { githubReadToken, githubWriteToken } from '@sr-services/Constants'
+import { githubReadToken, githubWriteToken } from '@sr-services/Inputs'
 
 export const client = new Octokit({ auth: githubWriteToken() })
 

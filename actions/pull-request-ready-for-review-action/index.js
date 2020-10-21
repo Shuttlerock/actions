@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(809);
+/******/ 		return __webpack_require__(827);
 /******/ 	};
 /******/ 	// initialize runtime
 /******/ 	runtime(__webpack_require__);
@@ -10718,7 +10718,19 @@ module.exports = function generate_enum(it, $keyword, $ruleType) {
 /* 165 */,
 /* 166 */,
 /* 167 */,
-/* 168 */,
+/* 168 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PleaseReviewLabel = exports.InProgressLabel = void 0;
+// Labels.
+exports.InProgressLabel = 'in-progress';
+exports.PleaseReviewLabel = 'please-review';
+
+
+/***/ }),
 /* 169 */,
 /* 170 */,
 /* 171 */
@@ -13516,7 +13528,63 @@ Promise.join = function () {
 /* 251 */,
 /* 252 */,
 /* 253 */,
-/* 254 */,
+/* 254 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.pullRequestReadyForReview = void 0;
+const core_1 = __webpack_require__(186);
+const isNil_1 = __importDefault(__webpack_require__(977));
+const Constants_1 = __webpack_require__(168);
+const Github_1 = __webpack_require__(390);
+const Jira_1 = __webpack_require__(404);
+/**
+ * Runs whenever a pull request is marked as 'ready for review'.
+ *
+ * @param {} payload The JSON payload from Github sent when a pull request is updated.
+ */
+exports.pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { pull_request: pullRequest, repository } = payload;
+    // Used for log messages.
+    const prName = `${repository.name}#${pullRequest.number}`;
+    core_1.info(`Getting the Jira key from the pull request ${prName}...`);
+    const issueKey = Github_1.getIssueKey(pullRequest);
+    if (isNil_1.default(issueKey)) {
+        core_1.info(`Couldn't extract a Jira issue key from ${prName} - ignoring`);
+        return;
+    }
+    core_1.info(`Fetching the Jira issue ${issueKey}...`);
+    const issue = yield Jira_1.getIssue(issueKey);
+    if (isNil_1.default(issue)) {
+        core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
+        return;
+    }
+    if (issue.fields.status.name === Jira_1.JiraStatusTechReview) {
+        core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusTechReview}' - ignoring`);
+        return;
+    }
+    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusTechReview}'...`);
+    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusTechReview);
+    core_1.info(`Adding the '${Constants_1.PleaseReviewLabel}' label...`);
+    yield Github_1.addLabels(repository.name, pullRequest.number, [Constants_1.PleaseReviewLabel]);
+});
+
+
+/***/ }),
 /* 255 */,
 /* 256 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -35935,64 +36003,7 @@ module.exports = function generate_const(it, $keyword, $ruleType) {
 /* 662 */,
 /* 663 */,
 /* 664 */,
-/* 665 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.pullRequestClosed = void 0;
-const core_1 = __webpack_require__(186);
-const isNil_1 = __importDefault(__webpack_require__(977));
-const Github_1 = __webpack_require__(390);
-const Jira_1 = __webpack_require__(404);
-/**
- * Runs whenever a pull request is closed (not necessarily merged).
- *
- * @param {} payload The JSON payload from Github sent when a pull request is closed.
- */
-exports.pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pull_request: pullRequest, repository } = payload;
-    // Used for log messages.
-    const prName = `${repository.name}#${pullRequest.number}`;
-    if (!pullRequest.merged) {
-        core_1.info(`${prName} is not merged - ignoring`);
-        return;
-    }
-    core_1.info(`Getting the Jira key from the pull request ${prName}...`);
-    const issueKey = Github_1.getIssueKey(pullRequest);
-    if (isNil_1.default(issueKey)) {
-        core_1.info(`Couldn't extract a Jira issue key from ${prName} - ignoring`);
-        return;
-    }
-    core_1.info(`Fetching the Jira issue ${issueKey}...`);
-    const issue = yield Jira_1.getIssue(issueKey);
-    if (isNil_1.default(issue)) {
-        core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
-        return;
-    }
-    if (issue.fields.status.name === Jira_1.JiraStatusValidated) {
-        core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusValidated}' - ignoring`);
-        return;
-    }
-    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusValidated}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusValidated);
-});
-
-
-/***/ }),
+/* 665 */,
 /* 666 */,
 /* 667 */,
 /* 668 */
@@ -42523,44 +42534,7 @@ module.exports = isFunction;
 /* 806 */,
 /* 807 */,
 /* 808 */,
-/* 809 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
-const core_1 = __webpack_require__(186);
-const github_1 = __webpack_require__(438);
-const pullRequestClosed_1 = __webpack_require__(665);
-/**
- * Runs whenever a pull request is closed (not necessarily merged).
- *
- * To trigger this event manually:
- *
- * $ act --job pull_request_closed_action --eventpath src/actions/pull-request-closed-action/__tests__/fixtures/pull-request-closed.json
- */
-exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload } = (yield github_1.context);
-    yield pullRequestClosed_1.pullRequestClosed(payload);
-});
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-exports.run().catch(err => {
-    core_1.error(err);
-    core_1.setFailed(err.message);
-});
-
-
-/***/ }),
+/* 809 */,
 /* 810 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -43153,7 +43127,44 @@ module.exports = isUndefined;
 
 /***/ }),
 /* 826 */,
-/* 827 */,
+/* 827 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
+const core_1 = __webpack_require__(186);
+const github_1 = __webpack_require__(438);
+const pullRequestReadyForReview_1 = __webpack_require__(254);
+/**
+ * Runs whenever a pull request is marked as 'ready for review'.
+ *
+ * To trigger this event manually:
+ *
+ * $ act --job pull_request_ready_for_review_action --eventpath src/actions/pull-request-ready-for-review-action/__tests__/fixtures/pull-request-ready-for-review.json
+ */
+exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { payload } = (yield github_1.context);
+    yield pullRequestReadyForReview_1.pullRequestReadyForReview(payload);
+});
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+exports.run().catch(err => {
+    core_1.error(err);
+    core_1.setFailed(err.message);
+});
+
+
+/***/ }),
 /* 828 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 

@@ -1,0 +1,10 @@
+{
+  "action": "ready_for_review",
+  "pull_request": {
+    "number": 105,
+    "title": "[STUDIO-538] When a PR is set to `Ready for Review`, add the `please-review` label, and move to `Tech Review`"
+  },
+  "repository": {
+    "name": "actions"
+  }
+}
