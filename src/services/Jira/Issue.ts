@@ -7,6 +7,7 @@ import { client } from '@sr-services/Jira/Client'
 
 interface User {
   accountId: string
+  displayName?: string
   emailAddress: string
 }
 

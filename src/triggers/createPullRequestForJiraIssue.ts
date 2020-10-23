@@ -2,7 +2,7 @@ import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
 
 import { InProgressLabel } from '@sr-services/Constants'
-import { getCredentialsByEmail } from '@sr-services/Credentials'
+import { fetchCredentials } from '@sr-services/Credentials'
 import {
   addLabels,
   assignOwners,
@@ -40,7 +40,7 @@ export const createPullRequestForJiraIssue = async (
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
   if (isNil(issue)) {
-    const credentials = await getCredentialsByEmail(email)
+    const credentials = await fetchCredentials(email)
     const message = `Issue ${issueKey}> could not be found, so no pull request was created`
     await sendUserMessage(credentials.slack_id, message)
     error(message)
@@ -52,14 +52,16 @@ export const createPullRequestForJiraIssue = async (
 
   info('Finding out who the pull request should belong to...')
   if (isNil(issue.fields.assignee)) {
-    const credentials = await getCredentialsByEmail(email)
+    const credentials = await fetchCredentials(email)
     const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
     await sendUserMessage(credentials.slack_id, message)
     error(message)
     return
   }
-  const assigneeEmail = issue.fields.assignee.emailAddress
-  const credentials = await getCredentialsByEmail(assigneeEmail)
+  const credentialLookup =
+    issue.fields.assignee.emailAddress || issue.fields.assignee.displayName
+  const credentials = await fetchCredentials(credentialLookup)
+  const assigneeEmail = credentials.email
   const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1') // Grab the first name from the email address.
   const newBranchName = `${parameterize(assigneeName)}/${parameterize(
     issue.key
