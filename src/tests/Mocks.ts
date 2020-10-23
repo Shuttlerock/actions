@@ -17,6 +17,7 @@ import pullRequests from '@sr-tests/fixtures/jira-pull-requests.json'
 import transitions from '@sr-tests/fixtures/jira-transitions.json'
 
 export const mockCredentials = {
+  email: 'user@example.com',
   github_token: 'my-github-token',
   github_username: 'my-github-username',
   leads: [],

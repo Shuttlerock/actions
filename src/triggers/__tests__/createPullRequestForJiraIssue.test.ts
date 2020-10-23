@@ -43,8 +43,8 @@ describe('createPullRequestForJiraIssue', () => {
 
   beforeEach(() => {
     credentialsSpy = jest
-      .spyOn(Credentials, 'getCredentialsByEmail')
-      .mockImplementation((_email: string) => Promise.resolve(mockCredentials))
+      .spyOn(Credentials, 'fetchCredentials')
+      .mockImplementation((_email?: string) => Promise.resolve(mockCredentials))
     githubAddLabelsSpy = jest
       .spyOn(Github, 'addLabels')
       .mockImplementation(

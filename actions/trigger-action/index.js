@@ -7278,7 +7278,27 @@ module.exports = function generate_oneOf(it, $keyword, $ruleType) {
 
 /***/ }),
 /* 107 */,
-/* 108 */,
+/* 108 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.debug = void 0;
+const core_1 = __webpack_require__(186);
+/**
+ * Logs the given message. This is a wrapper around the Github debug() method
+ * allowing it to log objects as well as strings.
+ *
+ * @param {unknown} message The string or object to log.
+ */
+exports.debug = (message) => {
+    const payload = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
+    core_1.debug(payload);
+};
+
+
+/***/ }),
 /* 109 */
 /***/ (function(module) {
 
@@ -17279,7 +17299,34 @@ module.exports = Reader;
 
 
 /***/ }),
-/* 291 */,
+/* 291 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// Port of lower_bound from https://en.cppreference.com/w/cpp/algorithm/lower_bound
+// Used to compute insertion index to keep queue sorted after insertion
+function lowerBound(array, value, comparator) {
+    let first = 0;
+    let count = array.length;
+    while (count > 0) {
+        const step = (count / 2) | 0;
+        let it = first + step;
+        if (comparator(array[it], value) <= 0) {
+            first = ++it;
+            count -= step + 1;
+        }
+        else {
+            count = step;
+        }
+    }
+    return first;
+}
+exports.default = lowerBound;
+
+
+/***/ }),
 /* 292 */,
 /* 293 */
 /***/ (function(module) {
@@ -19876,7 +19923,28 @@ module.exports = {
 
 /***/ }),
 /* 329 */,
-/* 330 */,
+/* 330 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = (promise, onFinally) => {
+	onFinally = onFinally || (() => {});
+
+	return promise.then(
+		val => new Promise(resolve => {
+			resolve(onFinally());
+		}).then(() => val),
+		err => new Promise(resolve => {
+			resolve(onFinally());
+		}).then(() => {
+			throw err;
+		})
+	);
+};
+
+
+/***/ }),
 /* 331 */,
 /* 332 */,
 /* 333 */,
@@ -24318,7 +24386,70 @@ Certificate._oldVersionDetect = function (obj) {
 
 
 /***/ }),
-/* 407 */,
+/* 407 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const pFinally = __webpack_require__(330);
+
+class TimeoutError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = 'TimeoutError';
+	}
+}
+
+const pTimeout = (promise, milliseconds, fallback) => new Promise((resolve, reject) => {
+	if (typeof milliseconds !== 'number' || milliseconds < 0) {
+		throw new TypeError('Expected `milliseconds` to be a positive number');
+	}
+
+	if (milliseconds === Infinity) {
+		resolve(promise);
+		return;
+	}
+
+	const timer = setTimeout(() => {
+		if (typeof fallback === 'function') {
+			try {
+				resolve(fallback());
+			} catch (error) {
+				reject(error);
+			}
+
+			return;
+		}
+
+		const message = typeof fallback === 'string' ? fallback : `Promise timed out after ${milliseconds} milliseconds`;
+		const timeoutError = fallback instanceof Error ? fallback : new TimeoutError(message);
+
+		if (typeof promise.cancel === 'function') {
+			promise.cancel();
+		}
+
+		reject(timeoutError);
+	}, milliseconds);
+
+	// TODO: Use native `finally` keyword when targeting Node.js 10
+	pFinally(
+		// eslint-disable-next-line promise/prefer-await-to-then
+		promise.then(resolve, reject),
+		() => {
+			clearTimeout(timer);
+		}
+	);
+});
+
+module.exports = pTimeout;
+// TODO: Remove this for the next major release
+module.exports.default = pTimeout;
+
+module.exports.TimeoutError = TimeoutError;
+
+
+/***/ }),
 /* 408 */
 /***/ (function(module) {
 
@@ -27804,7 +27935,7 @@ if (Symbol['asyncIterator'] === undefined) {
 const querystring_1 = __webpack_require__(191);
 const path_1 = __webpack_require__(622);
 const is_stream_1 = __importDefault(__webpack_require__(554));
-const p_queue_1 = __importDefault(__webpack_require__(938)); // tslint:disable-line:import-name
+const p_queue_1 = __importDefault(__webpack_require__(983)); // tslint:disable-line:import-name
 const p_retry_1 = __importStar(__webpack_require__(548));
 const axios_1 = __importDefault(__webpack_require__(545));
 const form_data_1 = __importDefault(__webpack_require__(826)); // tslint:disable-line:import-name
@@ -33454,7 +33585,45 @@ SSHBuffer.prototype.write = function (buf) {
 
 
 /***/ }),
-/* 492 */,
+/* 492 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const lower_bound_1 = __webpack_require__(291);
+class PriorityQueue {
+    constructor() {
+        this._queue = [];
+    }
+    enqueue(run, options) {
+        options = Object.assign({ priority: 0 }, options);
+        const element = {
+            priority: options.priority,
+            run
+        };
+        if (this.size && this._queue[this.size - 1].priority >= options.priority) {
+            this._queue.push(element);
+            return;
+        }
+        const index = lower_bound_1.default(this._queue, element, (a, b) => b.priority - a.priority);
+        this._queue.splice(index, 0, element);
+    }
+    dequeue() {
+        const item = this._queue.shift();
+        return item === null || item === void 0 ? void 0 : item.run;
+    }
+    filter(options) {
+        return this._queue.filter((element) => element.priority === options.priority).map((element) => element.run);
+    }
+    get size() {
+        return this._queue.length;
+    }
+}
+exports.default = PriorityQueue;
+
+
+/***/ }),
 /* 493 */,
 /* 494 */,
 /* 495 */,
@@ -35042,21 +35211,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCredentialsByEmail = void 0;
+exports.fetchCredentials = void 0;
 const crypto_1 = __webpack_require__(417);
+const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
 /**
- * Fetches the user credentials from the remote credential service for the given email address.
+ * Fetches the user credentials from the remote credential service for the given email of name.
  *
- * @param {string} email The email addres of the user to look up.
+ * @param {string} identifier The email address or Jira display name of the user to look up.
  *
  * @returns {Credentials} The credentials object.
  */
-exports.getCredentialsByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = Buffer.from(email).toString('base64');
+exports.fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, function* () {
+    if (isNil_1.default(identifier)) {
+        throw new Error('Could not lookup user credentials because no identifier or display name was found');
+    }
+    const id = Buffer.from(identifier).toString('base64');
     const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
-        .update(email)
+        .update(identifier)
         .digest('hex');
     const url = `${Inputs_1.credentialsApiPrefix()}${id}`;
     const response = yield node_fetch_1.default(url, {
@@ -35064,7 +35237,7 @@ exports.getCredentialsByEmail = (email) => __awaiter(void 0, void 0, void 0, fun
     });
     const credentials = (yield response.json());
     if (credentials.status !== 'ok') {
-        throw new Error(`Could not get credentials for the user ${email}`);
+        throw new Error(`Could not get credentials for the user ${identifier}`);
     }
     return credentials;
 });
@@ -35637,23 +35810,45 @@ class Methods extends eventemitter3_1.EventEmitter {
                 },
             },
             conversations: {
-                setTeams: bindApiCall(this, 'admin.conversations.setTeams'),
+                archive: bindApiCall(this, 'admin.conversations.archive'),
+                convertToPrivate: bindApiCall(this, 'admin.conversations.convertToPrivate'),
+                create: bindApiCall(this, 'admin.conversations.create'),
+                delete: bindApiCall(this, 'admin.conversations.delete'),
+                disconnectShared: bindApiCall(this, 'admin.conversations.disconnectShared'),
+                ekm: {
+                    listOriginalConnectedChannelInfo: bindApiCall(this, 'admin.conversations.ekm.listOriginalConnectedChannelInfo'),
+                },
+                getConversationPrefs: bindApiCall(this, 'admin.conversations.getConversationPrefs'),
+                getTeams: bindApiCall(this, 'admin.conversations.getTeams'),
+                invite: bindApiCall(this, 'admin.conversations.invite'),
+                rename: bindApiCall(this, 'admin.conversations.rename'),
                 restrictAccess: {
                     addGroup: bindApiCall(this, 'admin.conversations.restrictAccess.addGroup'),
                     listGroups: bindApiCall(this, 'admin.conversations.restrictAccess.listGroups'),
                     removeGroup: bindApiCall(this, 'admin.conversations.restrictAccess.removeGroup'),
                 },
+                search: bindApiCall(this, 'admin.conversations.search'),
+                setConversationPrefs: bindApiCall(this, 'admin.conversations.setConversationPrefs'),
+                setTeams: bindApiCall(this, 'admin.conversations.setTeams'),
+                unarchive: bindApiCall(this, 'admin.conversations.unarchive'),
+            },
+            emoji: {
+                add: bindApiCall(this, 'admin.emoji.add'),
+                addAlias: bindApiCall(this, 'admin.emoji.addAlias'),
+                list: bindApiCall(this, 'admin.emoji.list'),
+                remove: bindApiCall(this, 'admin.emoji.remove'),
+                rename: bindApiCall(this, 'admin.emoji.rename'),
             },
             inviteRequests: {
                 approve: bindApiCall(this, 'admin.inviteRequests.approve'),
-                deny: bindApiCall(this, 'admin.inviteRequests.deny'),
-                list: bindApiCall(this, 'admin.inviteRequests.list'),
                 approved: {
                     list: bindApiCall(this, 'admin.inviteRequests.approved.list'),
                 },
                 denied: {
                     list: bindApiCall(this, 'admin.inviteRequests.denied.list'),
                 },
+                deny: bindApiCall(this, 'admin.inviteRequests.deny'),
+                list: bindApiCall(this, 'admin.inviteRequests.list'),
             },
             teams: {
                 admins: {
@@ -35680,13 +35875,14 @@ class Methods extends eventemitter3_1.EventEmitter {
                 removeChannels: bindApiCall(this, 'admin.usergroups.removeChannels'),
             },
             users: {
-                session: {
-                    reset: bindApiCall(this, 'admin.users.session.reset'),
-                },
                 assign: bindApiCall(this, 'admin.users.assign'),
                 invite: bindApiCall(this, 'admin.users.invite'),
                 list: bindApiCall(this, 'admin.users.list'),
                 remove: bindApiCall(this, 'admin.users.remove'),
+                session: {
+                    reset: bindApiCall(this, 'admin.users.session.reset'),
+                    invalidate: bindApiCall(this, 'admin.users.session.invalidate'),
+                },
                 setAdmin: bindApiCall(this, 'admin.users.setAdmin'),
                 setExpiration: bindApiCall(this, 'admin.users.setExpiration'),
                 setOwner: bindApiCall(this, 'admin.users.setOwner'),
@@ -35695,6 +35891,14 @@ class Methods extends eventemitter3_1.EventEmitter {
         };
         this.api = {
             test: bindApiCall(this, 'api.test'),
+        };
+        this.apps = {
+            event: {
+                authorizations: {
+                    list: bindApiCall(this, 'apps.event.authorizations.list'),
+                },
+            },
+            uninstall: bindApiCall(this, 'apps.uninstall'),
         };
         this.auth = {
             revoke: bindApiCall(this, 'auth.revoke'),
@@ -35931,6 +36135,10 @@ exports.cursorPaginationEnabledMethods = new Set();
 exports.cursorPaginationEnabledMethods.add('admin.apps.approved.list');
 exports.cursorPaginationEnabledMethods.add('admin.apps.requests.list');
 exports.cursorPaginationEnabledMethods.add('admin.apps.restricted.list');
+exports.cursorPaginationEnabledMethods.add('admin.conversations.ekm.listOriginalConnectedChannelInfo');
+exports.cursorPaginationEnabledMethods.add('admin.conversations.getTeams');
+exports.cursorPaginationEnabledMethods.add('admin.conversations.search');
+exports.cursorPaginationEnabledMethods.add('admin.emoji.list');
 exports.cursorPaginationEnabledMethods.add('admin.inviteRequests.approved.list');
 exports.cursorPaginationEnabledMethods.add('admin.inviteRequests.denied.list');
 exports.cursorPaginationEnabledMethods.add('admin.inviteRequests.list');
@@ -35938,6 +36146,7 @@ exports.cursorPaginationEnabledMethods.add('admin.teams.admins.list');
 exports.cursorPaginationEnabledMethods.add('admin.teams.list');
 exports.cursorPaginationEnabledMethods.add('admin.teams.owners.list');
 exports.cursorPaginationEnabledMethods.add('admin.users.list');
+exports.cursorPaginationEnabledMethods.add('apps.event.authorizations.list');
 exports.cursorPaginationEnabledMethods.add('channels.list');
 exports.cursorPaginationEnabledMethods.add('chat.scheduledMessages.list');
 exports.cursorPaginationEnabledMethods.add('conversations.history');
@@ -43964,7 +44173,7 @@ __webpack_require__(248)(
     Promise, PromiseArray, tryConvertToPromise, INTERNAL, async);
 Promise.Promise = Promise;
 Promise.version = "3.7.2";
-__webpack_require__(924)(Promise);
+__webpack_require__(735)(Promise);
 __webpack_require__(619)(Promise, apiRejection, INTERNAL, tryConvertToPromise, Proxyable, debug);
 __webpack_require__(150)(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
 __webpack_require__(447)(Promise);
@@ -47387,7 +47596,136 @@ nacl.setPRNG = function(fn) {
 /* 732 */,
 /* 733 */,
 /* 734 */,
-/* 735 */,
+/* 735 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var cr = Object.create;
+if (cr) {
+    var callerCache = cr(null);
+    var getterCache = cr(null);
+    callerCache[" size"] = getterCache[" size"] = 0;
+}
+
+module.exports = function(Promise) {
+var util = __webpack_require__(448);
+var canEvaluate = util.canEvaluate;
+var isIdentifier = util.isIdentifier;
+
+var getMethodCaller;
+var getGetter;
+if (true) {
+var makeMethodCaller = function (methodName) {
+    return new Function("ensureMethod", "                                    \n\
+        return function(obj) {                                               \n\
+            'use strict'                                                     \n\
+            var len = this.length;                                           \n\
+            ensureMethod(obj, 'methodName');                                 \n\
+            switch(len) {                                                    \n\
+                case 1: return obj.methodName(this[0]);                      \n\
+                case 2: return obj.methodName(this[0], this[1]);             \n\
+                case 3: return obj.methodName(this[0], this[1], this[2]);    \n\
+                case 0: return obj.methodName();                             \n\
+                default:                                                     \n\
+                    return obj.methodName.apply(obj, this);                  \n\
+            }                                                                \n\
+        };                                                                   \n\
+        ".replace(/methodName/g, methodName))(ensureMethod);
+};
+
+var makeGetter = function (propertyName) {
+    return new Function("obj", "                                             \n\
+        'use strict';                                                        \n\
+        return obj.propertyName;                                             \n\
+        ".replace("propertyName", propertyName));
+};
+
+var getCompiled = function(name, compiler, cache) {
+    var ret = cache[name];
+    if (typeof ret !== "function") {
+        if (!isIdentifier(name)) {
+            return null;
+        }
+        ret = compiler(name);
+        cache[name] = ret;
+        cache[" size"]++;
+        if (cache[" size"] > 512) {
+            var keys = Object.keys(cache);
+            for (var i = 0; i < 256; ++i) delete cache[keys[i]];
+            cache[" size"] = keys.length - 256;
+        }
+    }
+    return ret;
+};
+
+getMethodCaller = function(name) {
+    return getCompiled(name, makeMethodCaller, callerCache);
+};
+
+getGetter = function(name) {
+    return getCompiled(name, makeGetter, getterCache);
+};
+}
+
+function ensureMethod(obj, methodName) {
+    var fn;
+    if (obj != null) fn = obj[methodName];
+    if (typeof fn !== "function") {
+        var message = "Object " + util.classString(obj) + " has no method '" +
+            util.toString(methodName) + "'";
+        throw new Promise.TypeError(message);
+    }
+    return fn;
+}
+
+function caller(obj) {
+    var methodName = this.pop();
+    var fn = ensureMethod(obj, methodName);
+    return fn.apply(obj, this);
+}
+Promise.prototype.call = function (methodName) {
+    var $_len = arguments.length;var args = new Array(Math.max($_len - 1, 0)); for(var $_i = 1; $_i < $_len; ++$_i) {args[$_i - 1] = arguments[$_i];};
+    if (true) {
+        if (canEvaluate) {
+            var maybeCaller = getMethodCaller(methodName);
+            if (maybeCaller !== null) {
+                return this._then(
+                    maybeCaller, undefined, undefined, args, undefined);
+            }
+        }
+    }
+    args.push(methodName);
+    return this._then(caller, undefined, undefined, args, undefined);
+};
+
+function namedGetter(obj) {
+    return obj[this];
+}
+function indexedGetter(obj) {
+    var index = +this;
+    if (index < 0) index = Math.max(0, index + obj.length);
+    return obj[index];
+}
+Promise.prototype.get = function (propertyName) {
+    var isIndex = (typeof propertyName === "number");
+    var getter;
+    if (!isIndex) {
+        if (canEvaluate) {
+            var maybeGetter = getGetter(propertyName);
+            getter = maybeGetter !== null ? maybeGetter : namedGetter;
+        } else {
+            getter = namedGetter;
+        }
+    } else {
+        getter = indexedGetter;
+    }
+    return this._then(getter, undefined, undefined, propertyName, undefined);
+};
+};
+
+
+/***/ }),
 /* 736 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -47414,6 +47752,7 @@ const Credentials_1 = __webpack_require__(543);
 const Github_1 = __webpack_require__(390);
 const Inputs_1 = __webpack_require__(968);
 const Jira_1 = __webpack_require__(404);
+const Log_1 = __webpack_require__(108);
 const Slack_1 = __webpack_require__(745);
 const String_1 = __webpack_require__(299);
 const Template_1 = __webpack_require__(920);
@@ -47437,7 +47776,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     core_1.info('Fetching the Jira issue details...');
     const issue = yield Jira_1.getIssue(issueKey);
     if (isNil_1.default(issue)) {
-        const credentials = yield Credentials_1.getCredentialsByEmail(email);
+        const credentials = yield Credentials_1.fetchCredentials(email);
         const message = `Issue ${issueKey}> could not be found, so no pull request was created`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
@@ -47447,14 +47786,18 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Finding out who the pull request should belong to...');
     if (isNil_1.default(issue.fields.assignee)) {
-        const credentials = yield Credentials_1.getCredentialsByEmail(email);
+        const credentials = yield Credentials_1.fetchCredentials(email);
         const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
         core_1.error(message);
         return;
     }
-    const assigneeEmail = issue.fields.assignee.emailAddress;
-    const credentials = yield Credentials_1.getCredentialsByEmail(assigneeEmail);
+    const credentialLookup = issue.fields.assignee.emailAddress || issue.fields.assignee.displayName;
+    const credentials = yield Credentials_1.fetchCredentials(credentialLookup);
+    Log_1.debug('~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    Log_1.debug(credentials);
+    Log_1.debug('~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    const assigneeEmail = credentials.email;
     const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1'); // Grab the first name from the email address.
     const newBranchName = `${String_1.parameterize(assigneeName)}/${String_1.parameterize(issue.key)}-${String_1.parameterize(issue.fields.summary)}`;
     core_1.info(`The pull request will be assigned to @${credentials.github_username}`);
@@ -53261,132 +53604,345 @@ module.exports = getRawTag;
 
 /***/ }),
 /* 924 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-var cr = Object.create;
-if (cr) {
-    var callerCache = cr(null);
-    var getterCache = cr(null);
-    callerCache[" size"] = getterCache[" size"] = 0;
+
+var has = Object.prototype.hasOwnProperty
+  , prefix = '~';
+
+/**
+ * Constructor to create a storage for our `EE` objects.
+ * An `Events` instance is a plain object whose properties are event names.
+ *
+ * @constructor
+ * @private
+ */
+function Events() {}
+
+//
+// We try to not inherit from `Object.prototype`. In some engines creating an
+// instance in this way is faster than calling `Object.create(null)` directly.
+// If `Object.create(null)` is not supported we prefix the event names with a
+// character to make sure that the built-in object properties are not
+// overridden or used as an attack vector.
+//
+if (Object.create) {
+  Events.prototype = Object.create(null);
+
+  //
+  // This hack is needed because the `__proto__` property is still inherited in
+  // some old browsers like Android 4, iPhone 5.1, Opera 11 and Safari 5.
+  //
+  if (!new Events().__proto__) prefix = false;
 }
 
-module.exports = function(Promise) {
-var util = __webpack_require__(448);
-var canEvaluate = util.canEvaluate;
-var isIdentifier = util.isIdentifier;
+/**
+ * Representation of a single event listener.
+ *
+ * @param {Function} fn The listener function.
+ * @param {*} context The context to invoke the listener with.
+ * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+ * @constructor
+ * @private
+ */
+function EE(fn, context, once) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once || false;
+}
 
-var getMethodCaller;
-var getGetter;
+/**
+ * Add a listener for a given event.
+ *
+ * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} context The context to invoke the listener with.
+ * @param {Boolean} once Specify if the listener is a one-time listener.
+ * @returns {EventEmitter}
+ * @private
+ */
+function addListener(emitter, event, fn, context, once) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('The listener must be a function');
+  }
+
+  var listener = new EE(fn, context || emitter, once)
+    , evt = prefix ? prefix + event : event;
+
+  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+  else emitter._events[evt] = [emitter._events[evt], listener];
+
+  return emitter;
+}
+
+/**
+ * Clear event by name.
+ *
+ * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {(String|Symbol)} evt The Event name.
+ * @private
+ */
+function clearEvent(emitter, evt) {
+  if (--emitter._eventsCount === 0) emitter._events = new Events();
+  else delete emitter._events[evt];
+}
+
+/**
+ * Minimal `EventEmitter` interface that is molded against the Node.js
+ * `EventEmitter` interface.
+ *
+ * @constructor
+ * @public
+ */
+function EventEmitter() {
+  this._events = new Events();
+  this._eventsCount = 0;
+}
+
+/**
+ * Return an array listing the events for which the emitter has registered
+ * listeners.
+ *
+ * @returns {Array}
+ * @public
+ */
+EventEmitter.prototype.eventNames = function eventNames() {
+  var names = []
+    , events
+    , name;
+
+  if (this._eventsCount === 0) return names;
+
+  for (name in (events = this._events)) {
+    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+  }
+
+  if (Object.getOwnPropertySymbols) {
+    return names.concat(Object.getOwnPropertySymbols(events));
+  }
+
+  return names;
+};
+
+/**
+ * Return the listeners registered for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Array} The registered listeners.
+ * @public
+ */
+EventEmitter.prototype.listeners = function listeners(event) {
+  var evt = prefix ? prefix + event : event
+    , handlers = this._events[evt];
+
+  if (!handlers) return [];
+  if (handlers.fn) return [handlers.fn];
+
+  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) {
+    ee[i] = handlers[i].fn;
+  }
+
+  return ee;
+};
+
+/**
+ * Return the number of listeners listening to a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Number} The number of listeners.
+ * @public
+ */
+EventEmitter.prototype.listenerCount = function listenerCount(event) {
+  var evt = prefix ? prefix + event : event
+    , listeners = this._events[evt];
+
+  if (!listeners) return 0;
+  if (listeners.fn) return 1;
+  return listeners.length;
+};
+
+/**
+ * Calls each of the listeners registered for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Boolean} `true` if the event had listeners, else `false`.
+ * @public
+ */
+EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+  var evt = prefix ? prefix + event : event;
+
+  if (!this._events[evt]) return false;
+
+  var listeners = this._events[evt]
+    , len = arguments.length
+    , args
+    , i;
+
+  if (listeners.fn) {
+    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+    switch (len) {
+      case 1: return listeners.fn.call(listeners.context), true;
+      case 2: return listeners.fn.call(listeners.context, a1), true;
+      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+    }
+
+    for (i = 1, args = new Array(len -1); i < len; i++) {
+      args[i - 1] = arguments[i];
+    }
+
+    listeners.fn.apply(listeners.context, args);
+  } else {
+    var length = listeners.length
+      , j;
+
+    for (i = 0; i < length; i++) {
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+
+      switch (len) {
+        case 1: listeners[i].fn.call(listeners[i].context); break;
+        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+        case 4: listeners[i].fn.call(listeners[i].context, a1, a2, a3); break;
+        default:
+          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+            args[j - 1] = arguments[j];
+          }
+
+          listeners[i].fn.apply(listeners[i].context, args);
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Add a listener for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} [context=this] The context to invoke the listener with.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.on = function on(event, fn, context) {
+  return addListener(this, event, fn, context, false);
+};
+
+/**
+ * Add a one-time listener for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} [context=this] The context to invoke the listener with.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.once = function once(event, fn, context) {
+  return addListener(this, event, fn, context, true);
+};
+
+/**
+ * Remove the listeners of a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn Only remove the listeners that match this function.
+ * @param {*} context Only remove the listeners that have this context.
+ * @param {Boolean} once Only remove one-time listeners.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+  var evt = prefix ? prefix + event : event;
+
+  if (!this._events[evt]) return this;
+  if (!fn) {
+    clearEvent(this, evt);
+    return this;
+  }
+
+  var listeners = this._events[evt];
+
+  if (listeners.fn) {
+    if (
+      listeners.fn === fn &&
+      (!once || listeners.once) &&
+      (!context || listeners.context === context)
+    ) {
+      clearEvent(this, evt);
+    }
+  } else {
+    for (var i = 0, events = [], length = listeners.length; i < length; i++) {
+      if (
+        listeners[i].fn !== fn ||
+        (once && !listeners[i].once) ||
+        (context && listeners[i].context !== context)
+      ) {
+        events.push(listeners[i]);
+      }
+    }
+
+    //
+    // Reset the array, or remove it completely if we have no more listeners.
+    //
+    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+    else clearEvent(this, evt);
+  }
+
+  return this;
+};
+
+/**
+ * Remove all listeners, or those of the specified event.
+ *
+ * @param {(String|Symbol)} [event] The event name.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  var evt;
+
+  if (event) {
+    evt = prefix ? prefix + event : event;
+    if (this._events[evt]) clearEvent(this, evt);
+  } else {
+    this._events = new Events();
+    this._eventsCount = 0;
+  }
+
+  return this;
+};
+
+//
+// Alias methods names because people roll like that.
+//
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+//
+// Expose the prefix.
+//
+EventEmitter.prefixed = prefix;
+
+//
+// Allow `EventEmitter` to be imported as module namespace.
+//
+EventEmitter.EventEmitter = EventEmitter;
+
+//
+// Expose the module.
+//
 if (true) {
-var makeMethodCaller = function (methodName) {
-    return new Function("ensureMethod", "                                    \n\
-        return function(obj) {                                               \n\
-            'use strict'                                                     \n\
-            var len = this.length;                                           \n\
-            ensureMethod(obj, 'methodName');                                 \n\
-            switch(len) {                                                    \n\
-                case 1: return obj.methodName(this[0]);                      \n\
-                case 2: return obj.methodName(this[0], this[1]);             \n\
-                case 3: return obj.methodName(this[0], this[1], this[2]);    \n\
-                case 0: return obj.methodName();                             \n\
-                default:                                                     \n\
-                    return obj.methodName.apply(obj, this);                  \n\
-            }                                                                \n\
-        };                                                                   \n\
-        ".replace(/methodName/g, methodName))(ensureMethod);
-};
-
-var makeGetter = function (propertyName) {
-    return new Function("obj", "                                             \n\
-        'use strict';                                                        \n\
-        return obj.propertyName;                                             \n\
-        ".replace("propertyName", propertyName));
-};
-
-var getCompiled = function(name, compiler, cache) {
-    var ret = cache[name];
-    if (typeof ret !== "function") {
-        if (!isIdentifier(name)) {
-            return null;
-        }
-        ret = compiler(name);
-        cache[name] = ret;
-        cache[" size"]++;
-        if (cache[" size"] > 512) {
-            var keys = Object.keys(cache);
-            for (var i = 0; i < 256; ++i) delete cache[keys[i]];
-            cache[" size"] = keys.length - 256;
-        }
-    }
-    return ret;
-};
-
-getMethodCaller = function(name) {
-    return getCompiled(name, makeMethodCaller, callerCache);
-};
-
-getGetter = function(name) {
-    return getCompiled(name, makeGetter, getterCache);
-};
+  module.exports = EventEmitter;
 }
-
-function ensureMethod(obj, methodName) {
-    var fn;
-    if (obj != null) fn = obj[methodName];
-    if (typeof fn !== "function") {
-        var message = "Object " + util.classString(obj) + " has no method '" +
-            util.toString(methodName) + "'";
-        throw new Promise.TypeError(message);
-    }
-    return fn;
-}
-
-function caller(obj) {
-    var methodName = this.pop();
-    var fn = ensureMethod(obj, methodName);
-    return fn.apply(obj, this);
-}
-Promise.prototype.call = function (methodName) {
-    var $_len = arguments.length;var args = new Array(Math.max($_len - 1, 0)); for(var $_i = 1; $_i < $_len; ++$_i) {args[$_i - 1] = arguments[$_i];};
-    if (true) {
-        if (canEvaluate) {
-            var maybeCaller = getMethodCaller(methodName);
-            if (maybeCaller !== null) {
-                return this._then(
-                    maybeCaller, undefined, undefined, args, undefined);
-            }
-        }
-    }
-    args.push(methodName);
-    return this._then(caller, undefined, undefined, args, undefined);
-};
-
-function namedGetter(obj) {
-    return obj[this];
-}
-function indexedGetter(obj) {
-    var index = +this;
-    if (index < 0) index = Math.max(0, index + obj.length);
-    return obj[index];
-}
-Promise.prototype.get = function (propertyName) {
-    var isIndex = (typeof propertyName === "number");
-    var getter;
-    if (!isIndex) {
-        if (canEvaluate) {
-            var maybeGetter = getGetter(propertyName);
-            getter = maybeGetter !== null ? maybeGetter : namedGetter;
-        } else {
-            getter = namedGetter;
-        }
-    } else {
-        getter = indexedGetter;
-    }
-    return this._then(getter, undefined, undefined, propertyName, undefined);
-};
-};
 
 
 /***/ }),
@@ -54179,202 +54735,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 /* 935 */,
 /* 936 */,
 /* 937 */,
-/* 938 */
-/***/ (function(module) {
-
-"use strict";
-
-
-// Port of lower_bound from http://en.cppreference.com/w/cpp/algorithm/lower_bound
-// Used to compute insertion index to keep queue sorted after insertion
-function lowerBound(array, value, comp) {
-	let first = 0;
-	let count = array.length;
-
-	while (count > 0) {
-		const step = (count / 2) | 0;
-		let it = first + step;
-
-		if (comp(array[it], value) <= 0) {
-			first = ++it;
-			count -= step + 1;
-		} else {
-			count = step;
-		}
-	}
-
-	return first;
-}
-
-class PriorityQueue {
-	constructor() {
-		this._queue = [];
-	}
-
-	enqueue(run, opts) {
-		opts = Object.assign({
-			priority: 0
-		}, opts);
-
-		const element = {priority: opts.priority, run};
-
-		if (this.size && this._queue[this.size - 1].priority >= opts.priority) {
-			this._queue.push(element);
-			return;
-		}
-
-		const index = lowerBound(this._queue, element, (a, b) => b.priority - a.priority);
-		this._queue.splice(index, 0, element);
-	}
-
-	dequeue() {
-		return this._queue.shift().run;
-	}
-
-	get size() {
-		return this._queue.length;
-	}
-}
-
-class PQueue {
-	constructor(opts) {
-		opts = Object.assign({
-			concurrency: Infinity,
-			autoStart: true,
-			queueClass: PriorityQueue
-		}, opts);
-
-		if (!(typeof opts.concurrency === 'number' && opts.concurrency >= 1)) {
-			throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${opts.concurrency}\` (${typeof opts.concurrency})`);
-		}
-
-		this.queue = new opts.queueClass(); // eslint-disable-line new-cap
-		this._queueClass = opts.queueClass;
-		this._pendingCount = 0;
-		this._concurrency = opts.concurrency;
-		this._isPaused = opts.autoStart === false;
-		this._resolveEmpty = () => {};
-		this._resolveIdle = () => {};
-	}
-
-	_next() {
-		this._pendingCount--;
-
-		if (this.queue.size > 0) {
-			if (!this._isPaused) {
-				this.queue.dequeue()();
-			}
-		} else {
-			this._resolveEmpty();
-			this._resolveEmpty = () => {};
-
-			if (this._pendingCount === 0) {
-				this._resolveIdle();
-				this._resolveIdle = () => {};
-			}
-		}
-	}
-
-	add(fn, opts) {
-		return new Promise((resolve, reject) => {
-			const run = () => {
-				this._pendingCount++;
-
-				try {
-					Promise.resolve(fn()).then(
-						val => {
-							resolve(val);
-							this._next();
-						},
-						err => {
-							reject(err);
-							this._next();
-						}
-					);
-				} catch (err) {
-					reject(err);
-					this._next();
-				}
-			};
-
-			if (!this._isPaused && this._pendingCount < this._concurrency) {
-				run();
-			} else {
-				this.queue.enqueue(run, opts);
-			}
-		});
-	}
-
-	addAll(fns, opts) {
-		return Promise.all(fns.map(fn => this.add(fn, opts)));
-	}
-
-	start() {
-		if (!this._isPaused) {
-			return;
-		}
-
-		this._isPaused = false;
-		while (this.queue.size > 0 && this._pendingCount < this._concurrency) {
-			this.queue.dequeue()();
-		}
-	}
-
-	pause() {
-		this._isPaused = true;
-	}
-
-	clear() {
-		this.queue = new this._queueClass(); // eslint-disable-line new-cap
-	}
-
-	onEmpty() {
-		// Instantly resolve if the queue is empty
-		if (this.queue.size === 0) {
-			return Promise.resolve();
-		}
-
-		return new Promise(resolve => {
-			const existingResolve = this._resolveEmpty;
-			this._resolveEmpty = () => {
-				existingResolve();
-				resolve();
-			};
-		});
-	}
-
-	onIdle() {
-		// Instantly resolve if none pending
-		if (this._pendingCount === 0) {
-			return Promise.resolve();
-		}
-
-		return new Promise(resolve => {
-			const existingResolve = this._resolveIdle;
-			this._resolveIdle = () => {
-				existingResolve();
-				resolve();
-			};
-		});
-	}
-
-	get size() {
-		return this.queue.size;
-	}
-
-	get pending() {
-		return this._pendingCount;
-	}
-
-	get isPaused() {
-		return this._isPaused;
-	}
-}
-
-module.exports = PQueue;
-
-
-/***/ }),
+/* 938 */,
 /* 939 */,
 /* 940 */
 /***/ (function(module) {
@@ -55311,7 +55672,7 @@ module.exports = HARError
 /* 945 */
 /***/ (function(module) {
 
-module.exports = {"name":"@slack/web-api","version":"5.12.0","description":"Official library for using the Slack Platform's Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 8.9.0","npm":">= 5.5.1"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch 'src' --ext 'ts' --exec npm run build"},"dependencies":{"@slack/logger":">=1.0.0 <3.0.0","@slack/types":"^1.7.0","@types/is-stream":"^1.1.0","@types/node":">=8.9.0","@types/p-queue":"^2.3.2","axios":"^0.19.0","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^2.4.2","p-retry":"^4.0.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^8.0.3","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^3.3.3333"},"tsd":{"directory":"test/types"}};
+module.exports = {"name":"@slack/web-api","version":"5.13.0","description":"Official library for using the Slack Platform's Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 8.9.0","npm":">= 5.5.1"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch 'src' --ext 'ts' --exec npm run build"},"dependencies":{"@slack/logger":">=1.0.0 <3.0.0","@slack/types":"^1.7.0","@types/is-stream":"^1.1.0","@types/node":">=8.9.0","axios":"^0.19.0","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^8.0.3","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^3.3.3333"},"tsd":{"directory":"test/types"}};
 
 /***/ }),
 /* 946 */,
@@ -57301,7 +57662,292 @@ module.exports = {
 /* 980 */,
 /* 981 */,
 /* 982 */,
-/* 983 */,
+/* 983 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const EventEmitter = __webpack_require__(924);
+const p_timeout_1 = __webpack_require__(407);
+const priority_queue_1 = __webpack_require__(492);
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const empty = () => { };
+const timeoutError = new p_timeout_1.TimeoutError();
+/**
+Promise queue with concurrency control.
+*/
+class PQueue extends EventEmitter {
+    constructor(options) {
+        var _a, _b, _c, _d;
+        super();
+        this._intervalCount = 0;
+        this._intervalEnd = 0;
+        this._pendingCount = 0;
+        this._resolveEmpty = empty;
+        this._resolveIdle = empty;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        options = Object.assign({ carryoverConcurrencyCount: false, intervalCap: Infinity, interval: 0, concurrency: Infinity, autoStart: true, queueClass: priority_queue_1.default }, options);
+        if (!(typeof options.intervalCap === 'number' && options.intervalCap >= 1)) {
+            throw new TypeError(`Expected \`intervalCap\` to be a number from 1 and up, got \`${(_b = (_a = options.intervalCap) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : ''}\` (${typeof options.intervalCap})`);
+        }
+        if (options.interval === undefined || !(Number.isFinite(options.interval) && options.interval >= 0)) {
+            throw new TypeError(`Expected \`interval\` to be a finite number >= 0, got \`${(_d = (_c = options.interval) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ''}\` (${typeof options.interval})`);
+        }
+        this._carryoverConcurrencyCount = options.carryoverConcurrencyCount;
+        this._isIntervalIgnored = options.intervalCap === Infinity || options.interval === 0;
+        this._intervalCap = options.intervalCap;
+        this._interval = options.interval;
+        this._queue = new options.queueClass();
+        this._queueClass = options.queueClass;
+        this.concurrency = options.concurrency;
+        this._timeout = options.timeout;
+        this._throwOnTimeout = options.throwOnTimeout === true;
+        this._isPaused = options.autoStart === false;
+    }
+    get _doesIntervalAllowAnother() {
+        return this._isIntervalIgnored || this._intervalCount < this._intervalCap;
+    }
+    get _doesConcurrentAllowAnother() {
+        return this._pendingCount < this._concurrency;
+    }
+    _next() {
+        this._pendingCount--;
+        this._tryToStartAnother();
+        this.emit('next');
+    }
+    _resolvePromises() {
+        this._resolveEmpty();
+        this._resolveEmpty = empty;
+        if (this._pendingCount === 0) {
+            this._resolveIdle();
+            this._resolveIdle = empty;
+            this.emit('idle');
+        }
+    }
+    _onResumeInterval() {
+        this._onInterval();
+        this._initializeIntervalIfNeeded();
+        this._timeoutId = undefined;
+    }
+    _isIntervalPaused() {
+        const now = Date.now();
+        if (this._intervalId === undefined) {
+            const delay = this._intervalEnd - now;
+            if (delay < 0) {
+                // Act as the interval was done
+                // We don't need to resume it here because it will be resumed on line 160
+                this._intervalCount = (this._carryoverConcurrencyCount) ? this._pendingCount : 0;
+            }
+            else {
+                // Act as the interval is pending
+                if (this._timeoutId === undefined) {
+                    this._timeoutId = setTimeout(() => {
+                        this._onResumeInterval();
+                    }, delay);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    _tryToStartAnother() {
+        if (this._queue.size === 0) {
+            // We can clear the interval ("pause")
+            // Because we can redo it later ("resume")
+            if (this._intervalId) {
+                clearInterval(this._intervalId);
+            }
+            this._intervalId = undefined;
+            this._resolvePromises();
+            return false;
+        }
+        if (!this._isPaused) {
+            const canInitializeInterval = !this._isIntervalPaused();
+            if (this._doesIntervalAllowAnother && this._doesConcurrentAllowAnother) {
+                const job = this._queue.dequeue();
+                if (!job) {
+                    return false;
+                }
+                this.emit('active');
+                job();
+                if (canInitializeInterval) {
+                    this._initializeIntervalIfNeeded();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    _initializeIntervalIfNeeded() {
+        if (this._isIntervalIgnored || this._intervalId !== undefined) {
+            return;
+        }
+        this._intervalId = setInterval(() => {
+            this._onInterval();
+        }, this._interval);
+        this._intervalEnd = Date.now() + this._interval;
+    }
+    _onInterval() {
+        if (this._intervalCount === 0 && this._pendingCount === 0 && this._intervalId) {
+            clearInterval(this._intervalId);
+            this._intervalId = undefined;
+        }
+        this._intervalCount = this._carryoverConcurrencyCount ? this._pendingCount : 0;
+        this._processQueue();
+    }
+    /**
+    Executes all queued functions until it reaches the limit.
+    */
+    _processQueue() {
+        // eslint-disable-next-line no-empty
+        while (this._tryToStartAnother()) { }
+    }
+    get concurrency() {
+        return this._concurrency;
+    }
+    set concurrency(newConcurrency) {
+        if (!(typeof newConcurrency === 'number' && newConcurrency >= 1)) {
+            throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${newConcurrency}\` (${typeof newConcurrency})`);
+        }
+        this._concurrency = newConcurrency;
+        this._processQueue();
+    }
+    /**
+    Adds a sync or async task to the queue. Always returns a promise.
+    */
+    async add(fn, options = {}) {
+        return new Promise((resolve, reject) => {
+            const run = async () => {
+                this._pendingCount++;
+                this._intervalCount++;
+                try {
+                    const operation = (this._timeout === undefined && options.timeout === undefined) ? fn() : p_timeout_1.default(Promise.resolve(fn()), (options.timeout === undefined ? this._timeout : options.timeout), () => {
+                        if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
+                            reject(timeoutError);
+                        }
+                        return undefined;
+                    });
+                    resolve(await operation);
+                }
+                catch (error) {
+                    reject(error);
+                }
+                this._next();
+            };
+            this._queue.enqueue(run, options);
+            this._tryToStartAnother();
+            this.emit('add');
+        });
+    }
+    /**
+    Same as `.add()`, but accepts an array of sync or async functions.
+
+    @returns A promise that resolves when all functions are resolved.
+    */
+    async addAll(functions, options) {
+        return Promise.all(functions.map(async (function_) => this.add(function_, options)));
+    }
+    /**
+    Start (or resume) executing enqueued tasks within concurrency limit. No need to call this if queue is not paused (via `options.autoStart = false` or by `.pause()` method.)
+    */
+    start() {
+        if (!this._isPaused) {
+            return this;
+        }
+        this._isPaused = false;
+        this._processQueue();
+        return this;
+    }
+    /**
+    Put queue execution on hold.
+    */
+    pause() {
+        this._isPaused = true;
+    }
+    /**
+    Clear the queue.
+    */
+    clear() {
+        this._queue = new this._queueClass();
+    }
+    /**
+    Can be called multiple times. Useful if you for example add additional items at a later time.
+
+    @returns A promise that settles when the queue becomes empty.
+    */
+    async onEmpty() {
+        // Instantly resolve if the queue is empty
+        if (this._queue.size === 0) {
+            return;
+        }
+        return new Promise(resolve => {
+            const existingResolve = this._resolveEmpty;
+            this._resolveEmpty = () => {
+                existingResolve();
+                resolve();
+            };
+        });
+    }
+    /**
+    The difference with `.onEmpty` is that `.onIdle` guarantees that all work from the queue has finished. `.onEmpty` merely signals that the queue is empty, but it could mean that some promises haven't completed yet.
+
+    @returns A promise that settles when the queue becomes empty, and all promises have completed; `queue.size === 0 && queue.pending === 0`.
+    */
+    async onIdle() {
+        // Instantly resolve if none pending and if nothing else is queued
+        if (this._pendingCount === 0 && this._queue.size === 0) {
+            return;
+        }
+        return new Promise(resolve => {
+            const existingResolve = this._resolveIdle;
+            this._resolveIdle = () => {
+                existingResolve();
+                resolve();
+            };
+        });
+    }
+    /**
+    Size of the queue.
+    */
+    get size() {
+        return this._queue.size;
+    }
+    /**
+    Size of the queue, filtered by the given options.
+
+    For example, this can be used to find the number of items remaining in the queue with a specific priority level.
+    */
+    sizeBy(options) {
+        // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+        return this._queue.filter(options).length;
+    }
+    /**
+    Number of pending promises.
+    */
+    get pending() {
+        return this._pendingCount;
+    }
+    /**
+    Whether the queue is currently paused.
+    */
+    get isPaused() {
+        return this._isPaused;
+    }
+    get timeout() {
+        return this._timeout;
+    }
+    /**
+    Set the timeout for future operations.
+    */
+    set timeout(milliseconds) {
+        this._timeout = milliseconds;
+    }
+}
+exports.default = PQueue;
+
+
+/***/ }),
 /* 984 */,
 /* 985 */
 /***/ (function(module, __unusedexports, __webpack_require__) {

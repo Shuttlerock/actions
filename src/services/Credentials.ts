@@ -1,10 +1,12 @@
 import { createHmac } from 'crypto'
+import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
 import { Repository } from '@sr-services/Github'
 import { credentialsApiPrefix, credentialsApiSecret } from '@sr-services/Inputs'
 
 export interface Credentials {
+  email: string
   github_token: string
   github_username: string
   leads: Repository[]
@@ -14,18 +16,24 @@ export interface Credentials {
 }
 
 /**
- * Fetches the user credentials from the remote credential service for the given email address.
+ * Fetches the user credentials from the remote credential service for the given email of name.
  *
- * @param {string} email The email addres of the user to look up.
+ * @param {string} identifier The email address or Jira display name of the user to look up.
  *
  * @returns {Credentials} The credentials object.
  */
-export const getCredentialsByEmail = async (
-  email: string
+export const fetchCredentials = async (
+  identifier?: string
 ): Promise<Credentials> => {
-  const id = Buffer.from(email).toString('base64')
+  if (isNil(identifier)) {
+    throw new Error(
+      'Could not lookup user credentials because no identifier or display name was found'
+    )
+  }
+
+  const id = Buffer.from(identifier).toString('base64')
   const signature = createHmac('sha256', credentialsApiSecret())
-    .update(email)
+    .update(identifier)
     .digest('hex')
   const url = `${credentialsApiPrefix()}${id}`
 
@@ -36,7 +44,7 @@ export const getCredentialsByEmail = async (
   const credentials = (await response.json()) as Credentials
 
   if (credentials.status !== 'ok') {
-    throw new Error(`Could not get credentials for the user ${email}`)
+    throw new Error(`Could not get credentials for the user ${identifier}`)
   }
 
   return credentials
