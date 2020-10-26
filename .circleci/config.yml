@@ -50,11 +50,6 @@ jobs:
             yarn clean
             yarn build
             yarn package
-      - save_cache:
-          name: "Save build cache"
-          key: v1-build-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ~/actions/build
 
   jest:
     <<: *defaults
@@ -65,9 +60,6 @@ jobs:
       - restore_cache:
           name: "Restore yarn cache"
           key: v1-yarn-{{ checksum "yarn.lock" }}
-      - restore_cache:
-          name: "Restore build cache"
-          key: v1-build-{{ .Environment.CIRCLE_SHA1 }}
       - run: yarn test
 
   lint:
@@ -101,7 +93,7 @@ workflows:
             - yarn_dependencies
       - jest:
           requires:
-            - compile
+            - yarn_dependencies
       - lint:
           requires:
             - yarn_dependencies
