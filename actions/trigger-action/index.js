@@ -16115,7 +16115,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.getIssuePullRequestNumbers = exports.getIssue = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = void 0;
+exports.setIssueStatus = exports.getIssuePullRequestNumbers = exports.getEpic = exports.getIssue = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = void 0;
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
@@ -16124,6 +16124,8 @@ const Client_1 = __webpack_require__(861);
 exports.JiraStatusInDevelopment = 'In development';
 exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
+// Jira issue types.
+exports.JiraIssueTypeEpic = 'Epic';
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -16137,7 +16139,8 @@ exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
         const issue = (yield Client_1.client.findIssue(key, 'names'));
         // Find the repository, and include it explicitly. This is a bit ugly due to the way
         // Jira includes custom fields.
-        const fieldName = Object.keys(issue.names).find(name => issue.names[name] === 'Repository');
+        const names = issue.names || {};
+        const fieldName = Object.keys(names).find(name => names[name] === 'Repository');
         if (fieldName) {
             issue.fields.repository = (_a = issue.fields[fieldName]) === null || _a === void 0 ? void 0 : _a.value;
         }
@@ -16149,6 +16152,29 @@ exports.getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
         }
         throw err;
     }
+});
+/**
+ * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ *
+ * @returns {Issue} The epic issue data.
+ */
+exports.getEpic = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const issue = yield exports.getIssue(key);
+    if (isNil_1.default(issue)) {
+        return undefined;
+    }
+    if (issue.fields.issuetype.name === exports.JiraIssueTypeEpic) {
+        return issue;
+    }
+    if (issue.fields.parent) {
+        if (issue.fields.parent.fields.issuetype.name === exports.JiraIssueTypeEpic) {
+            return issue.fields.parent;
+        }
+        return exports.getEpic(issue.fields.parent.key);
+    }
+    return undefined;
 });
 /**
  * Fetches the numbers of the pull requests attached to this issue. Note that
@@ -23965,6 +23991,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(519), exports);
 __exportStar(__webpack_require__(273), exports);
 
 
@@ -34139,7 +34166,83 @@ module.exports = {"$id":"query.json#","$schema":"http://json-schema.org/draft-06
 
 /***/ }),
 /* 518 */,
-/* 519 */,
+/* 519 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createEpicPullRequest = void 0;
+const core_1 = __webpack_require__(186);
+const isNil_1 = __importDefault(__webpack_require__(977));
+const Constants_1 = __webpack_require__(168);
+const Github_1 = __webpack_require__(390);
+const Inputs_1 = __webpack_require__(968);
+const Issue_1 = __webpack_require__(273);
+const String_1 = __webpack_require__(299);
+const Template_1 = __webpack_require__(920);
+/**
+ * Creates a pull request for the given Jira epic.
+ *
+ * @param {Issue} epic            The Jira epic we will create the pull request for.
+ * @param {string} repositoryName Jira Epics don't have a repository - if we encounter an issue
+ *                                belonging to an epic, we will use the child issue's repository.
+ */
+exports.createEpicPullRequest = (epic, repositoryName) => __awaiter(void 0, void 0, void 0, function* () {
+    const newBranchName = `sr-devops/${String_1.parameterize(epic.key)}-${String_1.parameterize(epic.fields.summary)}`;
+    const jiraUrl = `https://${Inputs_1.jiraHost()}/browse/${epic.key}`;
+    core_1.info(`The Jira URL is ${jiraUrl}`);
+    core_1.info('Checking if there is an open pull request for this epic...');
+    let pullRequestNumber;
+    const repo = yield Github_1.getRepository(repositoryName);
+    const pullRequestNumbers = yield Issue_1.getIssuePullRequestNumbers(epic.id);
+    if (pullRequestNumbers.length > 0) {
+        ;
+        [pullRequestNumber] = pullRequestNumbers;
+        core_1.info(`Pull request #${pullRequestNumber} already exists`);
+    }
+    else {
+        core_1.info('There is no open pull request for this issue');
+        const baseBranchName = repo.default_branch;
+        const branch = yield Github_1.getBranch(repo.name, newBranchName);
+        core_1.info(`Checking if the branch '${newBranchName}' already exists...`);
+        if (isNil_1.default(branch)) {
+            core_1.info(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
+            yield Github_1.createBranch(repo.name, baseBranchName, newBranchName, `.meta/${epic.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${epic.key}] [skip ci] Create pull request.`);
+        }
+        core_1.info('Creating the pull request...');
+        const prTitle = `[${epic.key}] ${epic.fields.summary}`;
+        const templateVars = {
+            description: epic.fields.description || '',
+            issueType: epic.fields.issuetype.name,
+            summary: epic.fields.summary,
+            jiraUrl,
+        };
+        const prBody = Template_1.render(Template_1.PullRequestForEpicTemplate, templateVars);
+        const pullRequest = yield Github_1.createPullRequest(repo.name, baseBranchName, newBranchName, prTitle, prBody, Inputs_1.githubWriteToken());
+        pullRequestNumber = pullRequest.number;
+        core_1.info(`Created pull request #${pullRequestNumber}`);
+    }
+    core_1.info('Adding labels...');
+    yield Github_1.addLabels(repo.name, pullRequestNumber, [Constants_1.InProgressLabel]);
+    const url = `https://github.com/${Inputs_1.organizationName()}/${repo.name}/pull/${pullRequestNumber}`;
+    core_1.info(`Finished creating pull request ${url} for Jira epic ${epic.key}`);
+});
+
+
+/***/ }),
 /* 520 */,
 /* 521 */,
 /* 522 */,
@@ -47801,7 +47904,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1'); // Grab the first name from the email address.
     const newBranchName = `${String_1.parameterize(assigneeName)}/${String_1.parameterize(issue.key)}-${String_1.parameterize(issue.fields.summary)}`;
     core_1.info(`The pull request will be assigned to @${credentials.github_username}`);
-    if (issue.fields.subtasks.length > 0) {
+    if ((issue.fields.subtasks || []).length > 0) {
         const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`;
         core_1.info(message);
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
@@ -47827,6 +47930,13 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         core_1.info("Notifying the user that we're maing a pull request...");
         const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
+        // Decide if this is an epic.
+        const epic = yield Jira_1.getEpic(issue.key);
+        if (epic) {
+            core_1.info(`Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`);
+            // Todo: use the branch from this newly created PR.
+            yield Jira_1.createEpicPullRequest(epic, issue.fields.repository);
+        }
         const baseBranchName = repo.default_branch;
         const branch = yield Github_1.getBranch(repo.name, newBranchName);
         core_1.info(`Checking if the branch '${newBranchName}' already exists...`);
@@ -47837,7 +47947,7 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         core_1.info('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
         const templateVars = {
-            description: issue.fields.description,
+            description: issue.fields.description || '',
             issueType: issue.fields.issuetype.name,
             summary: issue.fields.summary,
             jiraUrl,
@@ -53459,7 +53569,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PullRequestForIssueTemplate = exports.render = void 0;
+exports.PullRequestForIssueTemplate = exports.PullRequestForEpicTemplate = exports.render = void 0;
 const mustache_1 = __webpack_require__(272);
 /**
  * Renders the given template string and returns the resulting string.
@@ -53470,6 +53580,21 @@ const mustache_1 = __webpack_require__(272);
  * @returns {string} The rendered template.
  */
 exports.render = (template, vars) => mustache_1.render(template, vars);
+exports.PullRequestForEpicTemplate = `
+## [Epic] {{summary}}
+
+[Jira {{issueType}}]({{&jiraUrl}})
+
+{{description}}
+
+## Pull Requests
+
+## Jira Issues
+
+## How to test
+
+## Deployment Notes
+`;
 exports.PullRequestForIssueTemplate = `
 ## {{summary}}
 

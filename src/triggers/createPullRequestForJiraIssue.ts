@@ -12,7 +12,12 @@ import {
   getRepository,
 } from '@sr-services/Github'
 import { jiraHost, organizationName } from '@sr-services/Inputs'
-import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira'
+import {
+  createEpicPullRequest,
+  getEpic,
+  getIssue,
+  getIssuePullRequestNumbers,
+} from '@sr-services/Jira'
 import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'
 import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
@@ -68,7 +73,7 @@ export const createPullRequestForJiraIssue = async (
   )}-${parameterize(issue.fields.summary)}`
   info(`The pull request will be assigned to @${credentials.github_username}`)
 
-  if (issue.fields.subtasks.length > 0) {
+  if ((issue.fields.subtasks || []).length > 0) {
     const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`
     info(message)
     await sendUserMessage(credentials.slack_id, message)
@@ -96,6 +101,16 @@ export const createPullRequestForJiraIssue = async (
     const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`
     await sendUserMessage(credentials.slack_id, message)
 
+    // Decide if this is an epic.
+    const epic = await getEpic(issue.key)
+    if (epic) {
+      info(
+        `Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`
+      )
+      // Todo: use the branch from this newly created PR.
+      await createEpicPullRequest(epic, issue.fields.repository)
+    }
+
     const baseBranchName = repo.default_branch
     const branch = await getBranch(repo.name, newBranchName)
 
@@ -117,7 +132,7 @@ export const createPullRequestForJiraIssue = async (
     info('Creating the pull request...')
     const prTitle = `[${issue.key}] ${issue.fields.summary}`
     const templateVars = {
-      description: issue.fields.description,
+      description: issue.fields.description || '',
       issueType: issue.fields.issuetype.name,
       summary: issue.fields.summary,
       jiraUrl,

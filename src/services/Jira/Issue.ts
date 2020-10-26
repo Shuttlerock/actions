@@ -14,12 +14,13 @@ interface User {
 export interface Issue {
   fields: {
     assignee?: User
-    description: string
+    description?: string
     issuetype: {
       name: string
       subtask: boolean
     }
-    subtasks: Issue[]
+    parent?: Issue
+    subtasks?: Issue[]
     summary: string
     status: {
       name: string
@@ -29,7 +30,7 @@ export interface Issue {
   }
   id: string
   key: string
-  names: {
+  names?: {
     [name: string]: string
   }
   subtask?: boolean
@@ -53,6 +54,9 @@ export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
 
+// Jira issue types.
+export const JiraIssueTypeEpic = 'Epic'
+
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -66,8 +70,9 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
 
     // Find the repository, and include it explicitly. This is a bit ugly due to the way
     // Jira includes custom fields.
-    const fieldName = Object.keys(issue.names).find(
-      name => issue.names[name] === 'Repository'
+    const names = issue.names || {}
+    const fieldName = Object.keys(names).find(
+      name => names[name] === 'Repository'
     )
     if (fieldName) {
       issue.fields.repository = ((issue.fields as unknown) as {
@@ -83,6 +88,31 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
 
     throw err
   }
+}
+
+/**
+ * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ *
+ * @returns {Issue} The epic issue data.
+ */
+export const getEpic = async (key: string): Promise<Issue | undefined> => {
+  const issue = await getIssue(key)
+  if (isNil(issue)) {
+    return undefined
+  }
+  if (issue.fields.issuetype.name === JiraIssueTypeEpic) {
+    return issue
+  }
+  if (issue.fields.parent) {
+    if (issue.fields.parent.fields.issuetype.name === JiraIssueTypeEpic) {
+      return issue.fields.parent
+    }
+    return getEpic(issue.fields.parent.key)
+  }
+
+  return undefined
 }
 
 /**

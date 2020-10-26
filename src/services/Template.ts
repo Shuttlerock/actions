@@ -15,6 +15,22 @@ interface TemplateVars {
 export const render = (template: string, vars: TemplateVars): string =>
   mustacheRender(template, vars)
 
+export const PullRequestForEpicTemplate = `
+## [Epic] {{summary}}
+
+[Jira {{issueType}}]({{&jiraUrl}})
+
+{{description}}
+
+## Pull Requests
+
+## Jira Issues
+
+## How to test
+
+## Deployment Notes
+`
+
 export const PullRequestForIssueTemplate = `
 ## {{summary}}
 
