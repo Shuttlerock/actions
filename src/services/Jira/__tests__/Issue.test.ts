@@ -5,8 +5,9 @@ import { client } from '@sr-services/Jira/Client'
 import {
   getIssue,
   getIssuePullRequestNumbers,
-  setIssueStatus,
+  issueUrl,
   JiraStatusValidated,
+  setIssueStatus,
 } from '@sr-services/Jira/Issue'
 import {
   mockJiraIssue,
@@ -49,8 +50,15 @@ describe('Issue', () => {
       ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
         new Response(JSON.stringify(mockJiraPullRequests))
       )
-      const numbers = await getIssuePullRequestNumbers('EXAMPLE-236')
+      const numbers = await getIssuePullRequestNumbers('ISSUE-236')
       expect(numbers).toEqual([65])
+    })
+  })
+
+  describe('issueUrl', () => {
+    it('returns the URL', () => {
+      const expected = 'https://example.atlassian.net/browse/ISSUE-236'
+      expect(issueUrl('ISSUE-236')).toEqual(expected)
     })
   })
 

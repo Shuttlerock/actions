@@ -120,7 +120,7 @@ export const getIssueKey = (
  * @param {Repository} repo   The name of the repository that the PR will belong to.
  * @param {number}     number The pull request number to fetch.
  *
- * @returns {PullsGetResponseData} The PR data.
+ * @returns {PullsGetResponseData} The pull request data.
  */
 export const getPullRequest = async (
   repo: Repository,
@@ -144,3 +144,14 @@ export const getPullRequest = async (
 
   return undefined
 }
+
+/**
+ * Returns the URL of the pull request with the given number and repo.
+ *
+ * @param {Repository} repo   The name of the repository that the PR will belong to.
+ * @param {number}     number The pull request number to fetch.
+ *
+ * @returns {string} The URL of the pull request.
+ */
+export const pullRequestUrl = (repo: Repository, number: number): string =>
+  `https://github.com/${organizationName()}/${repo}/pull/${number}`

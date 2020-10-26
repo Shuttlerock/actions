@@ -15,6 +15,7 @@ import {
   createPullRequest,
   getIssueKey,
   getPullRequest,
+  pullRequestUrl,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
@@ -190,6 +191,13 @@ describe('PullRequest', () => {
       expect(spy).toHaveBeenCalledWith(fetchPullParams)
       expect(result).toEqual(undefined)
       spy.mockRestore()
+    })
+  })
+
+  describe('pullRequestUrl', () => {
+    it('returns the URL', () => {
+      const expected = 'https://github.com/octokit/actions/pull/123'
+      expect(pullRequestUrl('actions', 123)).toEqual(expected)
     })
   })
 })
