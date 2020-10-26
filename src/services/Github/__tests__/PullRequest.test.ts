@@ -3,6 +3,7 @@ import {
   IssuesAddLabelsResponseData,
   OctokitResponse,
   PullsCreateResponseData,
+  PullsGetResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
@@ -13,15 +14,29 @@ import {
   assignOwners,
   createPullRequest,
   getIssueKey,
+  getPullRequest,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
   mockGithubPullRequestCreateResponse,
+  mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
 } from '@sr-tests/Mocks'
 
+interface GetPullParams {
+  owner: string
+  pull_number: number
+  repo: Repository
+}
+
+const pull_number = mockGithubPullRequest.number
 const repo = 'my-repo'
+const fetchPullParams = {
+  owner: organizationName(),
+  pull_number,
+  repo,
+}
 
 describe('PullRequest', () => {
   describe('addLabels', () => {
@@ -147,6 +162,34 @@ describe('PullRequest', () => {
         title: 'My Issue',
       } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
       expect(getIssueKey(pullRequest)).toBeUndefined()
+    })
+  })
+
+  describe('getPullRequest', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(Client.readClient.pulls, 'get')
+        .mockImplementation((_args?: GetPullParams) =>
+          Promise.resolve({
+            data: mockGithubPullRequest,
+          } as OctokitResponse<PullsGetResponseData>)
+        )
+      const result = await getPullRequest(repo, pull_number)
+      expect(spy).toHaveBeenCalledWith(fetchPullParams)
+      expect(result?.number).toEqual(pull_number)
+      spy.mockRestore()
+    })
+
+    it("returns undefined if the branch can't be found", async () => {
+      const spy = jest
+        .spyOn(Client.readClient.pulls, 'get')
+        .mockImplementation((_args?: GetPullParams) => {
+          throw new Error('Pull request not found')
+        })
+      const result = await getPullRequest(repo, pull_number)
+      expect(spy).toHaveBeenCalledWith(fetchPullParams)
+      expect(result).toEqual(undefined)
+      spy.mockRestore()
     })
   })
 })
