@@ -14,12 +14,13 @@ interface User {
 export interface Issue {
   fields: {
     assignee?: User
-    description: string
+    description?: string
     issuetype: {
       name: string
       subtask: boolean
     }
-    subtasks: Issue[]
+    parent?: Issue
+    subtasks?: Issue[]
     summary: string
     status: {
       name: string
@@ -29,7 +30,7 @@ export interface Issue {
   }
   id: string
   key: string
-  names: {
+  names?: {
     [name: string]: string
   }
   subtask?: boolean
@@ -53,10 +54,13 @@ export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
 
+// Jira issue types.
+export const JiraIssueTypeEpic = 'Epic'
+
 /**
  * Fetches the issue with the given key from Jira.
  *
- * @param {string} key The key of the Jira issue (eg. 'STUDIO-236').
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
  *
  * @returns {Issue} The issue data.
  */
@@ -66,8 +70,9 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
 
     // Find the repository, and include it explicitly. This is a bit ugly due to the way
     // Jira includes custom fields.
-    const fieldName = Object.keys(issue.names).find(
-      name => issue.names[name] === 'Repository'
+    const names = issue.names || {}
+    const fieldName = Object.keys(names).find(
+      name => names[name] === 'Repository'
     )
     if (fieldName) {
       issue.fields.repository = ((issue.fields as unknown) as {
@@ -84,6 +89,36 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
     throw err
   }
 }
+
+/**
+ * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
+ *
+ * @returns {Issue} The epic issue data.
+ */
+export const getEpic = async (key: string): Promise<Issue | undefined> => {
+  const issue = await getIssue(key)
+  if (isNil(issue)) {
+    return undefined
+  }
+  if (issue.fields.issuetype.name === JiraIssueTypeEpic) {
+    return issue
+  }
+  if (issue.fields.parent) {
+    if (issue.fields.parent.fields.issuetype.name === JiraIssueTypeEpic) {
+      return issue.fields.parent
+    }
+    // eslint-disable-next-line no-use-before-define
+    return recursiveGetEpic(issue.fields.parent.key)
+  }
+
+  return undefined
+}
+// This is purely separated for ease of testing.
+export const recursiveGetEpic = async (
+  key: string
+): Promise<Issue | undefined> => getEpic(key)
 
 /**
  * Fetches the numbers of the pull requests attached to this issue. Note that
@@ -111,6 +146,16 @@ export const getIssuePullRequestNumbers = async (
 
   return ids
 }
+
+/**
+ * Returns the URL of the issue with the given key.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
+ *
+ * @returns {string} The URL of the issue.
+ */
+export const issueUrl = (key: string): string =>
+  `https://${jiraHost()}/browse/${key}`
 
 /**
  * Transitions the given issue to the given status.

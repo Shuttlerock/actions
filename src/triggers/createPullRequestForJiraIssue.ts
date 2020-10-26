@@ -7,12 +7,18 @@ import {
   addLabels,
   assignOwners,
   createBranch,
+  createEpicPullRequest,
   createPullRequest,
   getBranch,
   getRepository,
+  pullRequestUrl,
 } from '@sr-services/Github'
-import { jiraHost, organizationName } from '@sr-services/Inputs'
-import { getIssue, getIssuePullRequestNumbers } from '@sr-services/Jira'
+import {
+  getEpic,
+  getIssue,
+  getIssuePullRequestNumbers,
+  issueUrl,
+} from '@sr-services/Jira'
 import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'
 import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
@@ -47,7 +53,7 @@ export const createPullRequestForJiraIssue = async (
     return
   }
 
-  const jiraUrl = `https://${jiraHost()}/browse/${issue.key}`
+  const jiraUrl = issueUrl(issue.key)
   info(`The Jira URL is ${jiraUrl}`)
 
   info('Finding out who the pull request should belong to...')
@@ -68,7 +74,7 @@ export const createPullRequestForJiraIssue = async (
   )}-${parameterize(issue.fields.summary)}`
   info(`The pull request will be assigned to @${credentials.github_username}`)
 
-  if (issue.fields.subtasks.length > 0) {
+  if ((issue.fields.subtasks || []).length > 0) {
     const message = `Issue <${jiraUrl}|${issue.key}> has subtasks, so no pull request was created`
     info(message)
     await sendUserMessage(credentials.slack_id, message)
@@ -92,12 +98,22 @@ export const createPullRequestForJiraIssue = async (
     info(`Pull request #${pullRequestNumber} already exists`)
   } else {
     info('There is no open pull request for this issue')
-    info("Notifying the user that we're maing a pull request...")
+    info("Notifying the user that we're making a pull request...")
     const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`
     await sendUserMessage(credentials.slack_id, message)
 
-    const baseBranchName = repo.default_branch
+    let baseBranchName = repo.default_branch
     const branch = await getBranch(repo.name, newBranchName)
+
+    // Decide if this is an epic.
+    const epic = await getEpic(issue.key)
+    if (epic) {
+      info(
+        `Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`
+      )
+      const epicPr = await createEpicPullRequest(epic, issue.fields.repository)
+      baseBranchName = epicPr.head.ref
+    }
 
     info(`Checking if the branch '${newBranchName}' already exists...`)
     if (isNil(branch)) {
@@ -117,7 +133,9 @@ export const createPullRequestForJiraIssue = async (
     info('Creating the pull request...')
     const prTitle = `[${issue.key}] ${issue.fields.summary}`
     const templateVars = {
-      description: issue.fields.description,
+      belongsToEpic: !!epic,
+      description: issue.fields.description || '',
+      epicUrl: epic && issueUrl(epic.key),
       issueType: issue.fields.issuetype.name,
       summary: issue.fields.summary,
       jiraUrl,
@@ -146,9 +164,7 @@ export const createPullRequestForJiraIssue = async (
   ])
 
   info(`Notifying Slack user ${credentials.slack_id}...`)
-  const url = `https://github.com/${organizationName()}/${
-    repo.name
-  }/pull/${pullRequestNumber}`
+  const url = pullRequestUrl(repo.name, pullRequestNumber)
   const message = `Here's your pull request: ${url}
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:

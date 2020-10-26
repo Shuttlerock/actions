@@ -9,7 +9,7 @@ jest.mock(
 describe('pull-request-converted-to-draft-action', () => {
   afterAll(() => jest.restoreAllMocks())
 
-  it('calls the method to close the pull request', async () => {
+  it('calls the method to process the pull request', async () => {
     process.env.GITHUB_EVENT_PATH = join(
       __dirname,
       'fixtures',

@@ -1,3 +1,4 @@
+import { InProgressLabel } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
 import { jiraHost } from '@sr-services/Inputs'
@@ -6,6 +7,7 @@ import * as Slack from '@sr-services/Slack'
 import {
   mockCredentials,
   mockGithubBranch,
+  mockGithubPullRequest,
   mockGithubPullRequestCreateResponse,
   mockGithubRepository,
   mockIssuesAddAssigneesResponseData,
@@ -15,16 +17,21 @@ import {
 import { createPullRequestForJiraIssue } from '@sr-triggers/createPullRequestForJiraIssue'
 
 jest.mock('@sr-services/Jira', () => ({
+  getEpic: jest.fn(),
   getIssue: jest.fn(),
   getIssuePullRequestNumbers: jest.fn(),
+  issueUrl: (key: string) => `https://example.atlassian.net/browse/${key}`,
 }))
 jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
 jest.mock('@sr-services/Github', () => ({
   addLabels: jest.fn(),
   assignOwners: jest.fn(),
+  createEpicPullRequest: jest.fn(),
   createPullRequest: jest.fn(),
   getBranch: jest.fn(),
   getRepository: jest.fn(),
+  pullRequestUrl: (repo: string, number: number) =>
+    `https://github.com/octokit/${repo}/pull/${number}`,
 }))
 
 const email = 'user@example.com'
@@ -160,5 +167,39 @@ describe('createPullRequestForJiraIssue', () => {
     )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
     expect(githubCreatePullRequestSpy).toHaveBeenCalled()
+    expect(githubCreatePullRequestSpy).toHaveBeenCalledWith(
+      'webhooks',
+      'develop',
+      'user/issue-236-create-a-release-pr',
+      '[ISSUE-236] Create a release PR',
+      expect.anything(),
+      'my-github-token'
+    )
+    expect(githubAddLabelsSpy).toHaveBeenCalledWith('webhooks', 123, [
+      InProgressLabel,
+    ])
+  })
+
+  it('creates an Epic PR if necessary', async () => {
+    const mockEpic = { ...mockJiraIssue, key: 'ISSUE-231' }
+    const getEpicSpy = jest
+      .spyOn(Jira, 'getEpic')
+      .mockImplementation((_issueKey: string) => Promise.resolve(mockEpic))
+    const createEpicPullRequestSpy = jest
+      .spyOn(Github, 'createEpicPullRequest')
+      .mockImplementation((_epic: Jira.Issue, _repo: Github.Repository) =>
+        Promise.resolve(mockGithubPullRequest)
+      )
+    await createPullRequestForJiraIssue(email, issueKey)
+    expect(githubCreatePullRequestSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'feature/create-epic-prs', // <-- The new PR should use the epic branch.
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    )
+    getEpicSpy.mockRestore()
+    createEpicPullRequestSpy.mockRestore()
   })
 })

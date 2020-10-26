@@ -6,9 +6,9 @@
     {
       "branches":[
         {
-          "name":"example-236-create-a-release",
-          "url":"https://github.com/octokit/actions/tree/example-236-create-a-release",
-          "createPullRequestUrl":"https://github.com/octokit/actions/pull/new/example-236-create-a-release",
+          "name":"issue-236-create-a-release",
+          "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release",
+          "createPullRequestUrl":"https://github.com/octokit/actions/pull/new/issue-236-create-a-release",
           "repository":{
             "name":"octokit/actions",
             "url":"https://github.com/octokit/actions",
@@ -41,11 +41,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#65",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -64,11 +64,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#64",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -87,11 +87,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#63",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -110,11 +110,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#62",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -133,11 +133,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#61",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -156,11 +156,11 @@
             "url":"https://github.com/octo-user"
           },
           "id":"#59",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":1,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -179,11 +179,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#58",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":1,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -202,11 +202,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#54",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -225,11 +225,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#51",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -248,11 +248,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#50",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":1,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -271,11 +271,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#49",
-          "name":"[EXAMPLE-236] Create a release PR",
+          "name":"[ISSUE-236] Create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -294,11 +294,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#44",
-          "name":"[EXAMPLE-236] create a release PR",
+          "name":"[ISSUE-236] create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"
@@ -317,11 +317,11 @@
             "url":"https://github.com/sr-devops"
           },
           "id":"#43",
-          "name":"[EXAMPLE-236] create a release PR",
+          "name":"[ISSUE-236] create a release PR",
           "commentCount":0,
           "source":{
-            "branch":"example-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/example-236-create-a-release"
+            "branch":"issue-236-create-a-release",
+            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
           },
           "destination":{
             "branch":"https://github.com/octokit/actions/tree/develop"

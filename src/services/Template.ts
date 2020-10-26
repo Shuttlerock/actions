@@ -1,7 +1,7 @@
 import { render as mustacheRender } from 'mustache'
 
 interface TemplateVars {
-  [key: string]: string | number
+  [key: string]: string | number | boolean | undefined
 }
 
 /**
@@ -15,10 +15,41 @@ interface TemplateVars {
 export const render = (template: string, vars: TemplateVars): string =>
   mustacheRender(template, vars)
 
-export const PullRequestForIssueTemplate = `
-## {{summary}}
+export const PullRequestForEpicTemplate = `
+## {{&summary}}
 
 [Jira {{issueType}}]({{&jiraUrl}})
+
+{{description}}
+
+## Pull Requests
+
+...
+
+## Jira Issues
+
+...
+
+## How to test
+
+...
+
+## Deployment Notes
+
+...
+
+## Epic Notes
+
+Add notes here.
+`
+
+export const PullRequestForIssueTemplate = `
+## {{&summary}}
+
+[Jira {{issueType}}]({{&jiraUrl}})
+{{#belongsToEpic}}
+[Jira Epic]({{&epicUrl}})
+{{/belongsToEpic}}
 
 {{description}}
 

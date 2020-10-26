@@ -2,10 +2,11 @@ import {
   IssuesAddAssigneesResponseData,
   IssuesAddLabelsResponseData,
   PullsCreateResponseData,
+  PullsGetResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
-import { client, clientForToken } from '@sr-services/Github/Client'
+import { client, clientForToken, readClient } from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import { jiraHost, organizationName } from '@sr-services/Inputs'
 
@@ -112,3 +113,45 @@ export const getIssueKey = (
 
   return undefined
 }
+
+/**
+ * Fetches the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR will belong to.
+ * @param {number}     number The pull request number to fetch.
+ *
+ * @returns {PullsGetResponseData} The pull request data.
+ */
+export const getPullRequest = async (
+  repo: Repository,
+  number: number
+): Promise<PullsGetResponseData | undefined> => {
+  try {
+    const response = await readClient.pulls.get({
+      owner: organizationName(),
+      pull_number: number,
+      repo,
+    })
+
+    return response.data
+  } catch (err) {
+    if (err.message === 'Pull request not found') {
+      return undefined
+    }
+
+    throw err
+  }
+
+  return undefined
+}
+
+/**
+ * Returns the URL of the pull request with the given number and repo.
+ *
+ * @param {Repository} repo   The name of the repository that the PR will belong to.
+ * @param {number}     number The pull request number to fetch.
+ *
+ * @returns {string} The URL of the pull request.
+ */
+export const pullRequestUrl = (repo: Repository, number: number): string =>
+  `https://github.com/${organizationName()}/${repo}/pull/${number}`

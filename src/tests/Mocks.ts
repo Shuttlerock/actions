@@ -2,6 +2,7 @@ import {
   IssuesAddAssigneesResponseData,
   IssuesAddLabelsResponseData,
   PullsCreateResponseData,
+  PullsGetResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
@@ -42,6 +43,8 @@ export const mockGithubPullRequestCreateResponse = ({
 } as unknown) as PullsCreateResponseData
 
 export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
+
+export const mockGithubPullRequest = (mockGithubPullRequestPayload.pull_request as unknown) as PullsGetResponseData
 
 export const mockGithubRepository = (repository as unknown) as ReposGetResponseData
 
