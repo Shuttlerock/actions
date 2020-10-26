@@ -109,11 +109,16 @@ export const getEpic = async (key: string): Promise<Issue | undefined> => {
     if (issue.fields.parent.fields.issuetype.name === JiraIssueTypeEpic) {
       return issue.fields.parent
     }
-    return getEpic(issue.fields.parent.key)
+    // eslint-disable-next-line no-use-before-define
+    return recursiveGetEpic(issue.fields.parent.key)
   }
 
   return undefined
 }
+// This is purely separated for ease of testing.
+export const recursiveGetEpic = async (
+  key: string
+): Promise<Issue | undefined> => getEpic(key)
 
 /**
  * Fetches the numbers of the pull requests attached to this issue. Note that

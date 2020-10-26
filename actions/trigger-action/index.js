@@ -16130,7 +16130,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.getEpic = exports.getIssue = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = void 0;
+exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = void 0;
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
@@ -16187,10 +16187,13 @@ exports.getEpic = (key) => __awaiter(void 0, void 0, void 0, function* () {
         if (issue.fields.parent.fields.issuetype.name === exports.JiraIssueTypeEpic) {
             return issue.fields.parent;
         }
-        return exports.getEpic(issue.fields.parent.key);
+        // eslint-disable-next-line no-use-before-define
+        return exports.recursiveGetEpic(issue.fields.parent.key);
     }
     return undefined;
 });
+// This is purely separated for ease of testing.
+exports.recursiveGetEpic = (key) => __awaiter(void 0, void 0, void 0, function* () { return exports.getEpic(key); });
 /**
  * Fetches the numbers of the pull requests attached to this issue. Note that
  * this is a **PRIVATE API**, and may break in the future.
@@ -47564,7 +47567,6 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
         const epic = yield Jira_1.getEpic(issue.key);
         if (epic) {
             core_1.info(`Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`);
-            // Todo: use the branch from this newly created PR.
             const epicPr = yield Github_1.createEpicPullRequest(epic, issue.fields.repository);
             baseBranchName = epicPr.head.ref;
         }

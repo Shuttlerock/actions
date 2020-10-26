@@ -111,7 +111,6 @@ export const createPullRequestForJiraIssue = async (
       info(
         `Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`
       )
-      // Todo: use the branch from this newly created PR.
       const epicPr = await createEpicPullRequest(epic, issue.fields.repository)
       baseBranchName = epicPr.head.ref
     }
