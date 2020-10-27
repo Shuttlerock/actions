@@ -15592,18 +15592,19 @@ exports.recursiveGetEpic = (key) => __awaiter(void 0, void 0, void 0, function* 
  * Fetches the numbers of the pull requests attached to this issue. Note that
  * this is a **PRIVATE API**, and may break in the future.
  *
- * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ * @param {string}     issueId The ID of the Jira issue (eg. '10910').
+ * @param {Repository} repo    The name of the repository we're dealing with.
  *
  * @returns {number[]} The PR numbers.
  */
-exports.getIssuePullRequestNumbers = (issueId) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getIssuePullRequestNumbers = (issueId, repo) => __awaiter(void 0, void 0, void 0, function* () {
     const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
     const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
     const response = yield node_fetch_1.default(url);
     const data = (yield response.json());
     const ids = data.detail
         .map((detail) => detail.pullRequests
-        .filter((pr) => pr.status === 'OPEN')
+        .filter((pr) => pr.url.startsWith(`https://github.com/${Inputs_1.organizationName()}/${repo}/`) && pr.status === 'OPEN')
         .map((pr) => pr.id))
         .flat()
         .map((id) => parseInt(id.replace(/[^\d]/, ''), 10));
@@ -51698,7 +51699,7 @@ exports.createEpicPullRequest = (epic, repositoryName) => __awaiter(void 0, void
     core_1.info('Checking if there is an open pull request for this epic...');
     let pullRequestNumber;
     const repo = yield Repository_1.getRepository(repositoryName);
-    const pullRequestNumbers = yield Jira_1.getIssuePullRequestNumbers(epic.id);
+    const pullRequestNumbers = yield Jira_1.getIssuePullRequestNumbers(epic.id, repo.name);
     if (pullRequestNumbers.length > 0) {
         ;
         [pullRequestNumber] = pullRequestNumbers;

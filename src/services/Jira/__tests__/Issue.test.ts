@@ -124,8 +124,8 @@ describe('Issue', () => {
       ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
         new Response(JSON.stringify(mockJiraPullRequests))
       )
-      const numbers = await getIssuePullRequestNumbers('ISSUE-236')
-      expect(numbers).toEqual([65])
+      const numbers = await getIssuePullRequestNumbers('ISSUE-236', 'actions')
+      expect(numbers).toEqual([64])
     })
   })
 

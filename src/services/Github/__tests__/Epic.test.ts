@@ -76,7 +76,9 @@ describe('Epic', () => {
         )
       jiraPrsSpy = jest
         .spyOn(Jira, 'getIssuePullRequestNumbers')
-        .mockImplementation((_issueId: string) => Promise.resolve([]))
+        .mockImplementation((_issueId: string, _repo: Git.Repository) =>
+          Promise.resolve([])
+        )
       repoSpy = jest
         .spyOn(Repository, 'getRepository')
         .mockImplementation((_name: string) =>

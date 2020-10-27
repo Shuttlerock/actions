@@ -38,7 +38,10 @@ export const createEpicPullRequest = async (
   info('Checking if there is an open pull request for this epic...')
   let pullRequestNumber
   const repo = await getRepository(repositoryName)
-  const pullRequestNumbers = await getIssuePullRequestNumbers(epic.id)
+  const pullRequestNumbers = await getIssuePullRequestNumbers(
+    epic.id,
+    repo.name
+  )
 
   if (pullRequestNumbers.length > 0) {
     ;[pullRequestNumber] = pullRequestNumbers
