@@ -2,7 +2,13 @@ import { TransitionObject } from 'jira-client'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { jiraEmail, jiraHost, jiraToken } from '@sr-services/Inputs'
+import { Repository } from '@sr-services/Github/Git'
+import {
+  jiraEmail,
+  jiraHost,
+  jiraToken,
+  organizationName,
+} from '@sr-services/Inputs'
 import { client } from '@sr-services/Jira/Client'
 
 interface User {
@@ -39,6 +45,7 @@ export interface Issue {
 interface GithubPullRequest {
   id: string
   status: 'DECLINED' | 'OPEN'
+  url: string
 }
 
 interface GithubDetail {
@@ -124,12 +131,14 @@ export const recursiveGetEpic = async (
  * Fetches the numbers of the pull requests attached to this issue. Note that
  * this is a **PRIVATE API**, and may break in the future.
  *
- * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ * @param {string}     issueId The ID of the Jira issue (eg. '10910').
+ * @param {Repository} repo    The name of the repository we're dealing with.
  *
  * @returns {number[]} The PR numbers.
  */
 export const getIssuePullRequestNumbers = async (
-  issueId: string
+  issueId: string,
+  repo: Repository
 ): Promise<number[]> => {
   const host = `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`
   const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`
@@ -138,7 +147,12 @@ export const getIssuePullRequestNumbers = async (
   const ids = data.detail
     .map((detail: GithubDetail) =>
       detail.pullRequests
-        .filter((pr: GithubPullRequest) => pr.status === 'OPEN')
+        .filter(
+          (pr: GithubPullRequest) =>
+            pr.url.startsWith(
+              `https://github.com/${organizationName()}/${repo}/`
+            ) && pr.status === 'OPEN'
+        )
         .map((pr: GithubPullRequest) => pr.id)
     )
     .flat()

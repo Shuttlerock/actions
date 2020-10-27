@@ -91,7 +91,10 @@ export const createPullRequestForJiraIssue = async (
   info('Checking if there is an open pull request for this issue...')
   let pullRequestNumber
   const repo = await getRepository(issue.fields.repository)
-  const pullRequestNumbers = await getIssuePullRequestNumbers(issue.id)
+  const pullRequestNumbers = await getIssuePullRequestNumbers(
+    issue.id,
+    repo.name
+  )
 
   if (pullRequestNumbers.length > 0) {
     ;[pullRequestNumber] = pullRequestNumbers

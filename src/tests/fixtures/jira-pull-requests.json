@@ -45,16 +45,16 @@
           "commentCount":0,
           "source":{
             "branch":"issue-236-create-a-release",
-            "url":"https://github.com/octokit/actions/tree/issue-236-create-a-release"
+            "url":"https://github.com/octokit/webhooks/tree/issue-236-create-a-release"
           },
           "destination":{
-            "branch":"https://github.com/octokit/actions/tree/develop"
+            "branch":"https://github.com/octokit/webhooks/tree/develop"
           },
           "reviewers":[
 
           ],
           "status":"OPEN",
-          "url":"https://github.com/octokit/actions/pull/65",
+          "url":"https://github.com/octokit/webhooks/pull/65",
           "lastUpdate":"2020-10-09T04:53:34.000+0000"
         },
         {
@@ -76,7 +76,7 @@
           "reviewers":[
 
           ],
-          "status":"DECLINED",
+          "status":"OPEN",
           "url":"https://github.com/octokit/actions/pull/64",
           "lastUpdate":"2020-10-09T04:53:20.000+0000"
         },
