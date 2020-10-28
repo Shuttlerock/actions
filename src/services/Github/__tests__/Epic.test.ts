@@ -2,6 +2,7 @@ import { EpicLabel, InProgressLabel } from '@sr-services/Constants'
 import * as Branch from '@sr-services/Github/Branch'
 import { createEpicPullRequest } from '@sr-services/Github/Epic'
 import * as Git from '@sr-services/Github/Git'
+import * as Label from '@sr-services/Github/Label'
 import * as PullRequest from '@sr-services/Github/PullRequest'
 import * as Repository from '@sr-services/Github/Repository'
 import * as Jira from '@sr-services/Jira'
@@ -22,8 +23,8 @@ jest.mock('@sr-services/Jira', () => ({
 }))
 jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
 jest.mock('@sr-services/Github/Branch', () => ({ getBranch: jest.fn() }))
+jest.mock('@sr-services/Github/Label', () => ({ addLabels: jest.fn() }))
 jest.mock('@sr-services/Github/PullRequest', () => ({
-  addLabels: jest.fn(),
   assignOwners: jest.fn(),
   createPullRequest: jest.fn(),
   getPullRequest: jest.fn(),
@@ -47,7 +48,7 @@ describe('Epic', () => {
 
     beforeEach(() => {
       githubAddLabelsSpy = jest
-        .spyOn(PullRequest, 'addLabels')
+        .spyOn(Label, 'addLabels')
         .mockImplementation(
           (_repo: Git.Repository, _number: number, _labels: string[]) =>
             Promise.resolve(mockIssuesAddLabelsResponseData)

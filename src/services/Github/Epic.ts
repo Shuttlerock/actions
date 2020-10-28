@@ -4,8 +4,8 @@ import isNil from 'lodash/isNil'
 
 import { EpicLabel, InProgressLabel } from '@sr-services/Constants'
 import { createBranch, getBranch } from '@sr-services/Github/Branch'
+import { addLabels } from '@sr-services/Github/Label'
 import {
-  addLabels,
   createPullRequest,
   getPullRequest,
   pullRequestUrl,

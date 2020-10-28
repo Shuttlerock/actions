@@ -2910,27 +2910,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setLabels = exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
+exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const Client_1 = __webpack_require__(818);
 const Inputs_1 = __webpack_require__(968);
-/**
- * Adds labels to the given issue or PR.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The labels to add.
- *
- * @returns {IssuesAddLabelsResponseData} The PR data.
- */
-exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addLabels({
-        issue_number: number,
-        labels,
-        owner: Inputs_1.organizationName(),
-        repo,
-    });
-    return response.data;
-});
 /**
  * Assigns owners to the given issue or PR.
  *
@@ -3023,24 +3005,6 @@ exports.getPullRequest = (repo, number) => __awaiter(void 0, void 0, void 0, fun
  * @returns {string} The URL of the pull request.
  */
 exports.pullRequestUrl = (repo, number) => `https://github.com/${Inputs_1.organizationName()}/${repo}/pull/${number}`;
-/**
- * Sets the labels for the given issue or PR, replacing any existing labels.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The list of labels to set.
- *
- * @returns {IssuesSetLabelsResponseData} The PR data.
- */
-exports.setLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.setLabels({
-        issue_number: number,
-        labels,
-        owner: Inputs_1.organizationName(),
-        repo,
-    });
-    return response.data;
-});
 
 
 /***/ }),
@@ -10320,7 +10284,63 @@ module.exports = {
 /***/ }),
 /* 144 */,
 /* 145 */,
-/* 146 */,
+/* 146 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setLabels = exports.addLabels = void 0;
+const Client_1 = __webpack_require__(818);
+const Inputs_1 = __webpack_require__(968);
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.addLabels({
+        issue_number: number,
+        labels,
+        owner: Inputs_1.organizationName(),
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Sets the labels for the given issue or PR, replacing any existing labels.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The list of labels to set.
+ *
+ * @returns {IssuesSetLabelsResponseData} The PR data.
+ */
+exports.setLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.setLabels({
+        issue_number: number,
+        labels,
+        owner: Inputs_1.organizationName(),
+        repo,
+    });
+    return response.data;
+});
+
+
+/***/ }),
 /* 147 */,
 /* 148 */,
 /* 149 */,
@@ -22099,6 +22119,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(__webpack_require__(866), exports);
 __exportStar(__webpack_require__(999), exports);
 __exportStar(__webpack_require__(433), exports);
+__exportStar(__webpack_require__(146), exports);
 __exportStar(__webpack_require__(28), exports);
 __exportStar(__webpack_require__(15), exports);
 
@@ -51703,6 +51724,7 @@ const core_1 = __webpack_require__(186);
 const isNil_1 = __importDefault(__webpack_require__(977));
 const Constants_1 = __webpack_require__(168);
 const Branch_1 = __webpack_require__(866);
+const Label_1 = __webpack_require__(146);
 const PullRequest_1 = __webpack_require__(28);
 const Repository_1 = __webpack_require__(15);
 const Inputs_1 = __webpack_require__(968);
@@ -51754,7 +51776,7 @@ exports.createEpicPullRequest = (epic, repositoryName) => __awaiter(void 0, void
         core_1.info(`Created epic pull request #${pullRequestNumber}`);
     }
     core_1.info('Adding epic labels...');
-    yield PullRequest_1.addLabels(repo.name, pullRequestNumber, [Constants_1.EpicLabel, Constants_1.InProgressLabel]);
+    yield Label_1.addLabels(repo.name, pullRequestNumber, [Constants_1.EpicLabel, Constants_1.InProgressLabel]);
     const url = PullRequest_1.pullRequestUrl(repo.name, pullRequestNumber);
     core_1.info(`Finished creating pull request ${url} for Jira epic ${epic.key}`);
     const pullRequest = yield PullRequest_1.getPullRequest(repo.name, pullRequestNumber);

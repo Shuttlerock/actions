@@ -1,7 +1,5 @@
 import {
   IssuesAddAssigneesResponseData,
-  IssuesAddLabelsResponseData,
-  IssuesSetLabelsResponseData,
   OctokitResponse,
   PullsCreateResponseData,
   PullsGetResponseData,
@@ -11,21 +9,17 @@ import { EventPayloads } from '@octokit/webhooks'
 import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
-  addLabels,
   assignOwners,
   createPullRequest,
   getIssueKey,
   getPullRequest,
   pullRequestUrl,
-  setLabels,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
   mockGithubPullRequestCreateResponse,
   mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
-  mockIssuesAddLabelsResponseData,
-  mockIssuesSetLabelsResponseData,
 } from '@sr-tests/Mocks'
 
 interface GetPullParams {
@@ -43,33 +37,6 @@ const fetchPullParams = {
 }
 
 describe('PullRequest', () => {
-  describe('addLabels', () => {
-    it('calls the Github API', async () => {
-      const spy = jest
-        .spyOn(Client.client.issues, 'addLabels')
-        .mockImplementation(
-          (_args?: {
-            issue_number: number
-            labels: string[]
-            owner: string
-            repo: Repository
-          }) =>
-            Promise.resolve({
-              data: mockIssuesAddLabelsResponseData,
-            } as OctokitResponse<IssuesAddLabelsResponseData>)
-        )
-      const result = await addLabels(repo, 23, ['my-label'])
-      expect(spy).toHaveBeenCalledWith({
-        issue_number: 23,
-        labels: ['my-label'],
-        owner: organizationName(),
-        repo,
-      })
-      expect(result[0].name).toEqual('my-label')
-      spy.mockRestore()
-    })
-  })
-
   describe('assignOwners', () => {
     it('calls the Github API', async () => {
       const spy = jest
@@ -201,33 +168,6 @@ describe('PullRequest', () => {
     it('returns the URL', () => {
       const expected = 'https://github.com/octokit/actions/pull/123'
       expect(pullRequestUrl('actions', 123)).toEqual(expected)
-    })
-  })
-
-  describe('setLabels', () => {
-    it('calls the Github API', async () => {
-      const spy = jest
-        .spyOn(Client.client.issues, 'setLabels')
-        .mockImplementation(
-          (_args?: {
-            issue_number: number
-            labels?: string[]
-            owner: string
-            repo: Repository
-          }) =>
-            Promise.resolve({
-              data: mockIssuesSetLabelsResponseData,
-            } as OctokitResponse<IssuesSetLabelsResponseData>)
-        )
-      const result = await setLabels(repo, 23, ['my-label'])
-      expect(spy).toHaveBeenCalledWith({
-        issue_number: 23,
-        labels: ['my-label'],
-        owner: organizationName(),
-        repo,
-      })
-      expect(result[0].name).toEqual('my-label')
-      spy.mockRestore()
     })
   })
 })
