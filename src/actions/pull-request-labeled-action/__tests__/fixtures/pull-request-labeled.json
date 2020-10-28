@@ -1,0 +1,20 @@
+{
+  "action": "labeled",
+  "pull_request": {
+    "labels": [{
+      "name": "in-progress"
+    }, {
+      "name": "under-discussion"
+    }],
+    "number": 136
+  },
+  "label": {
+    "name": "please-review"
+  },
+  "repository": {
+    "name": "actions"
+  },
+  "sender": {
+    "login": "recurser"
+  }
+}

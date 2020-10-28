@@ -1417,6 +1417,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch(err => {
     core_1.error(err);
+    core_1.error(err.stack);
     core_1.setFailed(err.message);
 });
 

@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(809);
+/******/ 		return __webpack_require__(141);
 /******/ 	};
 /******/ 	// initialize runtime
 /******/ 	runtime(__webpack_require__);
@@ -9823,7 +9823,45 @@ exports.debug = debug // for test
 /* 138 */,
 /* 139 */,
 /* 140 */,
-/* 141 */,
+/* 141 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
+const core_1 = __webpack_require__(186);
+const github_1 = __webpack_require__(438);
+const pullRequestLabeled_1 = __webpack_require__(475);
+/**
+ * Runs whenever a pull request is labeled.
+ *
+ * To trigger this event manually:
+ *
+ * $ act --job pull_request_labeled_action --eventpath src/actions/pull-request-labeled-action/__tests__/fixtures/pull-request-labeled.json
+ */
+exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { payload } = (yield github_1.context);
+    yield pullRequestLabeled_1.pullRequestLabeled(payload);
+});
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+exports.run().catch(err => {
+    core_1.error(err);
+    core_1.error(err.stack);
+    core_1.setFailed(err.message);
+});
+
+
+/***/ }),
 /* 142 */
 /***/ (function(module) {
 
@@ -29993,45 +30031,65 @@ function state(list, sortMethod)
 
 /***/ }),
 /* 475 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var Symbol = __webpack_require__(213),
-    arrayMap = __webpack_require__(356),
-    isArray = __webpack_require__(869),
-    isSymbol = __webpack_require__(403);
+"use strict";
 
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0;
-
-/** Used to convert symbols to primitives and strings. */
-var symbolProto = Symbol ? Symbol.prototype : undefined,
-    symbolToString = symbolProto ? symbolProto.toString : undefined;
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.pullRequestLabeled = void 0;
+const core_1 = __webpack_require__(186);
+const Constants_1 = __webpack_require__(168);
+const Github_1 = __webpack_require__(390);
+// Certain labels can't co-exist.
+const mutuallyExclusiveLabels = [
+    [Constants_1.HasConflictsLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.HasFailuresLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.HasIssuesLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel, Constants_1.PassedReviewLabel],
+    [Constants_1.HasIssuesLabel, Constants_1.PassedReviewLabel],
+];
 /**
- * The base implementation of `_.toString` which doesn't convert nullish
- * values to empty strings.
+ * Runs whenever a pull request is labeled.
  *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
+ * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
  */
-function baseToString(value) {
-  // Exit early for strings to avoid a performance hit in some environments.
-  if (typeof value == 'string') {
-    return value;
-  }
-  if (isArray(value)) {
-    // Recursively convert values (susceptible to call stack limits).
-    return arrayMap(value, baseToString) + '';
-  }
-  if (isSymbol(value)) {
-    return symbolToString ? symbolToString.call(value) : '';
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
-}
-
-module.exports = baseToString;
+exports.pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { label, pull_request: pullRequest, repository, sender } = payload;
+    if (sender.login === Constants_1.GithubWriteUser) {
+        core_1.info(`This label was added by @${Constants_1.GithubWriteUser} - nothing to do`);
+        return;
+    }
+    const added = label === null || label === void 0 ? void 0 : label.name; // We know we have a label for this event.
+    const existing = pullRequest.labels.map((lbl) => lbl.name);
+    core_1.info(`Existing labels are [${existing.join(', ')}]`);
+    core_1.info(`The label '${added}' was added`);
+    core_1.info('Deciding which labels to remove...');
+    const toRemoveRaw = mutuallyExclusiveLabels
+        .map((labels) => (labels.includes(added) ? labels : []))
+        .flat()
+        .filter((lbl) => lbl !== added && existing.includes(lbl));
+    const toRemove = [...new Set(toRemoveRaw)];
+    if (toRemove.length === 0) {
+        core_1.info('No labels need to be removed - giving up');
+        return;
+    }
+    core_1.info(`These labels will be removed: '${toRemove.join(', ')}'`);
+    const toKeep = [
+        ...existing.filter((lbl) => !toRemove.includes(lbl)),
+        added,
+    ].sort();
+    yield core_1.info(`Setting new labels: ${toKeep.join(', ')}]`);
+    yield Github_1.setLabels(repository.name, pullRequest.number, toKeep);
+});
 
 
 /***/ }),
@@ -37047,64 +37105,7 @@ module.exports = function generate_const(it, $keyword, $ruleType) {
 /* 662 */,
 /* 663 */,
 /* 664 */,
-/* 665 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.pullRequestClosed = void 0;
-const core_1 = __webpack_require__(186);
-const isNil_1 = __importDefault(__webpack_require__(977));
-const Github_1 = __webpack_require__(390);
-const Jira_1 = __webpack_require__(404);
-/**
- * Runs whenever a pull request is closed (not necessarily merged).
- *
- * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is closed.
- */
-exports.pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pull_request: pullRequest, repository } = payload;
-    // Used for log messages.
-    const prName = `${repository.name}#${pullRequest.number}`;
-    if (!pullRequest.merged) {
-        core_1.info(`${prName} is not merged - ignoring`);
-        return;
-    }
-    core_1.info(`Getting the Jira key from the pull request ${prName}...`);
-    const issueKey = Github_1.getIssueKey(pullRequest);
-    if (isNil_1.default(issueKey)) {
-        core_1.info(`Couldn't extract a Jira issue key from ${prName} - ignoring`);
-        return;
-    }
-    core_1.info(`Fetching the Jira issue ${issueKey}...`);
-    const issue = yield Jira_1.getIssue(issueKey);
-    if (isNil_1.default(issue)) {
-        core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
-        return;
-    }
-    if (issue.fields.status.name === Jira_1.JiraStatusValidated) {
-        core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusValidated}' - ignoring`);
-        return;
-    }
-    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusValidated}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusValidated);
-});
-
-
-/***/ }),
+/* 665 */,
 /* 666 */,
 /* 667 */,
 /* 668 */
@@ -39654,7 +39655,49 @@ exports.issueCommand = issueCommand;
 /* 718 */,
 /* 719 */,
 /* 720 */,
-/* 721 */,
+/* 721 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var Symbol = __webpack_require__(213),
+    arrayMap = __webpack_require__(356),
+    isArray = __webpack_require__(869),
+    isSymbol = __webpack_require__(403);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = baseToString;
+
+
+/***/ }),
 /* 722 */,
 /* 723 */,
 /* 724 */
@@ -43769,45 +43812,7 @@ module.exports = isFunction;
 /* 806 */,
 /* 807 */,
 /* 808 */,
-/* 809 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
-const core_1 = __webpack_require__(186);
-const github_1 = __webpack_require__(438);
-const pullRequestClosed_1 = __webpack_require__(665);
-/**
- * Runs whenever a pull request is closed (not necessarily merged).
- *
- * To trigger this event manually:
- *
- * $ act --job pull_request_closed_action --eventpath src/actions/pull-request-closed-action/__tests__/fixtures/pull-request-closed.json
- */
-exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload } = (yield github_1.context);
-    yield pullRequestClosed_1.pullRequestClosed(payload);
-});
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-exports.run().catch(err => {
-    core_1.error(err);
-    core_1.error(err.stack);
-    core_1.setFailed(err.message);
-});
-
-
-/***/ }),
+/* 809 */,
 /* 810 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -48300,7 +48305,7 @@ function write(key, options) {
 /* 931 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var baseToString = __webpack_require__(475);
+var baseToString = __webpack_require__(721);
 
 /**
  * Converts `value` to a string. An empty string is returned for `null`

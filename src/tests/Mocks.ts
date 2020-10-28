@@ -1,6 +1,7 @@
 import {
   IssuesAddAssigneesResponseData,
   IssuesAddLabelsResponseData,
+  IssuesSetLabelsResponseData,
   PullsCreateResponseData,
   PullsGetResponseData,
   ReposGetBranchResponseData,
@@ -55,6 +56,10 @@ export const mockIssuesAddAssigneesResponseData = {
 export const mockIssuesAddLabelsResponseData = [
   { name: 'my-label' },
 ] as IssuesAddLabelsResponseData
+
+export const mockIssuesSetLabelsResponseData = [
+  { name: 'my-label' },
+] as IssuesSetLabelsResponseData
 
 export const mockJiraIssue = issue as Issue
 
