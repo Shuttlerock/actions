@@ -12,7 +12,7 @@ import {
 /**
  * Runs whenever a pull request is closed (not necessarily merged).
  *
- * @param {} payload The JSON payload from Github sent when a pull request is closed.
+ * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is closed.
  */
 export const pullRequestClosed = async (
   payload: EventPayloads.WebhookPayloadPullRequest

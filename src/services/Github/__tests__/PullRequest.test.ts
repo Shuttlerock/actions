@@ -1,6 +1,7 @@
 import {
   IssuesAddAssigneesResponseData,
   IssuesAddLabelsResponseData,
+  IssuesSetLabelsResponseData,
   OctokitResponse,
   PullsCreateResponseData,
   PullsGetResponseData,
@@ -16,6 +17,7 @@ import {
   getIssueKey,
   getPullRequest,
   pullRequestUrl,
+  setLabels,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
@@ -23,6 +25,7 @@ import {
   mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
+  mockIssuesSetLabelsResponseData,
 } from '@sr-tests/Mocks'
 
 interface GetPullParams {
@@ -198,6 +201,33 @@ describe('PullRequest', () => {
     it('returns the URL', () => {
       const expected = 'https://github.com/octokit/actions/pull/123'
       expect(pullRequestUrl('actions', 123)).toEqual(expected)
+    })
+  })
+
+  describe('setLabels', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(Client.client.issues, 'setLabels')
+        .mockImplementation(
+          (_args?: {
+            issue_number: number
+            labels?: string[]
+            owner: string
+            repo: Repository
+          }) =>
+            Promise.resolve({
+              data: mockIssuesSetLabelsResponseData,
+            } as OctokitResponse<IssuesSetLabelsResponseData>)
+        )
+      const result = await setLabels(repo, 23, ['my-label'])
+      expect(spy).toHaveBeenCalledWith({
+        issue_number: 23,
+        labels: ['my-label'],
+        owner: organizationName(),
+        repo,
+      })
+      expect(result[0].name).toEqual('my-label')
+      spy.mockRestore()
     })
   })
 })

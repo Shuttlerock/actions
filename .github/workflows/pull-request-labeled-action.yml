@@ -1,0 +1,15 @@
+name: 'Pull request labeled'
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+
+jobs:
+  pull_request_labeled_action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Shuttlerock/actions/actions/pull-request-labeled-action@master
+        with:
+          organization-name: ${{ secrets.ORGANIZATION_NAME }}
+          repo-token:        ${{ secrets.GITHUB_TOKEN }}
+          write-token:       ${{ secrets.ACTIONS_WRITE_TOKEN }}

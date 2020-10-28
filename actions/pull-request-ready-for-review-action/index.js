@@ -2910,7 +2910,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
+exports.setLabels = exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = exports.addLabels = void 0;
 const Client_1 = __webpack_require__(818);
 const Inputs_1 = __webpack_require__(968);
 /**
@@ -3023,6 +3023,24 @@ exports.getPullRequest = (repo, number) => __awaiter(void 0, void 0, void 0, fun
  * @returns {string} The URL of the pull request.
  */
 exports.pullRequestUrl = (repo, number) => `https://github.com/${Inputs_1.organizationName()}/${repo}/pull/${number}`;
+/**
+ * Sets the labels for the given issue or PR, replacing any existing labels.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   labels The list of labels to set.
+ *
+ * @returns {IssuesSetLabelsResponseData} The PR data.
+ */
+exports.setLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.issues.setLabels({
+        issue_number: number,
+        labels,
+        owner: Inputs_1.organizationName(),
+        repo,
+    });
+    return response.data;
+});
 
 
 /***/ }),
@@ -10758,11 +10776,18 @@ module.exports = function generate_enum(it, $keyword, $ruleType) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PleaseReviewLabel = exports.InProgressLabel = exports.EpicLabel = void 0;
+exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
 // Labels.
 exports.EpicLabel = 'epic';
+exports.HasConflictsLabel = 'has-conflicts';
+exports.HasFailuresLabel = 'has-failures';
+exports.HasIssuesLabel = 'has-issues';
 exports.InProgressLabel = 'in-progress';
+exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
+exports.UnderDiscussionLabel = 'under-discussion';
+// The Github user our actions use.
+exports.GithubWriteUser = 'sr-devops';
 
 
 /***/ }),
@@ -44369,6 +44394,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 exports.run().catch(err => {
     core_1.error(err);
+    core_1.error(err.stack);
     core_1.setFailed(err.message);
 });
 
@@ -50364,11 +50390,11 @@ exports.githubReadToken = () => core_1.getInput('repo-token', { required: true }
 // Token with write access to Github - set in organization secrets.
 exports.githubWriteToken = () => core_1.getInput('write-token', { required: true });
 // The email address to use when connecting to the Jira API.
-exports.jiraEmail = () => core_1.getInput('jira-email', { required: true });
+exports.jiraEmail = () => core_1.getInput('jira-email', { required: false });
 // The host to use when connecting to the Jira API.
-exports.jiraHost = () => core_1.getInput('jira-host', { required: true });
+exports.jiraHost = () => core_1.getInput('jira-host', { required: false });
 // The API token to use when connecting to the Jira API.
-exports.jiraToken = () => core_1.getInput('jira-token', { required: true });
+exports.jiraToken = () => core_1.getInput('jira-token', { required: false });
 // The Github organization name.
 exports.organizationName = () => core_1.getInput('organization-name', { required: true });
 // ID of the Slack channel to post errors to, if we don't know where else to send them.

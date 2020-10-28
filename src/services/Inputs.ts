@@ -18,14 +18,14 @@ export const githubWriteToken = (): string =>
 
 // The email address to use when connecting to the Jira API.
 export const jiraEmail = (): string =>
-  getInput('jira-email', { required: true })
+  getInput('jira-email', { required: false })
 
 // The host to use when connecting to the Jira API.
-export const jiraHost = (): string => getInput('jira-host', { required: true })
+export const jiraHost = (): string => getInput('jira-host', { required: false })
 
 // The API token to use when connecting to the Jira API.
 export const jiraToken = (): string =>
-  getInput('jira-token', { required: true })
+  getInput('jira-token', { required: false })
 
 // The Github organization name.
 export const organizationName = (): string =>

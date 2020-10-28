@@ -1,0 +1,13 @@
+name: 'Pull request labeled'
+description: 'Organizes mutually exclusive labels after a pull request is labeled'
+author: 'Shuttlerock'
+runs:
+  using: 'node12'
+  main: 'index.js'
+inputs:
+  organization-name:
+    description: 'The name of the Github organization'
+  repo-token:
+    description: 'Github access token'
+  write-token:
+    description: 'Github access token with write access'
