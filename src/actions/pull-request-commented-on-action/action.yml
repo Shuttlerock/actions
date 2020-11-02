@@ -1,0 +1,10 @@
+name: 'Pull Request Commented On'
+description: 'Runs when the PR has been commented on'
+author: 'Shuttlerock'
+runs:
+  using: 'node12'
+  main: 'index.js'
+inputs:
+  repo-token:
+    description: 'Github access token'
+  

@@ -8,6 +8,10 @@ export const credentialsApiPrefix = (): string =>
 export const credentialsApiSecret = (): string =>
   getInput('credentials-api-secret', { required: true })
 
+// The API token to use when connecting to the CircleCI API.
+export const circleciToken = (): string =>
+  getInput('circleci-token', { required: true })
+
 // Token with read access to Github - provided by Github.
 export const githubReadToken = (): string =>
   getInput('repo-token', { required: true })
