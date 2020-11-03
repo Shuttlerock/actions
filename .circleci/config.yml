@@ -2,6 +2,9 @@ defaults: &defaults
   working_directory: ~/actions
   docker:
     - image: circleci/node:12.13-browsers
+      auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
   environment:
     ENV: test
 
@@ -85,19 +88,31 @@ workflows:
   version: 2
   build:
     jobs:
-      - checkout_code
+      - checkout_code:
+          context:
+            - docker-hub-creds
       - yarn_dependencies:
+          context:
+            - docker-hub-creds
           requires:
             - checkout_code
       - compile:
+          context:
+            - docker-hub-creds
           requires:
             - yarn_dependencies
       - jest:
+          context:
+            - docker-hub-creds
           requires:
             - yarn_dependencies
       - lint:
+          context:
+            - docker-hub-creds
           requires:
             - yarn_dependencies
       - format:
+          context:
+            - docker-hub-creds
           requires:
             - yarn_dependencies
