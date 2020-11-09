@@ -5,6 +5,9 @@
     "head": {
       "ref": "feature/create-epic-prs"
     },
+    "labels": [
+      { "name": "in-progress" }
+    ],
     "merged": true,
     "number": 123,
     "title": "[ISSUE-123] When a PR is merged, move it to `Validated`"

@@ -10476,28 +10476,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setLabels = exports.addLabels = void 0;
+exports.addLabels = exports.setLabels = void 0;
+const core_1 = __webpack_require__(186);
+const isNil_1 = __importDefault(__webpack_require__(977));
+const Constants_1 = __webpack_require__(168);
 const Client_1 = __webpack_require__(818);
+const PullRequest_1 = __webpack_require__(28);
 const Inputs_1 = __webpack_require__(968);
-/**
- * Adds labels to the given issue or PR.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The labels to add.
- *
- * @returns {IssuesAddLabelsResponseData} The PR data.
- */
-exports.addLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_1.client.issues.addLabels({
-        issue_number: number,
-        labels,
-        owner: Inputs_1.organizationName(),
-        repo,
-    });
-    return response.data;
-});
+// Certain labels can't co-exist.
+const mutuallyExclusiveLabels = [
+    [Constants_1.HasConflictsLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.HasFailuresLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.HasIssuesLabel, Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel],
+    [Constants_1.InProgressLabel, Constants_1.PleaseReviewLabel, Constants_1.PassedReviewLabel],
+    [Constants_1.HasIssuesLabel, Constants_1.PassedReviewLabel],
+];
 /**
  * Sets the labels for the given issue or PR, replacing any existing labels.
  *
@@ -10515,6 +10512,43 @@ exports.setLabels = (repo, number, labels) => __awaiter(void 0, void 0, void 0, 
         repo,
     });
     return response.data;
+});
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   added  The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+exports.addLabels = (repo, number, added) => __awaiter(void 0, void 0, void 0, function* () {
+    const pullRequest = yield PullRequest_1.getPullRequest(repo, number);
+    if (isNil_1.default(pullRequest)) {
+        throw new Error(`Could not add labels to ${repo}#${number} - the pull request could not be found`);
+    }
+    const existing = pullRequest.labels.map((lbl) => lbl.name);
+    core_1.info(`Existing labels are [${existing.join(', ')}]`);
+    core_1.info(`The labels [${added.join(', ')}] were added`);
+    core_1.info('Deciding which labels to remove...');
+    const toRemoveRaw = mutuallyExclusiveLabels
+        .map((lbls) => lbls.filter(lbl => added.includes(lbl)).length > 0 ? lbls : [])
+        .flat()
+        .filter((lbl) => !added.includes(lbl) && existing.includes(lbl));
+    const toRemove = [...new Set(toRemoveRaw)];
+    if (toRemove.length > 0) {
+        core_1.info(`These labels will be removed: '${toRemove.join(', ')}'`);
+    }
+    else {
+        core_1.info('No labels will be removed');
+    }
+    const toKeepRaw = [
+        ...existing.filter((lbl) => !toRemove.includes(lbl)),
+        ...added,
+    ].sort();
+    const toKeep = [...new Set(toKeepRaw)];
+    yield core_1.info(`Setting new labels: [${toKeep.join(', ')}]`);
+    return exports.setLabels(repo, number, toKeep);
 });
 
 

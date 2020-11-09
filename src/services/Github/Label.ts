@@ -1,35 +1,32 @@
+import { info } from '@actions/core'
 import {
   IssuesAddLabelsResponseData,
   IssuesSetLabelsResponseData,
 } from '@octokit/types'
+import { EventPayloads } from '@octokit/webhooks'
+import isNil from 'lodash/isNil'
 
+import {
+  HasConflictsLabel,
+  HasFailuresLabel,
+  HasIssuesLabel,
+  InProgressLabel,
+  PassedReviewLabel,
+  PleaseReviewLabel,
+} from '@sr-services/Constants'
 import { client } from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
+import { getPullRequest } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 
-/**
- * Adds labels to the given issue or PR.
- *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number}     number The PR number.
- * @param {string[]}   labels The labels to add.
- *
- * @returns {IssuesAddLabelsResponseData} The PR data.
- */
-export const addLabels = async (
-  repo: Repository,
-  number: number,
-  labels: string[]
-): Promise<IssuesAddLabelsResponseData> => {
-  const response = await client.issues.addLabels({
-    issue_number: number,
-    labels,
-    owner: organizationName(),
-    repo,
-  })
-
-  return response.data
-}
+// Certain labels can't co-exist.
+const mutuallyExclusiveLabels = [
+  [HasConflictsLabel, InProgressLabel, PleaseReviewLabel],
+  [HasFailuresLabel, InProgressLabel, PleaseReviewLabel],
+  [HasIssuesLabel, InProgressLabel, PleaseReviewLabel],
+  [InProgressLabel, PleaseReviewLabel, PassedReviewLabel],
+  [HasIssuesLabel, PassedReviewLabel],
+]
 
 /**
  * Sets the labels for the given issue or PR, replacing any existing labels.
@@ -53,4 +50,55 @@ export const setLabels = async (
   })
 
   return response.data
+}
+
+/**
+ * Adds labels to the given issue or PR.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The PR number.
+ * @param {string[]}   added  The labels to add.
+ *
+ * @returns {IssuesAddLabelsResponseData} The PR data.
+ */
+export const addLabels = async (
+  repo: Repository,
+  number: number,
+  added: string[]
+): Promise<IssuesAddLabelsResponseData> => {
+  const pullRequest = await getPullRequest(repo, number)
+  if (isNil(pullRequest)) {
+    throw new Error(
+      `Could not add labels to ${repo}#${number} - the pull request could not be found`
+    )
+  }
+
+  const existing = pullRequest.labels.map(
+    (lbl: EventPayloads.WebhookPayloadPullRequestLabel) => lbl.name
+  )
+  info(`Existing labels are [${existing.join(', ')}]`)
+  info(`The labels [${added.join(', ')}] were added`)
+
+  info('Deciding which labels to remove...')
+  const toRemoveRaw = mutuallyExclusiveLabels
+    .map((lbls: string[]): string[] =>
+      lbls.filter(lbl => added.includes(lbl)).length > 0 ? lbls : []
+    )
+    .flat()
+    .filter((lbl: string) => !added.includes(lbl) && existing.includes(lbl))
+  const toRemove = [...new Set(toRemoveRaw)]
+  if (toRemove.length > 0) {
+    info(`These labels will be removed: '${toRemove.join(', ')}'`)
+  } else {
+    info('No labels will be removed')
+  }
+
+  const toKeepRaw = [
+    ...existing.filter((lbl: string) => !toRemove.includes(lbl)),
+    ...added,
+  ].sort()
+  const toKeep = [...new Set(toKeepRaw)]
+  await info(`Setting new labels: [${toKeep.join(', ')}]`)
+
+  return setLabels(repo, number, toKeep)
 }
