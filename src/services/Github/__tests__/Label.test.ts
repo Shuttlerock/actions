@@ -72,6 +72,11 @@ describe('PullRequest', () => {
         repo,
       })
     })
+
+    it('does nothing if the labels will not change', async () => {
+      await addLabels(repo, 23, [InProgressLabel])
+      expect(githubSetLabelsSpy.mock.calls.length).toBe(0)
+    })
   })
 
   describe('setLabels', () => {

@@ -4,6 +4,7 @@ import {
   IssuesSetLabelsResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
+import isEqual from 'lodash/isEqual'
 import isNil from 'lodash/isNil'
 
 import {
@@ -98,7 +99,12 @@ export const addLabels = async (
     ...added,
   ].sort()
   const toKeep = [...new Set(toKeepRaw)]
-  await info(`Setting new labels: [${toKeep.join(', ')}]`)
+  await info(`New labels: [${toKeep.join(', ')}]`)
+
+  if (isEqual(existing, toKeep)) {
+    info('The labels will not change - giving up')
+    return []
+  }
 
   return setLabels(repo, number, toKeep)
 }

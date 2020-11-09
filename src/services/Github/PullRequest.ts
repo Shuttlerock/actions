@@ -3,11 +3,15 @@ import {
   PullsCreateResponseData,
   PullsGetResponseData,
 } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
 
 import { client, clientForToken, readClient } from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import { jiraHost, organizationName } from '@sr-services/Inputs'
+
+export interface PullRequestContent {
+  title: string
+  body: string
+}
 
 /**
  * Assigns owners to the given issue or PR.
@@ -66,9 +70,7 @@ export const createPullRequest = async (
   return response.data
 }
 
-export const getIssueKey = (
-  pr: EventPayloads.WebhookPayloadPullRequestPullRequest
-): string | undefined => {
+export const getIssueKey = (pr: PullRequestContent): string | undefined => {
   // Try to get the key from the title.
   let matches = /^\[([A-Z]+-[\d]+)\] .*$/.exec(pr.title)
   if (matches?.length === 2) {

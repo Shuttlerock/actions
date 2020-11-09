@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
 
 import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
 import { PleaseReviewLabel } from '@sr-services/Constants'
@@ -47,10 +46,7 @@ describe('pull-request-ready-for-review-action', () => {
         )
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
-        .mockImplementation(
-          (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
-            'ISSUE-236'
-        )
+        .mockImplementation((_pr: Github.PullRequestContent) => 'ISSUE-236')
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string) => undefined)
@@ -88,8 +84,7 @@ describe('pull-request-ready-for-review-action', () => {
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {
       getIssueKeySpy.mockImplementation(
-        (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
-          undefined
+        (_pr: Github.PullRequestContent) => undefined
       )
       await pullRequestReadyForReview(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`

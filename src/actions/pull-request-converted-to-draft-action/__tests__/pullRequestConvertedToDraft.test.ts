@@ -47,10 +47,7 @@ describe('pull-request-converted-to-draft-action', () => {
         )
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
-        .mockImplementation(
-          (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
-            'ISSUE-236'
-        )
+        .mockImplementation((_pr: Github.PullRequestContent) => 'ISSUE-236')
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string) => undefined)
