@@ -25,6 +25,7 @@ export interface Issue {
       name: string
       subtask: boolean
     }
+    labels?: any
     parent?: Issue
     subtasks?: Issue[]
     summary: string
@@ -64,6 +65,9 @@ export const JiraStatusValidated = 'Validated'
 
 // Jira issue types.
 export const JiraIssueTypeEpic = 'Epic'
+
+// Jira labels.
+export const JiraLabelSkipPR = 'Skip_PR'
 
 /**
  * Fetches the issue with the given key from Jira.
@@ -115,7 +119,7 @@ export const getEpic = async (key: string): Promise<Issue | undefined> => {
   }
   if (issue.fields.parent) {
     if (issue.fields.parent.fields.issuetype.name === JiraIssueTypeEpic) {
-      return issue.fields.parent
+      return getIssue(issue.fields.parent.key)
     }
     // eslint-disable-next-line no-use-before-define
     return recursiveGetEpic(issue.fields.parent.key)

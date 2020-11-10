@@ -82,7 +82,7 @@ describe('Issue', () => {
       )
       const result = await getEpic(issueKey)
       expect(result).toBeUndefined()
-      expect(recursiveGetEpicSpy.mock.calls.length).toBe(0)
+      expect(recursiveGetEpicSpy).toHaveBeenCalledTimes(0)
     })
 
     it('returns the issue if it is an epic', async () => {
@@ -90,7 +90,7 @@ describe('Issue', () => {
       const result = await getEpic(issueKey)
       expect(result?.key).toEqual(epicKey)
       expect(getIssueSpy).toHaveBeenCalledWith(issueKey)
-      expect(recursiveGetEpicSpy.mock.calls.length).toBe(0)
+      expect(recursiveGetEpicSpy).toHaveBeenCalledTimes(0)
     })
 
     it('returns the parent issue if it is an epic', async () => {
@@ -98,11 +98,13 @@ describe('Issue', () => {
         ...mockJiraIssue,
         fields: { ...mockJiraIssue.fields, parent: epic },
       }
-      getIssueSpy.mockImplementation((_key: string) => Promise.resolve(issue))
+      getIssueSpy
+        .mockImplementationOnce((_key: string) => Promise.resolve(issue))
+        .mockImplementationOnce((_key: string) => Promise.resolve(epic))
       const result = await getEpic(issueKey)
       expect(result?.key).toEqual(epicKey)
       expect(getIssueSpy).toHaveBeenCalledWith(issueKey)
-      expect(recursiveGetEpicSpy.mock.calls.length).toBe(0)
+      expect(recursiveGetEpicSpy).toHaveBeenCalledTimes(0)
     })
 
     it('recurses if the parent is not an epic', async () => {
@@ -113,7 +115,9 @@ describe('Issue', () => {
           parent: { ...mockJiraIssue, key: 'ISSUE-234' },
         },
       }
-      getIssueSpy.mockImplementation((_key: string) => Promise.resolve(issue))
+      getIssueSpy.mockImplementationOnce((_key: string) =>
+        Promise.resolve(issue)
+      )
       await getEpic(issueKey)
       expect(recursiveGetEpicSpy).toHaveBeenCalledWith('ISSUE-234')
     })

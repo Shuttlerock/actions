@@ -102,7 +102,7 @@ describe('Epic', () => {
       )
       const pr = await createEpicPullRequest(mockJiraIssue, repo)
       expect(pr.number).toEqual(123)
-      expect(githubCreatePullRequestSpy.mock.calls.length).toBe(0)
+      expect(githubCreatePullRequestSpy).toHaveBeenCalledTimes(0)
     })
 
     it('creates a new PR', async () => {

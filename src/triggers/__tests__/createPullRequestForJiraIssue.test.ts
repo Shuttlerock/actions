@@ -21,6 +21,7 @@ jest.mock('@sr-services/Jira', () => ({
   getIssue: jest.fn(),
   getIssuePullRequestNumbers: jest.fn(),
   issueUrl: (key: string) => `https://example.atlassian.net/browse/${key}`,
+  JiraLabelSkipPR: 'Skip_PR',
 }))
 jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
 jest.mock('@sr-services/Github', () => ({
@@ -157,7 +158,7 @@ describe('createPullRequestForJiraIssue', () => {
       /^Here's your pull request: https:\/\/github.com\/octokit\/webhooks\/pull\/123/
     )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
-    expect(githubCreatePullRequestSpy.mock.calls.length).toBe(0)
+    expect(githubCreatePullRequestSpy).toHaveBeenCalledTimes(0)
   })
 
   it('creates a new PR', async () => {
@@ -199,6 +200,26 @@ describe('createPullRequestForJiraIssue', () => {
       expect.anything(),
       expect.anything()
     )
+    getEpicSpy.mockRestore()
+    createEpicPullRequestSpy.mockRestore()
+  })
+
+  it('skips the Epic PR if the Skip_PR label is present', async () => {
+    const mockEpic = {
+      ...mockJiraIssue,
+      key: 'ISSUE-231',
+      fields: { ...mockJiraIssue.fields, labels: [Jira.JiraLabelSkipPR] },
+    }
+    const getEpicSpy = jest
+      .spyOn(Jira, 'getEpic')
+      .mockImplementation((_issueKey: string) => Promise.resolve(mockEpic))
+    const createEpicPullRequestSpy = jest
+      .spyOn(Github, 'createEpicPullRequest')
+      .mockImplementation((_epic: Jira.Issue, _repo: Github.Repository) =>
+        Promise.resolve(mockGithubPullRequest)
+      )
+    await createPullRequestForJiraIssue(email, issueKey)
+    expect(createEpicPullRequestSpy).toHaveBeenCalledTimes(0)
     getEpicSpy.mockRestore()
     createEpicPullRequestSpy.mockRestore()
   })

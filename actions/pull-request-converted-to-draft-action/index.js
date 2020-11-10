@@ -16043,7 +16043,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
@@ -16055,6 +16055,8 @@ exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
 // Jira issue types.
 exports.JiraIssueTypeEpic = 'Epic';
+// Jira labels.
+exports.JiraLabelSkipPR = 'Skip_PR';
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -16099,7 +16101,7 @@ exports.getEpic = (key) => __awaiter(void 0, void 0, void 0, function* () {
     }
     if (issue.fields.parent) {
         if (issue.fields.parent.fields.issuetype.name === exports.JiraIssueTypeEpic) {
-            return issue.fields.parent;
+            return exports.getIssue(issue.fields.parent.key);
         }
         // eslint-disable-next-line no-use-before-define
         return exports.recursiveGetEpic(issue.fields.parent.key);
