@@ -1,0 +1,20 @@
+{
+  "action": "completed",
+  "check_run": {
+    "status": "completed",
+    "conclusion": "failure",
+    "output": {
+      "title": "Something went wrong title",
+      "summary": "Something went wrong summary",
+      "text": "Something went wrong text"
+    },
+    "pull_requests": [
+      {
+        "number": 142
+      }
+    ]
+  },
+  "repository": {
+    "name": "actions"
+  }
+}

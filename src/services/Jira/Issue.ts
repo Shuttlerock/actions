@@ -57,6 +57,7 @@ interface GithubDetails {
 }
 
 // Jira statuses.
+export const JiraStatusHasIssues = 'Has issues'
 export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
