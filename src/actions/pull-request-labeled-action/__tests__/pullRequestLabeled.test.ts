@@ -45,7 +45,7 @@ describe('pull-request-labeled-action', () => {
         },
       } as unknown) as EventPayloads.WebhookPayloadPullRequest
       await pullRequestLabeled(automatedPayload)
-      expect(addLabelsSpy.mock.calls.length).toBe(0)
+      expect(addLabelsSpy).toHaveBeenCalledTimes(0)
     })
   })
 })

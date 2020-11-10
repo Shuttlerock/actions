@@ -18,6 +18,7 @@ import {
   getIssue,
   getIssuePullRequestNumbers,
   issueUrl,
+  JiraLabelSkipPR,
 } from '@sr-services/Jira'
 import { sendUserMessage } from '@sr-services/Slack'
 import { parameterize } from '@sr-services/String'
@@ -110,7 +111,11 @@ export const createPullRequestForJiraIssue = async (
 
     // Decide if this is an epic.
     const epic = await getEpic(issue.key)
-    if (epic) {
+    if (
+      epic &&
+      !epic.fields.labels?.includes(JiraLabelSkipPR) &&
+      !issue.fields.labels?.includes(JiraLabelSkipPR)
+    ) {
       info(
         `Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`
       )
