@@ -9,7 +9,7 @@ import { checkRunCompleted } from '@sr-actions/check-run-completed-action/checkR
  *
  * To trigger this event manually:
  *
- * $ act --job check_run_completed_action --eventpath src/tests/fixtures/check-run-failed-payload.json
+ * $ act --job check_run_completed_action --eventpath src/actions/check-run-completed-action/__tests__/fixtures/check-run-failed-payload.json
  */
 export const run = async (): Promise<void> => {
   const { payload } = ((await context) as unknown) as {

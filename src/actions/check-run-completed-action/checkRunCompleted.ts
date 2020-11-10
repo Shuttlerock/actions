@@ -31,7 +31,8 @@ export const checkRunCompleted = async (
   const prName = `${repository.name}#${checkRun.pull_requests[0].number}`
 
   if (checkRun.conclusion !== 'failure') {
-    await info(`${prName} didn't fail - ignoring`)
+    info(`${prName} didn't fail - ignoring`)
+    return
   }
 
   info(`Fetching the pull request ${prName}`)

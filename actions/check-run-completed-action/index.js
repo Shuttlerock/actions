@@ -12977,7 +12977,7 @@ const checkRunCompleted_1 = __webpack_require__(655);
  *
  * To trigger this event manually:
  *
- * $ act --job check_run_completed_action --eventpath src/tests/fixtures/check-run-failed-payload.json
+ * $ act --job check_run_completed_action --eventpath src/actions/check-run-completed-action/__tests__/fixtures/check-run-failed-payload.json
  */
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const { payload } = (yield github_1.context);
@@ -42356,7 +42356,8 @@ exports.checkRunCompleted = (payload) => __awaiter(void 0, void 0, void 0, funct
     // Used for log messages.
     const prName = `${repository.name}#${checkRun.pull_requests[0].number}`;
     if (checkRun.conclusion !== 'failure') {
-        yield core_1.info(`${prName} didn't fail - ignoring`);
+        core_1.info(`${prName} didn't fail - ignoring`);
+        return;
     }
     core_1.info(`Fetching the pull request ${prName}`);
     const pullRequest = yield Github_1.getPullRequest(repository.name, checkRun.pull_requests[0].number);
