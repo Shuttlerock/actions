@@ -2,7 +2,9 @@ import {
   IssuesAddAssigneesResponseData,
   PullsCreateResponseData,
   PullsGetResponseData,
+  PullsRequestReviewersResponseData,
 } from '@octokit/types'
+import isNil from 'lodash/isNil'
 
 import { client, clientForToken, readClient } from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
@@ -120,6 +122,42 @@ export const getPullRequest = async (
   }
 
   return undefined
+}
+
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {PullsRequestReviewersResponseData} The PR data.
+ */
+export const assignReviewers = async (
+  repo: Repository,
+  number: number,
+  usernames: string[]
+): Promise<PullsRequestReviewersResponseData> => {
+  const pullRequest = await getPullRequest(repo, number)
+  if (isNil(pullRequest)) {
+    throw new Error(
+      `Could not find the pull request to assign reviewers to (${repo}#${number})`
+    )
+  }
+
+  // We can't assign the PR owner as a reviewer.
+  const reviewers = usernames.filter(
+    (username: string) => username !== pullRequest.user.login
+  )
+
+  const response = await client.pulls.requestReviewers({
+    reviewers,
+    pull_number: number,
+    owner: organizationName(),
+    repo,
+  })
+
+  return response.data
 }
 
 /**

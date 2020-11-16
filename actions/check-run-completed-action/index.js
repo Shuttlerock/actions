@@ -3095,8 +3095,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.pullRequestUrl = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+const isNil_1 = __importDefault(__webpack_require__(977));
 const Client_1 = __webpack_require__(818);
 const Inputs_1 = __webpack_require__(968);
 /**
@@ -3181,6 +3185,30 @@ exports.getPullRequest = (repo, number) => __awaiter(void 0, void 0, void 0, fun
         throw err;
     }
     return undefined;
+});
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {PullsRequestReviewersResponseData} The PR data.
+ */
+exports.assignReviewers = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
+    const pullRequest = yield exports.getPullRequest(repo, number);
+    if (isNil_1.default(pullRequest)) {
+        throw new Error(`Could not find the pull request to assign reviewers to (${repo}#${number})`);
+    }
+    // We can't assign the PR owner as a reviewer.
+    const reviewers = usernames.filter((username) => username !== pullRequest.user.login);
+    const response = yield Client_1.client.pulls.requestReviewers({
+        reviewers,
+        pull_number: number,
+        owner: Inputs_1.organizationName(),
+        repo,
+    });
+    return response.data;
 });
 /**
  * Returns the URL of the pull request with the given number and repo.
@@ -35646,13 +35674,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchCredentials = void 0;
+exports.fetchRepository = exports.fetchCredentials = void 0;
 const crypto_1 = __webpack_require__(417);
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
 /**
- * Fetches the user credentials from the remote credential service for the given email of name.
+ * Fetches the user credentials from the remote credential service for the given email or name.
  *
  * @param {string} identifier The email address or Jira display name of the user to look up.
  *
@@ -35666,7 +35694,7 @@ exports.fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, fun
     const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
         .update(identifier)
         .digest('hex');
-    const url = `${Inputs_1.credentialsApiPrefix()}${id}`;
+    const url = `${Inputs_1.credentialsApiPrefix()}credentials/${id}`;
     const response = yield node_fetch_1.default(url, {
         headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
     });
@@ -35675,6 +35703,28 @@ exports.fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, fun
         throw new Error(`Could not get credentials for the user ${identifier}`);
     }
     return credentials;
+});
+/**
+ * Fetches the repository with the given name from the remote credential service.
+ *
+ * @param {string} name The name of the repository to look up.
+ *
+ * @returns {Repository} The repository object.
+ */
+exports.fetchRepository = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Buffer.from(name).toString('base64');
+    const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
+        .update(name)
+        .digest('hex');
+    const url = `${Inputs_1.credentialsApiPrefix()}repositories/${id}`;
+    const response = yield node_fetch_1.default(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const repository = (yield response.json());
+    if (repository.status !== 'ok') {
+        throw new Error(`Could not get repository with the name ${name}`);
+    }
+    return repository;
 });
 
 
@@ -59115,9 +59165,9 @@ __exportStar(__webpack_require__(239), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.slackToken = exports.slackErrorChannelId = exports.organizationName = exports.jiraToken = exports.jiraHost = exports.jiraEmail = exports.githubWriteToken = exports.githubReadToken = exports.credentialsApiSecret = exports.credentialsApiPrefix = void 0;
 const core_1 = __webpack_require__(186);
-// The host to use when connecting to the Jira API.
+// The base URL to use when connecting to the internal credentials API.
 exports.credentialsApiPrefix = () => core_1.getInput('credentials-api-prefix', { required: true });
-// The host to use when connecting to the Jira API.
+// The secret to use when connecting to the internal credentials API.
 exports.credentialsApiSecret = () => core_1.getInput('credentials-api-secret', { required: true });
 // Token with read access to Github - provided by Github.
 exports.githubReadToken = () => core_1.getInput('repo-token', { required: true });

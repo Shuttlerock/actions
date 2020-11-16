@@ -3,6 +3,7 @@ import {
   OctokitResponse,
   PullsCreateResponseData,
   PullsGetResponseData,
+  PullsRequestReviewersResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
@@ -10,6 +11,7 @@ import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
   assignOwners,
+  assignReviewers,
   createPullRequest,
   getIssueKey,
   getPullRequest,
@@ -20,6 +22,7 @@ import {
   mockGithubPullRequestCreateResponse,
   mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
+  mockPullsRequestReviewersResponseData,
 } from '@sr-tests/Mocks'
 
 interface GetPullParams {
@@ -61,6 +64,40 @@ describe('PullRequest', () => {
       })
       expect(result.id).toEqual(1234)
       spy.mockRestore()
+    })
+  })
+  describe('assignReviewers', () => {
+    it('calls the Github API', async () => {
+      const getPullRequestSpy = jest
+        .spyOn(Client.readClient.pulls, 'get')
+        .mockImplementation((_args?: GetPullParams) =>
+          Promise.resolve({
+            data: mockGithubPullRequest,
+          } as OctokitResponse<PullsGetResponseData>)
+        )
+      const requestReviewersSpy = jest
+        .spyOn(Client.client.pulls, 'requestReviewers')
+        .mockImplementation(
+          (_args?: {
+            reviewers?: string[]
+            owner: string
+            pull_number: number
+            repo: Repository
+          }) =>
+            Promise.resolve({
+              data: mockPullsRequestReviewersResponseData,
+            } as OctokitResponse<PullsRequestReviewersResponseData>)
+        )
+      const result = await assignReviewers(repo, 23, ['dhh', 'dperrett'])
+      expect(requestReviewersSpy).toHaveBeenCalledWith({
+        owner: organizationName(),
+        pull_number: 23,
+        repo,
+        reviewers: ['dperrett'],
+      })
+      expect(result.id).toEqual(1234)
+      getPullRequestSpy.mockRestore()
+      requestReviewersSpy.mockRestore()
     })
   })
 
