@@ -11,7 +11,10 @@
     ],
     "merged": true,
     "number": 123,
-    "title": "[ISSUE-123] When a PR is merged, move it to `Validated`"
+    "title": "[ISSUE-123] When a PR is merged, move it to `Validated`",
+    "user": {
+      "login": "dhh"
+    }
   },
   "repository": {
     "name": "actions"

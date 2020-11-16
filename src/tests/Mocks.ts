@@ -4,13 +4,14 @@ import {
   IssuesSetLabelsResponseData,
   PullsCreateResponseData,
   PullsGetResponseData,
+  PullsRequestReviewersResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 import { TransitionObject } from 'jira-client'
 
-import { Credentials } from '@sr-services/Credentials'
+import { Credentials, Repository } from '@sr-services/Credentials'
 import { Issue } from '@sr-services/Jira/Issue'
 import pullRequestPayload from '@sr-tests/fixtures/github-pull-request-payload.json'
 import repository from '@sr-tests/fixtures/github-repository.json'
@@ -61,8 +62,18 @@ export const mockIssuesSetLabelsResponseData = [
   { name: 'my-label' },
 ] as IssuesSetLabelsResponseData
 
+export const mockPullsRequestReviewersResponseData = {
+  id: 1234,
+} as PullsRequestReviewersResponseData
+
 export const mockJiraIssue = issue as Issue
 
 export const mockJiraTransitions = transitions as TransitionObject[]
 
 export const mockJiraPullRequests = pullRequests
+
+export const mockRepository = {
+  leads: [{ github_username: 'dhh' }],
+  reviewers: [{ github_username: 'wycats' }],
+  status: 'ok',
+} as Repository

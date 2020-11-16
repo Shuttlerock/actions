@@ -3010,8 +3010,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pullRequestUrl = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.pullRequestUrl = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+const isNil_1 = __importDefault(__webpack_require__(977));
 const Client_1 = __webpack_require__(818);
 const Inputs_1 = __webpack_require__(968);
 /**
@@ -3096,6 +3100,30 @@ exports.getPullRequest = (repo, number) => __awaiter(void 0, void 0, void 0, fun
         throw err;
     }
     return undefined;
+});
+/**
+ * Assigns owners to the given issue or PR.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string[]}   usernames The usernames of the users to assign as owners.
+ *
+ * @returns {PullsRequestReviewersResponseData} The PR data.
+ */
+exports.assignReviewers = (repo, number, usernames) => __awaiter(void 0, void 0, void 0, function* () {
+    const pullRequest = yield exports.getPullRequest(repo, number);
+    if (isNil_1.default(pullRequest)) {
+        throw new Error(`Could not find the pull request to assign reviewers to (${repo}#${number})`);
+    }
+    // We can't assign the PR owner as a reviewer.
+    const reviewers = usernames.filter((username) => username !== pullRequest.user.login);
+    const response = yield Client_1.client.pulls.requestReviewers({
+        reviewers,
+        pull_number: number,
+        owner: Inputs_1.organizationName(),
+        repo,
+    });
+    return response.data;
 });
 /**
  * Returns the URL of the pull request with the given number and repo.
@@ -3197,7 +3225,7 @@ module.exports = {
 
 var assert = __webpack_require__(907);
 var SSHBuffer = __webpack_require__(621);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
 var Key = __webpack_require__(814);
@@ -5980,7 +6008,7 @@ function unescapeJsonPointer(str) {
 var aws4 = exports,
     url = __webpack_require__(835),
     querystring = __webpack_require__(191),
-    crypto = __webpack_require__(373),
+    crypto = __webpack_require__(417),
     lru = __webpack_require__(225),
     credentialsCache = lru(1000)
 
@@ -6386,7 +6414,7 @@ module.exports = Fingerprint;
 var assert = __webpack_require__(907);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var errs = __webpack_require__(979);
 var Key = __webpack_require__(814);
 var PrivateKey = __webpack_require__(602);
@@ -10164,7 +10192,7 @@ module.exports = function generate__limitProperties(it, $keyword, $ruleType) {
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = __webpack_require__(907);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var http = __webpack_require__(605);
 var util = __webpack_require__(669);
 var sshpk = __webpack_require__(22);
@@ -11954,7 +11982,7 @@ var qs = __webpack_require__(760)
 var caseless = __webpack_require__(684)
 var uuid = __webpack_require__(824)
 var oauth = __webpack_require__(468)
-var crypto = __webpack_require__(373)
+var crypto = __webpack_require__(417)
 var Buffer = __webpack_require__(867).Buffer
 
 function OAuth (request) {
@@ -13498,7 +13526,7 @@ module.exports = {
 // Copyright 2015 Joyent, Inc.
 
 var assert = __webpack_require__(907);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var sshpk = __webpack_require__(22);
 var utils = __webpack_require__(689);
 
@@ -14254,6 +14282,7 @@ exports.pullRequestReadyForReview = void 0;
 const core_1 = __webpack_require__(186);
 const isNil_1 = __importDefault(__webpack_require__(977));
 const Constants_1 = __webpack_require__(168);
+const Credentials_1 = __webpack_require__(543);
 const Github_1 = __webpack_require__(390);
 const Jira_1 = __webpack_require__(404);
 /**
@@ -14276,6 +14305,13 @@ exports.pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 
     if (isNil_1.default(issue)) {
         core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
         return;
+    }
+    core_1.info('Fetching repository details...');
+    const repo = yield Credentials_1.fetchRepository(repository.name);
+    const reviewers = repo.reviewers.map((user) => user.github_username);
+    core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
+    if (reviewers.length > 0) {
+        yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
     }
     if (issue.fields.status.name === Jira_1.JiraStatusTechReview) {
         core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusTechReview}' - ignoring`);
@@ -19065,7 +19101,7 @@ module.exports = {
 
 var assert = __webpack_require__(907);
 var asn1 = __webpack_require__(970);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
 var utils = __webpack_require__(575);
@@ -19795,7 +19831,7 @@ exports.pathMatch = pathMatch;
  * Module dependencies.
  */
 
-var crypto = __webpack_require__(373)
+var crypto = __webpack_require__(417)
   , parse = __webpack_require__(835).parse
   ;
 
@@ -20806,12 +20842,7 @@ module.exports = mapCacheGet;
 
 
 /***/ }),
-/* 373 */
-/***/ (function(module) {
-
-module.exports = require("crypto");
-
-/***/ }),
+/* 373 */,
 /* 374 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -21558,7 +21589,7 @@ module.exports = Signature;
 var assert = __webpack_require__(907);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var errs = __webpack_require__(979);
 var utils = __webpack_require__(575);
 var asn1 = __webpack_require__(970);
@@ -22254,7 +22285,7 @@ module.exports = Certificate;
 var assert = __webpack_require__(907);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Fingerprint = __webpack_require__(79);
 var Signature = __webpack_require__(394);
 var errs = __webpack_require__(979);
@@ -23018,24 +23049,9 @@ Promise.prototype._resolveFromSyncValue = function (value) {
 /***/ }),
 /* 416 */,
 /* 417 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-var nativeCreate = __webpack_require__(41);
-
-/**
- * Removes all key-value entries from the hash.
- *
- * @private
- * @name clear
- * @memberOf Hash
- */
-function hashClear() {
-  this.__data__ = nativeCreate ? nativeCreate(null) : {};
-  this.size = 0;
-}
-
-module.exports = hashClear;
-
+module.exports = require("crypto");
 
 /***/ }),
 /* 418 */,
@@ -27377,7 +27393,27 @@ module.exports = ret;
 /***/ }),
 /* 449 */,
 /* 450 */,
-/* 451 */,
+/* 451 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var nativeCreate = __webpack_require__(41);
+
+/**
+ * Removes all key-value entries from the hash.
+ *
+ * @private
+ * @name clear
+ * @memberOf Hash
+ */
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  this.size = 0;
+}
+
+module.exports = hashClear;
+
+
+/***/ }),
 /* 452 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29953,7 +29989,7 @@ exports.FetchError = FetchError;
 /* 468 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var crypto = __webpack_require__(373)
+var crypto = __webpack_require__(417)
 
 function sha (key, body, algorithm) {
   return crypto.createHmac(algorithm, key).update(body).digest('base64')
@@ -30926,7 +30962,7 @@ module.exports = Identity;
 
 var assert = __webpack_require__(907);
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Fingerprint = __webpack_require__(79);
 var Signature = __webpack_require__(394);
 var errs = __webpack_require__(979);
@@ -31721,7 +31757,7 @@ module.exports = {
 };
 
 var assert = __webpack_require__(907);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
 var utils = __webpack_require__(575);
@@ -32153,7 +32189,79 @@ module.exports = getValue;
 
 
 /***/ }),
-/* 543 */,
+/* 543 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchRepository = exports.fetchCredentials = void 0;
+const crypto_1 = __webpack_require__(417);
+const isNil_1 = __importDefault(__webpack_require__(977));
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Inputs_1 = __webpack_require__(968);
+/**
+ * Fetches the user credentials from the remote credential service for the given email or name.
+ *
+ * @param {string} identifier The email address or Jira display name of the user to look up.
+ *
+ * @returns {Credentials} The credentials object.
+ */
+exports.fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, function* () {
+    if (isNil_1.default(identifier)) {
+        throw new Error('Could not lookup user credentials because no identifier or display name was found');
+    }
+    const id = Buffer.from(identifier).toString('base64');
+    const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
+        .update(identifier)
+        .digest('hex');
+    const url = `${Inputs_1.credentialsApiPrefix()}credentials/${id}`;
+    const response = yield node_fetch_1.default(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const credentials = (yield response.json());
+    if (credentials.status !== 'ok') {
+        throw new Error(`Could not get credentials for the user ${identifier}`);
+    }
+    return credentials;
+});
+/**
+ * Fetches the repository with the given name from the remote credential service.
+ *
+ * @param {string} name The name of the repository to look up.
+ *
+ * @returns {Repository} The repository object.
+ */
+exports.fetchRepository = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Buffer.from(name).toString('base64');
+    const signature = crypto_1.createHmac('sha256', Inputs_1.credentialsApiSecret())
+        .update(name)
+        .digest('hex');
+    const url = `${Inputs_1.credentialsApiPrefix()}repositories/${id}`;
+    const response = yield node_fetch_1.default(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const repository = (yield response.json());
+    if (repository.status !== 'ok') {
+        throw new Error(`Could not get repository with the name ${name}`);
+    }
+    return repository;
+});
+
+
+/***/ }),
 /* 544 */,
 /* 545 */,
 /* 546 */,
@@ -32877,7 +32985,7 @@ Promise.props = function (promises) {
 // Unique ID creation requires a high quality random # generator.  In node.js
 // this is pretty straight-forward - we use the crypto API.
 
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
@@ -32917,7 +33025,7 @@ var assert = __webpack_require__(907);
 var Buffer = __webpack_require__(118).Buffer;
 var PrivateKey = __webpack_require__(602);
 var Key = __webpack_require__(814);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var algs = __webpack_require__(126);
 var asn1 = __webpack_require__(970);
 
@@ -35763,7 +35871,7 @@ module.exports = PrivateKey;
 var assert = __webpack_require__(907);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Fingerprint = __webpack_require__(79);
 var Signature = __webpack_require__(394);
 var errs = __webpack_require__(979);
@@ -37888,7 +37996,7 @@ var asn1 = __webpack_require__(970);
 var Buffer = __webpack_require__(118).Buffer;
 var algs = __webpack_require__(126);
 var utils = __webpack_require__(575);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 
 var Key = __webpack_require__(814);
 var PrivateKey = __webpack_require__(602);
@@ -43305,7 +43413,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(373);
+    crypto = __webpack_require__(417);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -45270,7 +45378,7 @@ module.exports = Key;
 
 var assert = __webpack_require__(907);
 var algs = __webpack_require__(126);
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var Fingerprint = __webpack_require__(79);
 var Signature = __webpack_require__(394);
 var DiffieHellman = __webpack_require__(538).DiffieHellman;
@@ -45844,7 +45952,7 @@ exports.run().catch(err => {
 "use strict";
 
 
-var crypto = __webpack_require__(373)
+var crypto = __webpack_require__(417)
 
 function randomString (size) {
   var bits = (size + 1) * 6
@@ -46390,7 +46498,7 @@ module.exports = stackClear;
 
 
 var jsonSafeStringify = __webpack_require__(73)
-var crypto = __webpack_require__(373)
+var crypto = __webpack_require__(417)
 var Buffer = __webpack_require__(867).Buffer
 
 var defer = typeof setImmediate === 'undefined'
@@ -46618,7 +46726,7 @@ Promise.filter = function (promises, fn, options) {
 /* 865 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-var crypto = __webpack_require__(373);
+var crypto = __webpack_require__(417);
 var BigInteger = __webpack_require__(587).BigInteger;
 var ECPointFp = __webpack_require__(943).ECPointFp;
 var Buffer = __webpack_require__(118).Buffer;
@@ -48287,7 +48395,7 @@ module.exports = eq;
 /* 902 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var hashClear = __webpack_require__(417),
+var hashClear = __webpack_require__(451),
     hashDelete = __webpack_require__(712),
     hashGet = __webpack_require__(395),
     hashHas = __webpack_require__(232),
@@ -52790,9 +52898,9 @@ module.exports = function generate_contains(it, $keyword, $ruleType) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.slackToken = exports.slackErrorChannelId = exports.organizationName = exports.jiraToken = exports.jiraHost = exports.jiraEmail = exports.githubWriteToken = exports.githubReadToken = exports.credentialsApiSecret = exports.credentialsApiPrefix = void 0;
 const core_1 = __webpack_require__(186);
-// The host to use when connecting to the Jira API.
+// The base URL to use when connecting to the internal credentials API.
 exports.credentialsApiPrefix = () => core_1.getInput('credentials-api-prefix', { required: true });
-// The host to use when connecting to the Jira API.
+// The secret to use when connecting to the internal credentials API.
 exports.credentialsApiSecret = () => core_1.getInput('credentials-api-secret', { required: true });
 // Token with read access to Github - provided by Github.
 exports.githubReadToken = () => core_1.getInput('repo-token', { required: true });

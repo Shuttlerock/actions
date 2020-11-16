@@ -25,7 +25,7 @@ export interface Issue {
       name: string
       subtask: boolean
     }
-    labels?: any
+    labels?: string[]
     parent?: Issue
     subtasks?: Issue[]
     summary: string
