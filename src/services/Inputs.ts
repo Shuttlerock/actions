@@ -1,10 +1,10 @@
 import { getInput } from '@actions/core'
 
-// The host to use when connecting to the Jira API.
+// The base URL to use when connecting to the internal credentials API.
 export const credentialsApiPrefix = (): string =>
   getInput('credentials-api-prefix', { required: true })
 
-// The host to use when connecting to the Jira API.
+// The secret to use when connecting to the internal credentials API.
 export const credentialsApiSecret = (): string =>
   getInput('credentials-api-secret', { required: true })
 
