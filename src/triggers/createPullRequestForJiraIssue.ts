@@ -27,7 +27,7 @@ import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
 /**
  * To trigger this event manually:
  *
- * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/createPullRequestForJiraIssue.ts.json
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/createPullRequestForJiraIssue.json
  *
  * or to trigger it via the Github API:
  *
