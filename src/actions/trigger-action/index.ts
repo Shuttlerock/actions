@@ -2,7 +2,10 @@ import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
 
 import { sendErrorMessage } from '@sr-services/Slack'
-import { createPullRequestForJiraIssue } from '@sr-triggers/index'
+import {
+  createPullRequestForJiraIssue,
+  jiraIssueTransitioned,
+} from '@sr-triggers/index'
 
 interface Context {
   payload: {
@@ -27,6 +30,9 @@ export const run = async (): Promise<void> => {
   switch (event) {
     case 'createPullRequestForJiraIssue':
       await createPullRequestForJiraIssue(email, param)
+      break
+    case 'jiraIssueTransitioned':
+      await jiraIssueTransitioned(email, param)
       break
     default:
       throw new Error(`Unknown event ${event}`)

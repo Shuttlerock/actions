@@ -1,0 +1,8 @@
+{
+  "ref": "master",
+  "inputs": {
+    "email": "dave@shuttlerock.com",
+    "event": "jiraIssueTransitioned",
+    "param": "STUDIO-860"
+  }
+}
