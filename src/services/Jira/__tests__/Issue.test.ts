@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 
 import { client } from '@sr-services/Jira/Client'
 import {
+  getChildIssues,
   getEpic,
   getIssue,
   getIssuePullRequestNumbers,
@@ -23,6 +24,24 @@ const { Response } = jest.requireActual('node-fetch')
 jest.mock('node-fetch', () => jest.fn())
 
 describe('Issue', () => {
+  describe('getChildIssues', () => {
+    it('calls the Jira API', async () => {
+      const spy = jest
+        .spyOn(client, 'searchJira')
+        .mockImplementation((_query: string, _options?: unknown) =>
+          Promise.resolve({ issues: [mockJiraIssue] })
+        )
+      const issues = await getChildIssues('ISSUE-123')
+      expect(spy).toHaveBeenCalledWith('parent=ISSUE-123', {
+        expand: ['names'],
+        maxResults: 100,
+      })
+      expect(issues.length).toEqual(1)
+      expect(issues[0].id).toEqual(mockJiraIssue.id)
+      spy.mockRestore()
+    })
+  })
+
   describe('getIssue', () => {
     it('calls the Jira API', async () => {
       const spy = jest

@@ -16071,7 +16071,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+const core_1 = __webpack_require__(186);
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
@@ -16085,6 +16086,27 @@ exports.JiraStatusValidated = 'Validated';
 exports.JiraIssueTypeEpic = 'Epic';
 // Jira labels.
 exports.JiraLabelSkipPR = 'Skip_PR';
+/**
+ * Fetches all direct children of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
+ *
+ * @returns {Issue[]} The direct child issues.
+ */
+exports.getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const { errorMessages, issues } = (yield Client_1.client.searchJira(`parent=${key}`, {
+        maxResults: 100,
+        expand: ['names'],
+    }));
+    if (!isNil_1.default(errorMessages)) {
+        errorMessages.forEach(msg => core_1.error(msg));
+        return [];
+    }
+    if (isNil_1.default(issues) || issues.length === 0) {
+        return [];
+    }
+    return issues;
+});
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -22212,6 +22234,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(__webpack_require__(273), exports);
+__exportStar(__webpack_require__(465), exports);
 
 
 /***/ }),
@@ -27702,7 +27725,68 @@ Store.prototype.getAllCookies = function(cb) {
 /* 462 */,
 /* 463 */,
 /* 464 */,
-/* 465 */,
+/* 465 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getColumns = exports.getBoard = void 0;
+const isNil_1 = __importDefault(__webpack_require__(977));
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Inputs_1 = __webpack_require__(968);
+/**
+ * Fetches the board definition for the given project ID.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {JiraBoard | undefined} The board belonging to te project.
+ */
+exports.getBoard = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
+    // We ignore pagination for now, and assume there is only one page of results.
+    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
+    const url = `${host}/rest/agile/1.0/board/`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    const board = data.values.find((brd) => brd.location.projectId.toString() === projectId);
+    return board;
+});
+/**
+ * Fetches the list of columns for the project with the given ID.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {JiraBoardColumn[] | undefined} The board belonging to te project.
+ */
+exports.getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    const board = yield exports.getBoard(projectId);
+    if (isNil_1.default(board)) {
+        return undefined;
+    }
+    // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
+    // We ignore pagination for now, and assume there is only one page of results.
+    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
+    const url = `${host}/rest/agile/1.0/board/${board.id}/configuration`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    return data.columnConfig.columns;
+});
+
+
+/***/ }),
 /* 466 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 

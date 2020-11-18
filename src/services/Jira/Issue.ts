@@ -1,3 +1,4 @@
+import { error } from '@actions/core'
 import { TransitionObject } from 'jira-client'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
@@ -27,6 +28,10 @@ export interface Issue {
     }
     labels?: string[]
     parent?: Issue
+    project?: {
+      id: string
+      key: string
+    }
     subtasks?: Issue[]
     summary: string
     status: {
@@ -68,6 +73,30 @@ export const JiraIssueTypeEpic = 'Epic'
 
 // Jira labels.
 export const JiraLabelSkipPR = 'Skip_PR'
+
+/**
+ * Fetches all direct children of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
+ *
+ * @returns {Issue[]} The direct child issues.
+ */
+export const getChildIssues = async (key: string): Promise<Issue[]> => {
+  const { errorMessages, issues } = (await client.searchJira(`parent=${key}`, {
+    maxResults: 100,
+    expand: ['names'],
+  })) as { errorMessages?: string[]; issues?: Issue[] }
+
+  if (!isNil(errorMessages)) {
+    errorMessages.forEach(msg => error(msg))
+    return []
+  }
+  if (isNil(issues) || issues.length === 0) {
+    return []
+  }
+
+  return issues
+}
 
 /**
  * Fetches the issue with the given key from Jira.

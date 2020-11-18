@@ -13,6 +13,12 @@ import { TransitionObject } from 'jira-client'
 
 import { Credentials, Repository } from '@sr-services/Credentials'
 import { Issue } from '@sr-services/Jira/Issue'
+import {
+  JiraBoard,
+  JiraBoardConfiguration,
+  JiraBoardList,
+  JiraBoardColumn,
+} from '@sr-services/Jira/Project'
 import pullRequestPayload from '@sr-tests/fixtures/github-pull-request-payload.json'
 import repository from '@sr-tests/fixtures/github-repository.json'
 import issue from '@sr-tests/fixtures/jira-issue.json'
@@ -65,6 +71,29 @@ export const mockIssuesSetLabelsResponseData = [
 export const mockPullsRequestReviewersResponseData = {
   id: 1234,
 } as PullsRequestReviewersResponseData
+
+export const mockJiraBoard = {
+  id: 123,
+  location: {
+    projectId: 10003,
+  },
+} as JiraBoard
+
+export const mockJiraBoardColumn = {
+  name: 'Ready for review',
+} as JiraBoardColumn
+
+export const mockJiraBoardConfiguration = {
+  columnConfig: {
+    columns: [mockJiraBoardColumn],
+  },
+  id: 456,
+  name: 'Octokit Board',
+} as JiraBoardConfiguration
+
+export const mockJiraBoardList = {
+  values: [mockJiraBoard],
+} as JiraBoardList
 
 export const mockJiraIssue = issue as Issue
 

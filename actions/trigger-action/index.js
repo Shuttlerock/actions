@@ -6618,7 +6618,41 @@ module.exports = arrayPush;
 
 /***/ }),
 /* 83 */,
-/* 84 */,
+/* 84 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isArray = __webpack_require__(869),
+    isSymbol = __webpack_require__(358);
+
+/** Used to match property names within property paths. */
+var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+    reIsPlainProp = /^\w*$/;
+
+/**
+ * Checks if `value` is a property name and not a property path.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ */
+function isKey(value, object) {
+  if (isArray(value)) {
+    return false;
+  }
+  var type = typeof value;
+  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+      value == null || isSymbol(value)) {
+    return true;
+  }
+  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+    (object != null && value in Object(object));
+}
+
+module.exports = isKey;
+
+
+/***/ }),
 /* 85 */
 /***/ (function(module) {
 
@@ -9713,7 +9747,74 @@ module.exports = Request
 
 
 /***/ }),
-/* 124 */,
+/* 124 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var Stack = __webpack_require__(323),
+    baseIsEqual = __webpack_require__(494);
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.isMatch` without support for iteratee shorthands.
+ *
+ * @private
+ * @param {Object} object The object to inspect.
+ * @param {Object} source The object of property values to match.
+ * @param {Array} matchData The property names, values, and compare flags to match.
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @returns {boolean} Returns `true` if `object` is a match, else `false`.
+ */
+function baseIsMatch(object, source, matchData, customizer) {
+  var index = matchData.length,
+      length = index,
+      noCustomizer = !customizer;
+
+  if (object == null) {
+    return !length;
+  }
+  object = Object(object);
+  while (index--) {
+    var data = matchData[index];
+    if ((noCustomizer && data[2])
+          ? data[1] !== object[data[0]]
+          : !(data[0] in object)
+        ) {
+      return false;
+    }
+  }
+  while (++index < length) {
+    data = matchData[index];
+    var key = data[0],
+        objValue = object[key],
+        srcValue = data[1];
+
+    if (noCustomizer && data[2]) {
+      if (objValue === undefined && !(key in object)) {
+        return false;
+      }
+    } else {
+      var stack = new Stack;
+      if (customizer) {
+        var result = customizer(objValue, srcValue, key, object, source, stack);
+      }
+      if (!(result === undefined
+            ? baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG, customizer, stack)
+            : result
+          )) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+module.exports = baseIsMatch;
+
+
+/***/ }),
 /* 125 */
 /***/ (function(module) {
 
@@ -10060,7 +10161,25 @@ module.exports = {
 /***/ }),
 /* 127 */,
 /* 128 */,
-/* 129 */,
+/* 129 */
+/***/ (function(module) {
+
+/**
+ * The base implementation of `_.hasIn` without support for deep paths.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {Array|string} key The key to check.
+ * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ */
+function baseHasIn(object, key) {
+  return object != null && key in Object(object);
+}
+
+module.exports = baseHasIn;
+
+
+/***/ }),
 /* 130 */,
 /* 131 */
 /***/ (function(module) {
@@ -10365,7 +10484,36 @@ module.exports = getValue;
 
 
 /***/ }),
-/* 141 */,
+/* 141 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isStrictComparable = __webpack_require__(594),
+    keys = __webpack_require__(645);
+
+/**
+ * Gets the property names, values, and compare flags of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the match data of `object`.
+ */
+function getMatchData(object) {
+  var result = keys(object),
+      length = result.length;
+
+  while (length--) {
+    var key = result[length],
+        value = object[key];
+
+    result[length] = [key, value, isStrictComparable(value)];
+  }
+  return result;
+}
+
+module.exports = getMatchData;
+
+
+/***/ }),
 /* 142 */
 /***/ (function(module) {
 
@@ -14867,7 +15015,44 @@ Promise.join = function () {
 /* 250 */,
 /* 251 */,
 /* 252 */,
-/* 253 */,
+/* 253 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseProperty = __webpack_require__(829),
+    basePropertyDeep = __webpack_require__(685),
+    isKey = __webpack_require__(84),
+    toKey = __webpack_require__(956);
+
+/**
+ * Creates a function that returns the value at `path` of a given object.
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ * @example
+ *
+ * var objects = [
+ *   { 'a': { 'b': 2 } },
+ *   { 'a': { 'b': 1 } }
+ * ];
+ *
+ * _.map(objects, _.property('a.b'));
+ * // => [2, 1]
+ *
+ * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+ * // => [1, 2]
+ */
+function property(path) {
+  return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
+}
+
+module.exports = property;
+
+
+/***/ }),
 /* 254 */,
 /* 255 */,
 /* 256 */
@@ -16679,7 +16864,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+const core_1 = __webpack_require__(186);
 const isNil_1 = __importDefault(__webpack_require__(977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
 const Inputs_1 = __webpack_require__(968);
@@ -16693,6 +16879,27 @@ exports.JiraStatusValidated = 'Validated';
 exports.JiraIssueTypeEpic = 'Epic';
 // Jira labels.
 exports.JiraLabelSkipPR = 'Skip_PR';
+/**
+ * Fetches all direct children of the issue with the given key from Jira.
+ *
+ * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
+ *
+ * @returns {Issue[]} The direct child issues.
+ */
+exports.getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
+    const { errorMessages, issues } = (yield Client_1.client.searchJira(`parent=${key}`, {
+        maxResults: 100,
+        expand: ['names'],
+    }));
+    if (!isNil_1.default(errorMessages)) {
+        errorMessages.forEach(msg => core_1.error(msg));
+        return [];
+    }
+    if (isNil_1.default(issues) || issues.length === 0) {
+        return [];
+    }
+    return issues;
+});
 /**
  * Fetches the issue with the given key from Jira.
  *
@@ -17634,7 +17841,45 @@ function mergeObjects(provided, overrides, defaults)
 
 
 /***/ }),
-/* 288 */,
+/* 288 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseGet = __webpack_require__(758);
+
+/**
+ * Gets the value at `path` of `object`. If the resolved value is
+ * `undefined`, the `defaultValue` is returned in its place.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @param {*} [defaultValue] The value returned for `undefined` resolved values.
+ * @returns {*} Returns the resolved value.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.get(object, 'a[0].b.c');
+ * // => 3
+ *
+ * _.get(object, ['a', '0', 'b', 'c']);
+ * // => 3
+ *
+ * _.get(object, 'a.b.c', 'default');
+ * // => 'default'
+ */
+function get(object, path, defaultValue) {
+  var result = object == null ? undefined : baseGet(object, path);
+  return result === undefined ? defaultValue : result;
+}
+
+module.exports = get;
+
+
+/***/ }),
 /* 289 */,
 /* 290 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -23326,6 +23571,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(__webpack_require__(273), exports);
+__exportStar(__webpack_require__(465), exports);
 
 
 /***/ }),
@@ -23957,7 +24203,46 @@ module.exports = function generate_items(it, $keyword, $ruleType) {
 
 
 /***/ }),
-/* 409 */,
+/* 409 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseHasIn = __webpack_require__(129),
+    hasPath = __webpack_require__(658);
+
+/**
+ * Checks if `path` is a direct or inherited property of `object`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @example
+ *
+ * var object = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.hasIn(object, 'a');
+ * // => true
+ *
+ * _.hasIn(object, 'a.b');
+ * // => true
+ *
+ * _.hasIn(object, ['a', 'b']);
+ * // => true
+ *
+ * _.hasIn(object, 'b');
+ * // => false
+ */
+function hasIn(object, path) {
+  return object != null && hasPath(object, path, baseHasIn);
+}
+
+module.exports = hasIn;
+
+
+/***/ }),
 /* 410 */
 /***/ (function(module) {
 
@@ -25249,7 +25534,43 @@ module.exports = __webpack_require__(498)
 
 
 /***/ }),
-/* 427 */,
+/* 427 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseMatches = __webpack_require__(599),
+    baseMatchesProperty = __webpack_require__(908),
+    identity = __webpack_require__(822),
+    isArray = __webpack_require__(869),
+    property = __webpack_require__(253);
+
+/**
+ * The base implementation of `_.iteratee`.
+ *
+ * @private
+ * @param {*} [value=_.identity] The value to convert to an iteratee.
+ * @returns {Function} Returns the iteratee.
+ */
+function baseIteratee(value) {
+  // Don't store the `typeof` result in a variable to avoid a JIT bug in Safari 9.
+  // See https://bugs.webkit.org/show_bug.cgi?id=156034 for more details.
+  if (typeof value == 'function') {
+    return value;
+  }
+  if (value == null) {
+    return identity;
+  }
+  if (typeof value == 'object') {
+    return isArray(value)
+      ? baseMatchesProperty(value[0], value[1])
+      : baseMatches(value);
+  }
+  return property(value);
+}
+
+module.exports = baseIteratee;
+
+
+/***/ }),
 /* 428 */,
 /* 429 */
 /***/ (function(__unusedmodule, exports) {
@@ -30033,10 +30354,72 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(__webpack_require__(736), exports);
+__exportStar(__webpack_require__(973), exports);
 
 
 /***/ }),
-/* 465 */,
+/* 465 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getColumns = exports.getBoard = void 0;
+const isNil_1 = __importDefault(__webpack_require__(977));
+const node_fetch_1 = __importDefault(__webpack_require__(467));
+const Inputs_1 = __webpack_require__(968);
+/**
+ * Fetches the board definition for the given project ID.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {JiraBoard | undefined} The board belonging to te project.
+ */
+exports.getBoard = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
+    // We ignore pagination for now, and assume there is only one page of results.
+    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
+    const url = `${host}/rest/agile/1.0/board/`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    const board = data.values.find((brd) => brd.location.projectId.toString() === projectId);
+    return board;
+});
+/**
+ * Fetches the list of columns for the project with the given ID.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {JiraBoardColumn[] | undefined} The board belonging to te project.
+ */
+exports.getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    const board = yield exports.getBoard(projectId);
+    if (isNil_1.default(board)) {
+        return undefined;
+    }
+    // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
+    // We ignore pagination for now, and assume there is only one page of results.
+    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
+    const url = `${host}/rest/agile/1.0/board/${board.id}/configuration`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    return data.columnConfig.columns;
+});
+
+
+/***/ }),
 /* 466 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -34124,7 +34507,32 @@ Identity._oldVersionDetect = function (obj) {
 
 
 /***/ }),
-/* 509 */,
+/* 509 */
+/***/ (function(module) {
+
+/**
+ * A specialized version of `matchesProperty` for source values suitable
+ * for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function matchesStrictComparable(key, srcValue) {
+  return function(object) {
+    if (object == null) {
+      return false;
+    }
+    return object[key] === srcValue &&
+      (srcValue !== undefined || (key in Object(object)));
+  };
+}
+
+module.exports = matchesStrictComparable;
+
+
+/***/ }),
 /* 510 */,
 /* 511 */,
 /* 512 */,
@@ -35124,7 +35532,44 @@ function generateECDSA(curve) {
 
 /***/ }),
 /* 539 */,
-/* 540 */,
+/* 540 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isSymbol = __webpack_require__(358);
+
+/**
+ * The base implementation of methods like `_.max` and `_.min` which accepts a
+ * `comparator` to determine the extremum value.
+ *
+ * @private
+ * @param {Array} array The array to iterate over.
+ * @param {Function} iteratee The iteratee invoked per iteration.
+ * @param {Function} comparator The comparator used to compare values.
+ * @returns {*} Returns the extremum value.
+ */
+function baseExtremum(array, iteratee, comparator) {
+  var index = -1,
+      length = array.length;
+
+  while (++index < length) {
+    var value = array[index],
+        current = iteratee(value);
+
+    if (current != null && (computed === undefined
+          ? (current === current && !isSymbol(current))
+          : comparator(current, computed)
+        )) {
+      var computed = current,
+          result = value;
+    }
+  }
+  return result;
+}
+
+module.exports = baseExtremum;
+
+
+/***/ }),
 /* 541 */
 /***/ (function(module) {
 
@@ -35654,7 +36099,46 @@ isStream.transform = function (stream) {
 /***/ }),
 /* 555 */,
 /* 556 */,
-/* 557 */,
+/* 557 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseExtremum = __webpack_require__(540),
+    baseIteratee = __webpack_require__(427),
+    baseLt = __webpack_require__(641);
+
+/**
+ * This method is like `_.min` except that it accepts `iteratee` which is
+ * invoked for each element in `array` to generate the criterion by which
+ * the value is ranked. The iteratee is invoked with one argument: (value).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Math
+ * @param {Array} array The array to iterate over.
+ * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
+ * @returns {*} Returns the minimum value.
+ * @example
+ *
+ * var objects = [{ 'n': 1 }, { 'n': 2 }];
+ *
+ * _.minBy(objects, function(o) { return o.n; });
+ * // => { 'n': 1 }
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.minBy(objects, 'n');
+ * // => { 'n': 1 }
+ */
+function minBy(array, iteratee) {
+  return (array && array.length)
+    ? baseExtremum(array, baseIteratee(iteratee, 2), baseLt)
+    : undefined;
+}
+
+module.exports = minBy;
+
+
+/***/ }),
 /* 558 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -38104,7 +38588,27 @@ module.exports = function generate_dependencies(it, $keyword, $ruleType) {
 /***/ }),
 /* 592 */,
 /* 593 */,
-/* 594 */,
+/* 594 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isObject = __webpack_require__(58);
+
+/**
+ * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` if suitable for strict
+ *  equality comparisons, else `false`.
+ */
+function isStrictComparable(value) {
+  return value === value && !isObject(value);
+}
+
+module.exports = isStrictComparable;
+
+
+/***/ }),
 /* 595 */,
 /* 596 */,
 /* 597 */
@@ -38114,7 +38618,34 @@ module.exports = {"$id":"response.json#","$schema":"http://json-schema.org/draft
 
 /***/ }),
 /* 598 */,
-/* 599 */,
+/* 599 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseIsMatch = __webpack_require__(124),
+    getMatchData = __webpack_require__(141),
+    matchesStrictComparable = __webpack_require__(509);
+
+/**
+ * The base implementation of `_.matches` which doesn't clone `source`.
+ *
+ * @private
+ * @param {Object} source The object of property values to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatches(source) {
+  var matchData = getMatchData(source);
+  if (matchData.length == 1 && matchData[0][2]) {
+    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+  }
+  return function(object) {
+    return object === source || baseIsMatch(object, source, matchData);
+  };
+}
+
+module.exports = baseMatches;
+
+
+/***/ }),
 /* 600 */,
 /* 601 */,
 /* 602 */
@@ -40024,7 +40555,26 @@ MemoryCookieStore.prototype.getAllCookies = function(cb) {
 
 
 /***/ }),
-/* 641 */,
+/* 641 */
+/***/ (function(module) {
+
+/**
+ * The base implementation of `_.lt` which doesn't coerce arguments.
+ *
+ * @private
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if `value` is less than `other`,
+ *  else `false`.
+ */
+function baseLt(value, other) {
+  return value < other;
+}
+
+module.exports = baseLt;
+
+
+/***/ }),
 /* 642 */,
 /* 643 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -40812,7 +41362,51 @@ module.exports = mapCacheDelete;
 
 
 /***/ }),
-/* 658 */,
+/* 658 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var castPath = __webpack_require__(963),
+    isArguments = __webpack_require__(495),
+    isArray = __webpack_require__(869),
+    isIndex = __webpack_require__(936),
+    isLength = __webpack_require__(530),
+    toKey = __webpack_require__(956);
+
+/**
+ * Checks if `path` exists on `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @param {Function} hasFunc The function to check properties.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ */
+function hasPath(object, path, hasFunc) {
+  path = castPath(path, object);
+
+  var index = -1,
+      length = path.length,
+      result = false;
+
+  while (++index < length) {
+    var key = toKey(path[index]);
+    if (!(result = object != null && hasFunc(object, key))) {
+      break;
+    }
+    object = object[key];
+  }
+  if (result || ++index != length) {
+    return result;
+  }
+  length = object == null ? 0 : object.length;
+  return !!length && isLength(length) && isIndex(key, length) &&
+    (isArray(object) || isArguments(object));
+}
+
+module.exports = hasPath;
+
+
+/***/ }),
 /* 659 */,
 /* 660 */,
 /* 661 */
@@ -41629,7 +42223,28 @@ module.exports.httpify = function (resp, headers) {
 
 
 /***/ }),
-/* 685 */,
+/* 685 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseGet = __webpack_require__(758);
+
+/**
+ * A specialized version of `baseProperty` which supports deep paths.
+ *
+ * @private
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyDeep(path) {
+  return function(object) {
+    return baseGet(object, path);
+  };
+}
+
+module.exports = basePropertyDeep;
+
+
+/***/ }),
 /* 686 */,
 /* 687 */,
 /* 688 */
@@ -48114,7 +48729,7 @@ const Template_1 = __webpack_require__(920);
 /**
  * To trigger this event manually:
  *
- * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/createPullRequestForJiraIssue.ts.json
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/createPullRequestForJiraIssue.json
  *
  * or to trigger it via the Github API:
  *
@@ -48233,7 +48848,38 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
 /***/ }),
 /* 737 */,
 /* 738 */,
-/* 739 */,
+/* 739 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var memoize = __webpack_require__(885);
+
+/** Used as the maximum memoize cache size. */
+var MAX_MEMOIZE_SIZE = 500;
+
+/**
+ * A specialized version of `_.memoize` which clears the memoized function's
+ * cache when it exceeds `MAX_MEMOIZE_SIZE`.
+ *
+ * @private
+ * @param {Function} func The function to have its output memoized.
+ * @returns {Function} Returns the new memoized function.
+ */
+function memoizeCapped(func) {
+  var result = memoize(func, function(key) {
+    if (cache.size === MAX_MEMOIZE_SIZE) {
+      cache.clear();
+    }
+    return key;
+  });
+
+  var cache = result.cache;
+  return result;
+}
+
+module.exports = memoizeCapped;
+
+
+/***/ }),
 /* 740 */,
 /* 741 */,
 /* 742 */,
@@ -48416,6 +49062,9 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
         case 'createPullRequestForJiraIssue':
             yield index_1.createPullRequestForJiraIssue(email, param);
             break;
+        case 'jiraIssueTransitioned':
+            yield index_1.jiraIssueTransitioned(email, param);
+            break;
         default:
             throw new Error(`Unknown event ${event}`);
     }
@@ -48575,7 +49224,36 @@ module.exports = _createClass;
 /***/ }),
 /* 756 */,
 /* 757 */,
-/* 758 */,
+/* 758 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var castPath = __webpack_require__(963),
+    toKey = __webpack_require__(956);
+
+/**
+ * The base implementation of `_.get` without support for default values.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {*} Returns the resolved value.
+ */
+function baseGet(object, path) {
+  path = castPath(path, object);
+
+  var index = 0,
+      length = path.length;
+
+  while (object != null && index < length) {
+    object = object[toKey(path[index++])];
+  }
+  return (index && index == length) ? object : undefined;
+}
+
+module.exports = baseGet;
+
+
+/***/ }),
 /* 759 */,
 /* 760 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -50204,7 +50882,33 @@ function removeHook (state, name, method) {
 /***/ }),
 /* 820 */,
 /* 821 */,
-/* 822 */,
+/* 822 */
+/***/ (function(module) {
+
+/**
+ * This method returns the first argument it receives.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ *
+ * console.log(_.identity(object) === object);
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+
+/***/ }),
 /* 823 */,
 /* 824 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -50855,7 +51559,26 @@ exports.header = function (uri, method, opts) {
 
 
 /***/ }),
-/* 829 */,
+/* 829 */
+/***/ (function(module) {
+
+/**
+ * The base implementation of `_.property` without support for deep paths.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function baseProperty(key) {
+  return function(object) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = baseProperty;
+
+
+/***/ }),
 /* 830 */,
 /* 831 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -52576,7 +53299,39 @@ module.exports = isArray;
 
 /***/ }),
 /* 870 */,
-/* 871 */,
+/* 871 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var memoizeCapped = __webpack_require__(739);
+
+/** Used to match property names within property paths. */
+var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+
+/** Used to match backslashes in property paths. */
+var reEscapeChar = /\\(\\)?/g;
+
+/**
+ * Converts `string` to a property path array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the property path array.
+ */
+var stringToPath = memoizeCapped(function(string) {
+  var result = [];
+  if (string.charCodeAt(0) === 46 /* . */) {
+    result.push('');
+  }
+  string.replace(rePropName, function(match, number, quote, subString) {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+  });
+  return result;
+});
+
+module.exports = stringToPath;
+
+
+/***/ }),
 /* 872 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -53070,7 +53825,85 @@ exports.requestLog = requestLog;
 
 /***/ }),
 /* 884 */,
-/* 885 */,
+/* 885 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var MapCache = __webpack_require__(938);
+
+/** Error message constants. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * Creates a function that memoizes the result of `func`. If `resolver` is
+ * provided, it determines the cache key for storing the result based on the
+ * arguments provided to the memoized function. By default, the first argument
+ * provided to the memoized function is used as the map cache key. The `func`
+ * is invoked with the `this` binding of the memoized function.
+ *
+ * **Note:** The cache is exposed as the `cache` property on the memoized
+ * function. Its creation may be customized by replacing the `_.memoize.Cache`
+ * constructor with one whose instances implement the
+ * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
+ * method interface of `clear`, `delete`, `get`, `has`, and `set`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to have its output memoized.
+ * @param {Function} [resolver] The function to resolve the cache key.
+ * @returns {Function} Returns the new memoized function.
+ * @example
+ *
+ * var object = { 'a': 1, 'b': 2 };
+ * var other = { 'c': 3, 'd': 4 };
+ *
+ * var values = _.memoize(_.values);
+ * values(object);
+ * // => [1, 2]
+ *
+ * values(other);
+ * // => [3, 4]
+ *
+ * object.a = 2;
+ * values(object);
+ * // => [1, 2]
+ *
+ * // Modify the result cache.
+ * values.cache.set(object, ['a', 'b']);
+ * values(object);
+ * // => ['a', 'b']
+ *
+ * // Replace `_.memoize.Cache`.
+ * _.memoize.Cache = WeakMap;
+ */
+function memoize(func, resolver) {
+  if (typeof func != 'function' || (resolver != null && typeof resolver != 'function')) {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  var memoized = function() {
+    var args = arguments,
+        key = resolver ? resolver.apply(this, args) : args[0],
+        cache = memoized.cache;
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    var result = func.apply(this, args);
+    memoized.cache = cache.set(key, result) || cache;
+    return result;
+  };
+  memoized.cache = new (memoize.Cache || MapCache);
+  return memoized;
+}
+
+// Expose `MapCache`.
+memoize.Cache = MapCache;
+
+module.exports = memoize;
+
+
+/***/ }),
 /* 886 */,
 /* 887 */,
 /* 888 */,
@@ -54570,7 +55403,45 @@ module.exports = _setExports(process.env.NODE_NDEBUG);
 
 
 /***/ }),
-/* 908 */,
+/* 908 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var baseIsEqual = __webpack_require__(494),
+    get = __webpack_require__(288),
+    hasIn = __webpack_require__(409),
+    isKey = __webpack_require__(84),
+    isStrictComparable = __webpack_require__(594),
+    matchesStrictComparable = __webpack_require__(509),
+    toKey = __webpack_require__(956);
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+ *
+ * @private
+ * @param {string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatchesProperty(path, srcValue) {
+  if (isKey(path) && isStrictComparable(srcValue)) {
+    return matchesStrictComparable(toKey(path), srcValue);
+  }
+  return function(object) {
+    var objValue = get(object, path);
+    return (objValue === undefined && objValue === srcValue)
+      ? hasIn(object, path)
+      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+  };
+}
+
+module.exports = baseMatchesProperty;
+
+
+/***/ }),
 /* 909 */,
 /* 910 */
 /***/ (function(module) {
@@ -57277,7 +58148,33 @@ module.exports = stackSet;
 
 
 /***/ }),
-/* 956 */,
+/* 956 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isSymbol = __webpack_require__(358);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/**
+ * Converts `value` to a string key if it's not a string or symbol.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @returns {string|symbol} Returns the key.
+ */
+function toKey(value) {
+  if (typeof value == 'string' || isSymbol(value)) {
+    return value;
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = toKey;
+
+
+/***/ }),
 /* 957 */,
 /* 958 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -59109,7 +60006,33 @@ function regex(str) {
 
 
 /***/ }),
-/* 963 */,
+/* 963 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isArray = __webpack_require__(869),
+    isKey = __webpack_require__(84),
+    stringToPath = __webpack_require__(871),
+    toString = __webpack_require__(931);
+
+/**
+ * Casts `value` to a path array if it's not one.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {Array} Returns the cast property path array.
+ */
+function castPath(value, object) {
+  if (isArray(value)) {
+    return value;
+  }
+  return isKey(value, object) ? [value] : stringToPath(toString(value));
+}
+
+module.exports = castPath;
+
+
+/***/ }),
 /* 964 */
 /***/ (function(module) {
 
@@ -59560,7 +60483,94 @@ module.exports = function generate_custom(it, $keyword, $ruleType) {
 
 
 /***/ }),
-/* 973 */,
+/* 973 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.jiraIssueTransitioned = void 0;
+const core_1 = __webpack_require__(186);
+const isNil_1 = __importDefault(__webpack_require__(977));
+const minBy_1 = __importDefault(__webpack_require__(557));
+const Jira_1 = __webpack_require__(404);
+/**
+ * To trigger this event manually:
+ *
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/jiraIssueTransitioned.json
+ *
+ * or to trigger it via the Github API:
+ *
+ * $ curl --header "Accept: application/vnd.github.v3+json" \
+ * --header  "Authorization: token YOUR_TOKEN" \
+ * --request POST \
+ * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "jiraIssueTransitioned", "param": "STUDIO-860" }}' \
+ * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
+ *
+ * @param {string} _email    The email address of the user who transitioned the issue.
+ * @param {string} issueKey The key of the Jira issue that was transitioned.
+ */
+exports.jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Fetching the Jira issue ${issueKey}...`);
+    const issue = yield Jira_1.getIssue(issueKey);
+    if (isNil_1.default(issue)) {
+        core_1.info(`Issue ${issueKey} could not be found - giving up`);
+        return;
+    }
+    if (isNil_1.default(issue.fields.parent)) {
+        core_1.info(`Issue ${issueKey} has no parent issue - nothing to do`);
+        return;
+    }
+    core_1.info(`Fetching the parent issue ${issue.fields.parent.key}...`);
+    const parent = yield Jira_1.getIssue(issue.fields.parent.key);
+    if (isNil_1.default(parent)) {
+        throw new Error(`Parent issue ${issue.fields.parent.key} could not be found`);
+    }
+    core_1.info(`Fetching the direct children of issue ${parent.key}...`);
+    const children = yield Jira_1.getChildIssues(parent.key);
+    if (children.length === 0) {
+        throw new Error(`No children found for parent issue ${parent.key}`);
+    }
+    if (isNil_1.default(parent.fields.project)) {
+        throw new Error(`No project attached to parent issue ${parent.key}`);
+    }
+    core_1.info(`Fetching the column names for the project ${parent.fields.project.key}...`);
+    const columns = yield Jira_1.getColumns(parent.fields.project.id);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${parent.fields.project.key}`);
+    }
+    const columnNames = columns.map((col) => col.name);
+    core_1.info('Finding the left-most status for child issues...');
+    const statuses = [
+        ...new Set(children.map((child) => child.fields.status.name)),
+    ];
+    const leftmost = minBy_1.default(statuses, (status) => columnNames.indexOf(status));
+    if (isNil_1.default(leftmost)) {
+        throw new Error(`Couldn't find the leftomost issue status for children of ${parent.key}`);
+    }
+    if (parent.fields.status.name === leftmost) {
+        core_1.info(`The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`);
+    }
+    else {
+        core_1.info(`Moved the parent issue ${parent.key} to '${leftmost}'`);
+        yield Jira_1.setIssueStatus(parent.id, leftmost);
+    }
+});
+
+
+/***/ }),
 /* 974 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
