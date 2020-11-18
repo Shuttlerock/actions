@@ -12,6 +12,7 @@
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint --config .eslintrc.js src",
     "package": "./bin/package",
+    "quick-package": "./bin/quick-package",
     "test": "jest"
   },
   "repository": {
