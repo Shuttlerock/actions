@@ -41,7 +41,7 @@
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
-    "@slack/web-api": "^5.13.0",
+    "@slack/web-api": "^5.14.0",
     "@types/lodash": "^4.14.165",
     "jira-client": "^6.21.0",
     "lodash": "^4.17.20",
