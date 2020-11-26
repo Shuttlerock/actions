@@ -48757,10 +48757,13 @@ exports.createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, v
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Finding out who the pull request should belong to...');
     if (isNil_1.default(issue.fields.assignee)) {
-        const credentials = yield Credentials_1.fetchCredentials(email);
-        const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
-        yield Slack_1.sendUserMessage(credentials.slack_id, message);
-        core_1.error(message);
+        // If this issue was transitioned via automation, we won't have anyone to send messages to.
+        if (!isNil_1.default(email)) {
+            const credentials = yield Credentials_1.fetchCredentials(email);
+            const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`;
+            yield Slack_1.sendUserMessage(credentials.slack_id, message);
+            core_1.error(message);
+        }
         return;
     }
     const credentialLookup = issue.fields.assignee.emailAddress || issue.fields.assignee.displayName;

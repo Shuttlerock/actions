@@ -59,10 +59,13 @@ export const createPullRequestForJiraIssue = async (
 
   info('Finding out who the pull request should belong to...')
   if (isNil(issue.fields.assignee)) {
-    const credentials = await fetchCredentials(email)
-    const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
-    await sendUserMessage(credentials.slack_id, message)
-    error(message)
+    // If this issue was transitioned via automation, we won't have anyone to send messages to.
+    if (!isNil(email)) {
+      const credentials = await fetchCredentials(email)
+      const message = `Issue <${jiraUrl}|${issue.key}> is not assigned to anyone, so no pull request was created`
+      await sendUserMessage(credentials.slack_id, message)
+      error(message)
+    }
     return
   }
   const credentialLookup =
