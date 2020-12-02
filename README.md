@@ -39,8 +39,8 @@ Create a new folder under `src/actions`, and add an `action.yml` inside defining
 
 First, install the [act](https://github.com/nektos/act) utility to run actions locally:
 ```bash
-$ git clone git@github.com:nektos/act.git
-$ cd act
+$ git clone git@github.com:nektos/act.git --branch v0.2.15
+$ cd act 
 ```
 
 Edit the file `pkg/runner/step_context.go` and apply the following patch (it expects the `action.yml` file at the repository root, whereas we have it multiple actions in subfolders):
@@ -66,6 +66,11 @@ Build `act`, and copy the resulting executable into your `PATH` somewhere:
 ```bash
 $ go build
 $ cp act ~/.bin
+```
+
+or:
+```bash
+$ make && make install
 ```
 
 You will also need to provide a github token in the `.secrets` file:
