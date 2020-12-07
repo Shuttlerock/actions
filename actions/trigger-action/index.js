@@ -14547,8 +14547,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendUserMessage = exports.sendErrorMessage = void 0;
+const isNil_1 = __importDefault(__webpack_require__(977));
 const Inputs_1 = __webpack_require__(968);
 const Client_1 = __webpack_require__(589);
 /**
@@ -14559,6 +14563,9 @@ const Client_1 = __webpack_require__(589);
  * @returns {void}
  */
 exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
+    if (isNil_1.default(message)) {
+        return;
+    }
     yield Client_1.client.chat.postMessage({
         channel: Inputs_1.slackErrorChannelId(),
         text: message,
@@ -14573,8 +14580,19 @@ exports.sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, functi
  * @returns {void}
  */
 exports.sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, function* () {
-    // See: https://api.slack.com/methods/chat.postMessage
-    yield Client_1.client.chat.postMessage({ channel: userId, text: message });
+    if (isNil_1.default(userId) || isNil_1.default(message)) {
+        return;
+    }
+    try {
+        // See: https://api.slack.com/methods/chat.postMessage
+        yield Client_1.client.chat.postMessage({ channel: userId, text: message });
+    }
+    catch (err) {
+        if (err.message.match(/channel_not_found/)) {
+            return;
+        }
+        throw err;
+    }
 });
 
 

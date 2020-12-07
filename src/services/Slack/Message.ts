@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil'
+
 import { slackErrorChannelId } from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 
@@ -9,6 +11,10 @@ import { client } from '@sr-services/Slack/Client'
  * @returns {void}
  */
 export const sendErrorMessage = async (message: string): Promise<void> => {
+  if (isNil(message)) {
+    return
+  }
+
   await client.chat.postMessage({
     channel: slackErrorChannelId(),
     text: message,
@@ -27,6 +33,18 @@ export const sendUserMessage = async (
   userId: string,
   message: string
 ): Promise<void> => {
-  // See: https://api.slack.com/methods/chat.postMessage
-  await client.chat.postMessage({ channel: userId, text: message })
+  if (isNil(userId) || isNil(message)) {
+    return
+  }
+
+  try {
+    // See: https://api.slack.com/methods/chat.postMessage
+    await client.chat.postMessage({ channel: userId, text: message })
+  } catch (err) {
+    if (err.message.match(/channel_not_found/)) {
+      return
+    }
+
+    throw err
+  }
 }
