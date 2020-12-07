@@ -62,10 +62,13 @@ export const checkRunCompleted = async (
   info(`Adding the '${HasIssuesLabel}' label...`)
   await addLabels(repository.name, pullRequest.number, [HasIssuesLabel])
 
-  if (issue.fields.status.name !== JiraStatusHasIssues) {
-    info(`Moving Jira issue ${issueKey} to '${JiraStatusHasIssues}'...`)
-    await setIssueStatus(issue.id, JiraStatusHasIssues)
+  if (issue.fields.status.name === JiraStatusHasIssues) {
+    info(`Issue ${issueKey} is already in '${JiraStatusHasIssues}' - giving up`)
+    return
   }
+
+  info(`Moving Jira issue ${issueKey} to '${JiraStatusHasIssues}'...`)
+  await setIssueStatus(issue.id, JiraStatusHasIssues)
 
   if (issue.fields.assignee) {
     info('Sending a Slack message to the Jira assignee...')
