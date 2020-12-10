@@ -67,6 +67,7 @@ export const addLabels = async (
   number: number,
   added: string[]
 ): Promise<IssuesAddLabelsResponseData> => {
+  info(`Fetching the pull request ${repo}#${number}...`)
   const pullRequest = await getPullRequest(repo, number)
   if (isNil(pullRequest)) {
     throw new Error(
