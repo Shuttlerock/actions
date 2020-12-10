@@ -44,6 +44,7 @@ export const createPullRequestForJiraIssue = async (
   email: string,
   issueKey: string
 ): Promise<void> => {
+  info(`Creating a pull request for issue ${issueKey} / ${email}`)
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
   if (isNil(issue)) {
@@ -163,10 +164,14 @@ export const createPullRequestForJiraIssue = async (
 
     pullRequestNumber = pullRequest.number
     info(`Created pull request #${pullRequestNumber}`)
+    // Sleep a little bit before we continue - we have been getting 404s trying to fetch the PR again straight after creating it.
+    await new Promise(r => setTimeout(r, 2000))
   }
 
   // 7. Mark the pull request as in-progress.
-  info('Adding labels...')
+  info(
+    `Adding the '${InProgressLabel}' label to ${repo.name}#${pullRequestNumber}...`
+  )
   await addLabels(repo.name, pullRequestNumber, [InProgressLabel])
 
   info(`Assigning @${credentials.github_username} as the owner...`)
