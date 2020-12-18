@@ -5,6 +5,7 @@ import { sendErrorMessage } from '@sr-services/Slack'
 import {
   createPullRequestForJiraIssue,
   jiraIssueTransitioned,
+  jiraStoryPointsUpdated,
 } from '@sr-triggers/index'
 
 interface Context {
@@ -30,6 +31,9 @@ export const run = async (): Promise<void> => {
   switch (event) {
     case 'createPullRequestForJiraIssue':
       await createPullRequestForJiraIssue(email, param)
+      break
+    case 'jiraStoryPointsUpdated':
+      await jiraStoryPointsUpdated(email, param)
       break
     case 'jiraIssueTransitioned':
       await jiraIssueTransitioned(email, param)

@@ -8,9 +8,11 @@ import {
   getIssue,
   getIssuePullRequestNumbers,
   issueUrl,
+  JiraFieldStoryPointEstimate,
   JiraIssueTypeEpic,
   JiraStatusValidated,
   setIssueStatus,
+  updateCustomField,
 } from '@sr-services/Jira/Issue'
 import * as Issue from '@sr-services/Jira/Issue'
 import {
@@ -24,24 +26,6 @@ const { Response } = jest.requireActual('node-fetch')
 jest.mock('node-fetch', () => jest.fn())
 
 describe('Issue', () => {
-  describe('getChildIssues', () => {
-    it('calls the Jira API', async () => {
-      const spy = jest
-        .spyOn(client, 'searchJira')
-        .mockImplementation((_query: string, _options?: unknown) =>
-          Promise.resolve({ issues: [mockJiraIssue] })
-        )
-      const issues = await getChildIssues('ISSUE-123')
-      expect(spy).toHaveBeenCalledWith('parent=ISSUE-123', {
-        expand: ['names'],
-        maxResults: 100,
-      })
-      expect(issues.length).toEqual(1)
-      expect(issues[0].id).toEqual(mockJiraIssue.id)
-      spy.mockRestore()
-    })
-  })
-
   describe('getIssue', () => {
     it('calls the Jira API', async () => {
       const spy = jest
@@ -63,6 +47,17 @@ describe('Issue', () => {
         )
       const data = await getIssue('10000')
       expect(data?.fields.repository).toEqual('actions')
+      spy.mockRestore()
+    })
+
+    it('includes the story points estimate explicitly', async () => {
+      const spy = jest
+        .spyOn(client, 'findIssue')
+        .mockImplementation((_key: string, _expand?: string) =>
+          Promise.resolve(mockJiraIssue)
+        )
+      const data = await getIssue('10000')
+      expect(data?.fields.storyPointEstimate).toEqual(5)
       spy.mockRestore()
     })
   })
@@ -177,6 +172,43 @@ describe('Issue', () => {
       })
       spyListTransitions.mockRestore()
       spyTransitionIssue.mockRestore()
+    })
+  })
+
+  describe('updateCustomField', () => {
+    it('calls the Jira API', async () => {
+      const spyUpdateIssue = jest
+        .spyOn(client, 'updateIssue')
+        .mockImplementation(
+          (_issueId: string, _data: Record<string, unknown>) =>
+            Promise.resolve({})
+        )
+      await updateCustomField(mockJiraIssue, JiraFieldStoryPointEstimate, 123)
+      const expected = {
+        fields: {
+          customfield_10015: 123,
+        },
+      }
+      expect(spyUpdateIssue).toHaveBeenCalledWith('10000', expected)
+      spyUpdateIssue.mockRestore()
+    })
+  })
+
+  describe('getChildIssues', () => {
+    it('calls the Jira API', async () => {
+      const spy = jest
+        .spyOn(client, 'searchJira')
+        .mockImplementation((_query: string, _options?: unknown) =>
+          Promise.resolve({ issues: [mockJiraIssue] })
+        )
+      const issues = await getChildIssues('ISSUE-123')
+      expect(spy).toHaveBeenCalledWith('parent=ISSUE-123', {
+        expand: ['names'],
+        maxResults: 100,
+      })
+      expect(issues.length).toEqual(1)
+      expect(issues[0].id).toEqual(mockJiraIssue.id)
+      spy.mockRestore()
     })
   })
 })

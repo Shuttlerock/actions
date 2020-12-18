@@ -60291,7 +60291,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const core_1 = __webpack_require__(2186);
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
@@ -60306,6 +60306,50 @@ exports.JiraStatusValidated = 'Validated';
 exports.JiraIssueTypeEpic = 'Epic';
 // Jira labels.
 exports.JiraLabelSkipPR = 'Skip_PR';
+// Jira issue field names.
+exports.JiraFieldRepository = 'Repository';
+exports.JiraFieldStoryPointEstimate = 'Story point estimate';
+/**
+ * Returns the field ID for the given human-readable field name.
+ *
+ * @param {Issue}  issue     The issue whose fields we want to search.
+ * @param {string} fieldName The human-readable field name to search for.
+ *
+ * @returns {string} The field ID.
+ */
+const idForFieldName = (issue, fieldName) => {
+    const names = issue.names || {};
+    return Object.keys(names).find(id => names[id] === fieldName);
+};
+/**
+ * Populates some fields explicitly that are buried away as 'custom fields' with ID
+ * identifiers mapped to the 'names' list.
+ *
+ * @param {Issue} issue The issue whose data we want to populate.
+ *
+ * @returns {Issue} The issues, with fields populated.
+ */
+const populateExplicitFields = (issue) => {
+    var _a;
+    let fieldId;
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    fieldId = idForFieldName(issue, exports.JiraFieldRepository);
+    if (fieldId) {
+        Object.assign(issue.fields, {
+            repository: (_a = issue.fields[fieldId]) === null || _a === void 0 ? void 0 : _a.value,
+        });
+    }
+    // Find the story points, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    fieldId = idForFieldName(issue, exports.JiraFieldStoryPointEstimate);
+    if (fieldId) {
+        Object.assign(issue.fields, {
+            storyPointEstimate: issue.fields[fieldId],
+        });
+    }
+    return issue;
+};
 /**
  * Fetches all direct children of the issue with the given key from Jira.
  *
@@ -60314,7 +60358,7 @@ exports.JiraLabelSkipPR = 'Skip_PR';
  * @returns {Issue[]} The direct child issues.
  */
 const getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    const { errorMessages, issues } = (yield Client_1.client.searchJira(`parent=${key}`, {
+    const { errorMessages, issues, names } = (yield Client_1.client.searchJira(`parent=${key}`, {
         maxResults: 100,
         expand: ['names'],
     }));
@@ -60325,7 +60369,10 @@ const getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
     if (isNil_1.default(issues) || issues.length === 0) {
         return [];
     }
-    return issues;
+    return issues.map((issue) => {
+        Object.assign(issue, { names });
+        return populateExplicitFields(issue);
+    });
 });
 exports.getChildIssues = getChildIssues;
 /**
@@ -60336,17 +60383,9 @@ exports.getChildIssues = getChildIssues;
  * @returns {Issue} The issue data.
  */
 const getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         const issue = (yield Client_1.client.findIssue(key, 'names'));
-        // Find the repository, and include it explicitly. This is a bit ugly due to the way
-        // Jira includes custom fields.
-        const names = issue.names || {};
-        const fieldName = Object.keys(names).find(name => names[name] === 'Repository');
-        if (fieldName) {
-            issue.fields.repository = (_a = issue.fields[fieldName]) === null || _a === void 0 ? void 0 : _a.value;
-        }
-        return issue;
+        return populateExplicitFields(issue);
     }
     catch (err) {
         if (err.statusCode === 404) {
@@ -60431,6 +60470,26 @@ const setIssueStatus = (issueId, status) => __awaiter(void 0, void 0, void 0, fu
     yield Client_1.client.transitionIssue(issueId, { transition });
 });
 exports.setIssueStatus = setIssueStatus;
+/**
+ * Sets the custom field with the given name to the given value.
+ *
+ * @param {Issue}           issue     The issue to update.
+ * @param {string}          fieldName The name of the custom field to update.
+ * @param {string | number} value The value to set the field to.
+ */
+const updateCustomField = (issue, fieldName, value) => __awaiter(void 0, void 0, void 0, function* () {
+    const fieldId = idForFieldName(issue, fieldName);
+    if (isNil_1.default(fieldId)) {
+        throw new Error(`Cannot find ID of field '${fieldName}' in issue ${issue.key}`);
+    }
+    const data = {
+        fields: {
+            [fieldId]: value,
+        },
+    };
+    yield Client_1.client.updateIssue(issue.id, data);
+});
+exports.updateCustomField = updateCustomField;
 
 
 /***/ }),
