@@ -18,6 +18,8 @@ interface User {
   emailAddress: string
 }
 
+type FieldNames = { [name: string]: string }
+
 export interface Issue {
   fields: {
     assignee?: User
@@ -39,12 +41,11 @@ export interface Issue {
     }
     // Added by us.
     repository?: string
+    storyPointEstimate?: number
   }
   id: string
   key: string
-  names?: {
-    [name: string]: string
-  }
+  names?: FieldNames
   subtask?: boolean
 }
 
@@ -74,6 +75,62 @@ export const JiraIssueTypeEpic = 'Epic'
 // Jira labels.
 export const JiraLabelSkipPR = 'Skip_PR'
 
+// Jira issue field names.
+export const JiraFieldRepository = 'Repository'
+export const JiraFieldStoryPointEstimate = 'Story point estimate'
+
+/**
+ * Returns the field ID for the given human-readable field name.
+ *
+ * @param {Issue}  issue     The issue whose fields we want to search.
+ * @param {string} fieldName The human-readable field name to search for.
+ *
+ * @returns {string} The field ID.
+ */
+const idForFieldName = (
+  issue: Issue,
+  fieldName: string
+): string | undefined => {
+  const names = issue.names || {}
+  return Object.keys(names).find(id => names[id] === fieldName)
+}
+
+/**
+ * Populates some fields explicitly that are buried away as 'custom fields' with ID
+ * identifiers mapped to the 'names' list.
+ *
+ * @param {Issue} issue The issue whose data we want to populate.
+ *
+ * @returns {Issue} The issues, with fields populated.
+ */
+const populateExplicitFields = (issue: Issue) => {
+  let fieldId
+
+  // Find the repository, and include it explicitly. This is a bit ugly due to the way
+  // Jira includes custom fields.
+  fieldId = idForFieldName(issue, JiraFieldRepository)
+  if (fieldId) {
+    Object.assign(issue.fields, {
+      repository: ((issue.fields as unknown) as {
+        [customField: string]: { value: string }
+      })[fieldId]?.value,
+    })
+  }
+
+  // Find the story points, and include it explicitly. This is a bit ugly due to the way
+  // Jira includes custom fields.
+  fieldId = idForFieldName(issue, JiraFieldStoryPointEstimate)
+  if (fieldId) {
+    Object.assign(issue.fields, {
+      storyPointEstimate: ((issue.fields as unknown) as {
+        [customField: string]: number
+      })[fieldId],
+    })
+  }
+
+  return issue
+}
+
 /**
  * Fetches all direct children of the issue with the given key from Jira.
  *
@@ -82,10 +139,13 @@ export const JiraLabelSkipPR = 'Skip_PR'
  * @returns {Issue[]} The direct child issues.
  */
 export const getChildIssues = async (key: string): Promise<Issue[]> => {
-  const { errorMessages, issues } = (await client.searchJira(`parent=${key}`, {
-    maxResults: 100,
-    expand: ['names'],
-  })) as { errorMessages?: string[]; issues?: Issue[] }
+  const { errorMessages, issues, names } = (await client.searchJira(
+    `parent=${key}`,
+    {
+      maxResults: 100,
+      expand: ['names'],
+    }
+  )) as { errorMessages?: string[]; issues?: Issue[]; names: FieldNames }
 
   if (!isNil(errorMessages)) {
     errorMessages.forEach(msg => error(msg))
@@ -95,7 +155,10 @@ export const getChildIssues = async (key: string): Promise<Issue[]> => {
     return []
   }
 
-  return issues
+  return issues.map((issue: Issue) => {
+    Object.assign(issue, { names })
+    return populateExplicitFields(issue)
+  })
 }
 
 /**
@@ -109,19 +172,7 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
   try {
     const issue = (await client.findIssue(key, 'names')) as Issue
 
-    // Find the repository, and include it explicitly. This is a bit ugly due to the way
-    // Jira includes custom fields.
-    const names = issue.names || {}
-    const fieldName = Object.keys(names).find(
-      name => names[name] === 'Repository'
-    )
-    if (fieldName) {
-      issue.fields.repository = ((issue.fields as unknown) as {
-        [customField: string]: { value: string }
-      })[fieldName]?.value
-    }
-
-    return issue
+    return populateExplicitFields(issue)
   } catch (err) {
     if (err.statusCode === 404) {
       return undefined
@@ -226,4 +277,31 @@ export const setIssueStatus = async (
   }
 
   await client.transitionIssue(issueId, { transition })
+}
+
+/**
+ * Sets the custom field with the given name to the given value.
+ *
+ * @param {Issue}           issue     The issue to update.
+ * @param {string}          fieldName The name of the custom field to update.
+ * @param {string | number} value The value to set the field to.
+ */
+export const updateCustomField = async (
+  issue: Issue,
+  fieldName: string,
+  value: string | number
+): Promise<void> => {
+  const fieldId = idForFieldName(issue, fieldName)
+  if (isNil(fieldId)) {
+    throw new Error(
+      `Cannot find ID of field '${fieldName}' in issue ${issue.key}`
+    )
+  }
+
+  const data = {
+    fields: {
+      [fieldId]: value,
+    },
+  }
+  await client.updateIssue(issue.id, data)
 }

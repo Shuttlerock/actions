@@ -1,0 +1,8 @@
+{
+  "ref": "master",
+  "inputs": {
+    "email": "dave@shuttlerock.com",
+    "event": "jiraStoryPointsUpdated",
+    "param": "STUDIO-1150"
+  }
+}

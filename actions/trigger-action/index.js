@@ -60269,6 +60269,9 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         case 'createPullRequestForJiraIssue':
             yield index_1.createPullRequestForJiraIssue(email, param);
             break;
+        case 'jiraStoryPointsUpdated':
+            yield index_1.jiraStoryPointsUpdated(email, param);
+            break;
         case 'jiraIssueTransitioned':
             yield index_1.jiraIssueTransitioned(email, param);
             break;
@@ -61094,7 +61097,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const core_1 = __webpack_require__(2186);
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
@@ -61109,6 +61112,50 @@ exports.JiraStatusValidated = 'Validated';
 exports.JiraIssueTypeEpic = 'Epic';
 // Jira labels.
 exports.JiraLabelSkipPR = 'Skip_PR';
+// Jira issue field names.
+exports.JiraFieldRepository = 'Repository';
+exports.JiraFieldStoryPointEstimate = 'Story point estimate';
+/**
+ * Returns the field ID for the given human-readable field name.
+ *
+ * @param {Issue}  issue     The issue whose fields we want to search.
+ * @param {string} fieldName The human-readable field name to search for.
+ *
+ * @returns {string} The field ID.
+ */
+const idForFieldName = (issue, fieldName) => {
+    const names = issue.names || {};
+    return Object.keys(names).find(id => names[id] === fieldName);
+};
+/**
+ * Populates some fields explicitly that are buried away as 'custom fields' with ID
+ * identifiers mapped to the 'names' list.
+ *
+ * @param {Issue} issue The issue whose data we want to populate.
+ *
+ * @returns {Issue} The issues, with fields populated.
+ */
+const populateExplicitFields = (issue) => {
+    var _a;
+    let fieldId;
+    // Find the repository, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    fieldId = idForFieldName(issue, exports.JiraFieldRepository);
+    if (fieldId) {
+        Object.assign(issue.fields, {
+            repository: (_a = issue.fields[fieldId]) === null || _a === void 0 ? void 0 : _a.value,
+        });
+    }
+    // Find the story points, and include it explicitly. This is a bit ugly due to the way
+    // Jira includes custom fields.
+    fieldId = idForFieldName(issue, exports.JiraFieldStoryPointEstimate);
+    if (fieldId) {
+        Object.assign(issue.fields, {
+            storyPointEstimate: issue.fields[fieldId],
+        });
+    }
+    return issue;
+};
 /**
  * Fetches all direct children of the issue with the given key from Jira.
  *
@@ -61117,7 +61164,7 @@ exports.JiraLabelSkipPR = 'Skip_PR';
  * @returns {Issue[]} The direct child issues.
  */
 const getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    const { errorMessages, issues } = (yield Client_1.client.searchJira(`parent=${key}`, {
+    const { errorMessages, issues, names } = (yield Client_1.client.searchJira(`parent=${key}`, {
         maxResults: 100,
         expand: ['names'],
     }));
@@ -61128,7 +61175,10 @@ const getChildIssues = (key) => __awaiter(void 0, void 0, void 0, function* () {
     if (isNil_1.default(issues) || issues.length === 0) {
         return [];
     }
-    return issues;
+    return issues.map((issue) => {
+        Object.assign(issue, { names });
+        return populateExplicitFields(issue);
+    });
 });
 exports.getChildIssues = getChildIssues;
 /**
@@ -61139,17 +61189,9 @@ exports.getChildIssues = getChildIssues;
  * @returns {Issue} The issue data.
  */
 const getIssue = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         const issue = (yield Client_1.client.findIssue(key, 'names'));
-        // Find the repository, and include it explicitly. This is a bit ugly due to the way
-        // Jira includes custom fields.
-        const names = issue.names || {};
-        const fieldName = Object.keys(names).find(name => names[name] === 'Repository');
-        if (fieldName) {
-            issue.fields.repository = (_a = issue.fields[fieldName]) === null || _a === void 0 ? void 0 : _a.value;
-        }
-        return issue;
+        return populateExplicitFields(issue);
     }
     catch (err) {
         if (err.statusCode === 404) {
@@ -61234,6 +61276,26 @@ const setIssueStatus = (issueId, status) => __awaiter(void 0, void 0, void 0, fu
     yield Client_1.client.transitionIssue(issueId, { transition });
 });
 exports.setIssueStatus = setIssueStatus;
+/**
+ * Sets the custom field with the given name to the given value.
+ *
+ * @param {Issue}           issue     The issue to update.
+ * @param {string}          fieldName The name of the custom field to update.
+ * @param {string | number} value The value to set the field to.
+ */
+const updateCustomField = (issue, fieldName, value) => __awaiter(void 0, void 0, void 0, function* () {
+    const fieldId = idForFieldName(issue, fieldName);
+    if (isNil_1.default(fieldId)) {
+        throw new Error(`Cannot find ID of field '${fieldName}' in issue ${issue.key}`);
+    }
+    const data = {
+        fields: {
+            [fieldId]: value,
+        },
+    };
+    yield Client_1.client.updateIssue(issue.id, data);
+});
+exports.updateCustomField = updateCustomField;
 
 
 /***/ }),
@@ -61704,6 +61766,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__webpack_require__(8749), exports);
 __exportStar(__webpack_require__(9973), exports);
+__exportStar(__webpack_require__(4453), exports);
 
 
 /***/ }),
@@ -61794,6 +61857,84 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     }
 });
 exports.jiraIssueTransitioned = jiraIssueTransitioned;
+
+
+/***/ }),
+
+/***/ 4453:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.jiraStoryPointsUpdated = void 0;
+const core_1 = __webpack_require__(2186);
+const isNil_1 = __importDefault(__webpack_require__(4977));
+const Jira_1 = __webpack_require__(404);
+/**
+ * To trigger this event manually:
+ *
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/jiraStoryPointsUpdated.json
+ *
+ * or to trigger it via the Github API:
+ *
+ * $ curl --header "Accept: application/vnd.github.v3+json" \
+ * --header  "Authorization: token YOUR_TOKEN" \
+ * --request POST \
+ * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "jiraStoryPointsUpdated", "param": "STUDIO-1150" }}' \
+ * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
+ *
+ * @param {string} email    The email address of the user who transitioned the issue.
+ * @param {string} issueKey The key of the Jira issue that was transitioned.
+ */
+const jiraStoryPointsUpdated = (email, issueKey) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Fetching the Jira issue ${issueKey}...`);
+    const issue = yield Jira_1.getIssue(issueKey);
+    if (isNil_1.default(issue)) {
+        core_1.info(`Issue ${issueKey} could not be found - giving up`);
+        return;
+    }
+    core_1.info(`Fetching the direct children of issue ${issueKey}...`);
+    const children = yield Jira_1.getChildIssues(issueKey);
+    if (children.length > 0) {
+        core_1.info(`Summing story points for ${children.length} children...`);
+        const sum = children.reduce((total, child) => {
+            return total + (child.fields.storyPointEstimate || 0);
+        }, 0);
+        if (sum === 0) {
+            core_1.info(`Children of ${issueKey} have zero points estimated - giving up`);
+            return;
+        }
+        if (issue.fields.storyPointEstimate === sum) {
+            core_1.info(`Issue ${issueKey} estimate is already set to ${sum} points - giving up`);
+            return;
+        }
+        core_1.info(`Setting the story point estimate for ${issueKey} to ${sum}...`);
+        yield Jira_1.updateCustomField(issue, Jira_1.JiraFieldStoryPointEstimate, sum);
+    }
+    // If this story has no parent, we're done.
+    if (isNil_1.default(issue.fields.parent)) {
+        core_1.info(`Issue ${issueKey} has no parent - finished`);
+        return;
+    }
+    // If this story has a parent, call on the parent.
+    core_1.info(`Issue ${issueKey} has a parent - summing points for ${issue.fields.parent.key}`);
+    yield exports.jiraStoryPointsUpdated(email, issue.fields.parent.key);
+    core_1.info(`Finished summing ${issue.fields.parent.key}`);
+});
+exports.jiraStoryPointsUpdated = jiraStoryPointsUpdated;
 
 
 /***/ }),
