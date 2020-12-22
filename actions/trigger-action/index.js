@@ -61880,6 +61880,17 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
         else {
             yield Jira_1.moveIssueToBoard(board.id, issue.id);
         }
+        core_1.info(`Checking if the direct children of issue ${issueKey} need to be moved to the board...`);
+        const children = yield Jira_1.getChildIssues(issueKey);
+        let moved = 0;
+        yield Promise.all(children.map((child) => __awaiter(void 0, void 0, void 0, function* () {
+            const childIsOnBoard = yield Jira_1.isIssueOnBoard(board.id, child.id);
+            if (!childIsOnBoard) {
+                yield Jira_1.moveIssueToBoard(board.id, child.id);
+                moved += 1;
+            }
+        })));
+        core_1.info(`Moved ${moved} children of issue ${issueKey} to the board`);
     }
     if (isNil_1.default(issue.fields.parent)) {
         core_1.info(`Issue ${issueKey} has no parent issue - nothing to do`);

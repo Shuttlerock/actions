@@ -62,6 +62,22 @@ export const jiraIssueTransitioned = async (
     } else {
       await moveIssueToBoard(board.id, issue.id)
     }
+
+    info(
+      `Checking if the direct children of issue ${issueKey} need to be moved to the board...`
+    )
+    const children = await getChildIssues(issueKey)
+    let moved = 0
+    await Promise.all(
+      children.map(async (child: Issue) => {
+        const childIsOnBoard = await isIssueOnBoard(board.id, child.id)
+        if (!childIsOnBoard) {
+          await moveIssueToBoard(board.id, child.id)
+          moved += 1
+        }
+      })
+    )
+    info(`Moved ${moved} children of issue ${issueKey} to the board`)
   }
 
   if (isNil(issue.fields.parent)) {
