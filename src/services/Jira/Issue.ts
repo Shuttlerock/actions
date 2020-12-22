@@ -69,6 +69,7 @@ interface IssueSearchResults {
 export const JiraStatusHasIssues = 'Has issues'
 export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusReadyForPlanning = 'Ready for planning'
+export const JiraStatusTechnicalPlanning = 'Technical Planning'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
 

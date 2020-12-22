@@ -61099,7 +61099,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const core_1 = __webpack_require__(2186);
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
@@ -61109,6 +61109,7 @@ const Client_1 = __webpack_require__(3861);
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
+exports.JiraStatusTechnicalPlanning = 'Technical Planning';
 exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
 // Jira issue types.
@@ -61919,9 +61920,15 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     const statuses = [
         ...new Set(children.map((child) => child.fields.status.name)),
     ];
-    const leftmost = minBy_1.default(statuses, (status) => columnNames.indexOf(status));
+    let leftmost = minBy_1.default(statuses, (status) => columnNames.indexOf(status));
     if (isNil_1.default(leftmost)) {
         throw new Error(`Couldn't find the leftomost issue status for children of ${parent.key}`);
+    }
+    // If any child of an epic is 'In development', then the epic is also 'In development'.
+    if (parent.fields.issuetype.name === Jira_1.JiraIssueTypeEpic) {
+        if (children.find((child) => child.fields.status.name === Jira_1.JiraStatusInDevelopment)) {
+            leftmost = Jira_1.JiraStatusInDevelopment;
+        }
     }
     if (parent.fields.status.name === leftmost) {
         core_1.info(`The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`);
