@@ -10,3 +10,6 @@ export const client = new JiraClient({
   strictSSL: true,
   username: jiraEmail(),
 })
+
+export const apiPrefix = (): string =>
+  `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`

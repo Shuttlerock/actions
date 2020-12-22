@@ -3,13 +3,17 @@ import isNil from 'lodash/isNil'
 import minBy from 'lodash/minBy'
 
 import {
+  getBoard,
   getChildIssues,
   getColumns,
   getIssue,
+  isIssueOnBoard,
   Issue,
   JiraBoardColumn,
   JiraIssueTypeEpic,
+  JiraStatusReadyForPlanning,
   JiraStatusValidated,
+  moveIssueToBoard,
   setIssueStatus,
 } from '@sr-services/Jira'
 
@@ -38,6 +42,26 @@ export const jiraIssueTransitioned = async (
   if (isNil(issue)) {
     info(`Issue ${issueKey} could not be found - giving up`)
     return
+  }
+
+  // If we're not 'Ready for planning', we should move the issue to the board if it isn't already there.
+  if (issue.fields.status.name !== JiraStatusReadyForPlanning) {
+    if (isNil(issue.fields.project)) {
+      throw new Error(`No project attached to issue ${issueKey}`)
+    }
+
+    info(`Checking if issue ${issueKey} needs to be moved to the board...`)
+    const board = await getBoard(issue.fields.project.id)
+    if (isNil(board)) {
+      throw new Error(`No board found for project ${issue.fields.project.id}`)
+    }
+
+    const isOnBoard = await isIssueOnBoard(board.id, issue.id)
+    if (isOnBoard) {
+      info(`Issue ${issueKey} is already on board ${board.id}`)
+    } else {
+      await moveIssueToBoard(board.id, issue.id)
+    }
   }
 
   if (isNil(issue.fields.parent)) {
