@@ -13,11 +13,7 @@ jest.mock('@sr-services/Jira', () => ({
   JiraFieldStoryPointEstimate: 'Story point estimate',
 }))
 
-const childIssue = {
-  ...mockJiraIssue,
-  id: '20000',
-  fields: { ...mockJiraIssue.fields, storyPointEstimate: 11 },
-}
+const childIssue = { ...mockJiraIssue, id: '20000' }
 const parentIssue = {
   ...mockJiraIssue,
   fields: { ...mockJiraIssue.fields, parent: undefined },

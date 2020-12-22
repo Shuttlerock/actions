@@ -343,6 +343,7 @@
       "total": 0,
       "worklogs": []
     },
-    "repository": "actions"
+    "repository": "actions",
+    "storyPointEstimate": 11
   }
 }
