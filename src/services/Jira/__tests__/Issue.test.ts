@@ -7,10 +7,12 @@ import {
   getEpic,
   getIssue,
   getIssuePullRequestNumbers,
+  isIssueOnBoard,
   issueUrl,
   JiraFieldStoryPointEstimate,
   JiraIssueTypeEpic,
   JiraStatusValidated,
+  moveIssueToBoard,
   setIssueStatus,
   updateCustomField,
 } from '@sr-services/Jira/Issue'
@@ -147,10 +149,36 @@ describe('Issue', () => {
     })
   })
 
+  describe('isIssueOnBoard', () => {
+    it('calls the Jira API', async () => {
+      const response = {
+        issues: [],
+        maxResults: 0,
+        startAt: 0,
+        total: 0,
+      }
+      ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        new Response(JSON.stringify(response))
+      )
+      const onBoard = await isIssueOnBoard(4, mockJiraIssue.id)
+      expect(onBoard).toBeTruthy()
+    })
+  })
+
   describe('issueUrl', () => {
     it('returns the URL', () => {
       const expected = 'https://example.atlassian.net/browse/ISSUE-236'
       expect(issueUrl('ISSUE-236')).toEqual(expected)
+    })
+  })
+
+  describe('moveIssueToBoard', () => {
+    it('calls the Jira API', async () => {
+      ;(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        new Response()
+      )
+      const statusCode = await moveIssueToBoard(4, mockJiraIssue.id)
+      expect(statusCode).toEqual(200)
     })
   })
 

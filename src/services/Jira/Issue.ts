@@ -1,16 +1,11 @@
-import { error } from '@actions/core'
+import { error, info } from '@actions/core'
 import { TransitionObject } from 'jira-client'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
 import { Repository } from '@sr-services/Github/Git'
-import {
-  jiraEmail,
-  jiraHost,
-  jiraToken,
-  organizationName,
-} from '@sr-services/Inputs'
-import { client } from '@sr-services/Jira/Client'
+import { jiraHost, organizationName } from '@sr-services/Inputs'
+import { apiPrefix, client } from '@sr-services/Jira/Client'
 
 interface User {
   accountId: string
@@ -63,9 +58,17 @@ interface GithubDetails {
   detail: GithubDetail[]
 }
 
+interface IssueSearchResults {
+  issues: Issue[]
+  maxResults: number
+  startAt: number
+  total: number
+}
+
 // Jira statuses.
 export const JiraStatusHasIssues = 'Has issues'
 export const JiraStatusInDevelopment = 'In development'
+export const JiraStatusReadyForPlanning = 'Ready for planning'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
 
@@ -225,8 +228,7 @@ export const getIssuePullRequestNumbers = async (
   issueId: string,
   repo: Repository
 ): Promise<number[]> => {
-  const host = `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`
-  const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`
+  const url = `${apiPrefix()}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`
   const response = await fetch(url)
   const data = (await response.json()) as GithubDetails
   const ids = data.detail
@@ -247,6 +249,26 @@ export const getIssuePullRequestNumbers = async (
 }
 
 /**
+ * Returns true if the issue is on the board with the given ID, false otherwise.
+ *
+ * @param {string} boardId The ID of the Jira board (eg. '4').
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {boolean} True if the issue is on the board.
+ */
+export const isIssueOnBoard = async (
+  boardId: number,
+  issueId: string
+): Promise<boolean> => {
+  const url = `${apiPrefix()}/rest/agile/1.0/board/${boardId}/backlog?jql=id%3D${issueId}`
+  const response = await fetch(url)
+  const data = (await response.json()) as IssueSearchResults
+
+  // If it's NOT in the backlog, then it's on the board.
+  return data.total === 0
+}
+
+/**
  * Returns the URL of the issue with the given key.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
@@ -255,6 +277,35 @@ export const getIssuePullRequestNumbers = async (
  */
 export const issueUrl = (key: string): string =>
   `https://${jiraHost()}/browse/${key}`
+
+/**
+ * Moves the issue to the board with the given ID.
+ *
+ * @see https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/#api-agile-1-0-board-boardid-issue-post
+ *
+ * @param {string} boardId The ID of the Jira board (eg. '4').
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number} The status code of the response.
+ */
+export const moveIssueToBoard = async (
+  boardId: number,
+  issueId: string
+): Promise<number> => {
+  info(`Moving issue ${issueId} to the board ${boardId}...`)
+  const url = `${apiPrefix()}/rest/agile/1.0/board/${boardId}/issue`
+  const options = {
+    body: JSON.stringify({ issues: [issueId] }),
+    headers: { 'Content-Type': 'application/json' },
+    method: 'post',
+  }
+  // This API method just returns 204 (No Content).
+  const response = await fetch(url, options)
+  info(
+    `Finished moving issue ${issueId} to the board ${boardId} (response status ${response.status})`
+  )
+  return response.status
+}
 
 /**
  * Transitions the given issue to the given status.

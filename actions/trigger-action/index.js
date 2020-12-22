@@ -61064,7 +61064,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.client = void 0;
+exports.apiPrefix = exports.client = void 0;
 const jira_client_1 = __importDefault(__webpack_require__(6411));
 const Inputs_1 = __webpack_require__(5968);
 exports.client = new jira_client_1.default({
@@ -61075,6 +61075,8 @@ exports.client = new jira_client_1.default({
     strictSSL: true,
     username: Inputs_1.jiraEmail(),
 });
+const apiPrefix = () => `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
+exports.apiPrefix = apiPrefix;
 
 
 /***/ }),
@@ -61097,7 +61099,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setIssueStatus = exports.issueUrl = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const core_1 = __webpack_require__(2186);
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
@@ -61106,6 +61108,7 @@ const Client_1 = __webpack_require__(3861);
 // Jira statuses.
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
+exports.JiraStatusReadyForPlanning = 'Ready for planning';
 exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
 // Jira issue types.
@@ -61239,8 +61242,7 @@ exports.recursiveGetEpic = recursiveGetEpic;
  * @returns {number[]} The PR numbers.
  */
 const getIssuePullRequestNumbers = (issueId, repo) => __awaiter(void 0, void 0, void 0, function* () {
-    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
-    const url = `${host}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
+    const url = `${Client_1.apiPrefix()}/rest/dev-status/latest/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=branch`;
     const response = yield node_fetch_1.default(url);
     const data = (yield response.json());
     const ids = data.detail
@@ -61253,6 +61255,22 @@ const getIssuePullRequestNumbers = (issueId, repo) => __awaiter(void 0, void 0, 
 });
 exports.getIssuePullRequestNumbers = getIssuePullRequestNumbers;
 /**
+ * Returns true if the issue is on the board with the given ID, false otherwise.
+ *
+ * @param {string} boardId The ID of the Jira board (eg. '4').
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {boolean} True if the issue is on the board.
+ */
+const isIssueOnBoard = (boardId, issueId) => __awaiter(void 0, void 0, void 0, function* () {
+    const url = `${Client_1.apiPrefix()}/rest/agile/1.0/board/${boardId}/backlog?jql=id%3D${issueId}`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    // If it's NOT in the backlog, then it's on the board.
+    return data.total === 0;
+});
+exports.isIssueOnBoard = isIssueOnBoard;
+/**
  * Returns the URL of the issue with the given key.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
@@ -61261,6 +61279,30 @@ exports.getIssuePullRequestNumbers = getIssuePullRequestNumbers;
  */
 const issueUrl = (key) => `https://${Inputs_1.jiraHost()}/browse/${key}`;
 exports.issueUrl = issueUrl;
+/**
+ * Moves the issue to the board with the given ID.
+ *
+ * @see https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/#api-agile-1-0-board-boardid-issue-post
+ *
+ * @param {string} boardId The ID of the Jira board (eg. '4').
+ * @param {string} issueId The ID of the Jira issue (eg. '10910').
+ *
+ * @returns {number} The status code of the response.
+ */
+const moveIssueToBoard = (boardId, issueId) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Moving issue ${issueId} to the board ${boardId}...`);
+    const url = `${Client_1.apiPrefix()}/rest/agile/1.0/board/${boardId}/issue`;
+    const options = {
+        body: JSON.stringify({ issues: [issueId] }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'post',
+    };
+    // This API method just returns 204 (No Content).
+    const response = yield node_fetch_1.default(url, options);
+    core_1.info(`Finished moving issue ${issueId} to the board ${boardId} (response status ${response.status})`);
+    return response.status;
+});
+exports.moveIssueToBoard = moveIssueToBoard;
 /**
  * Transitions the given issue to the given status.
  *
@@ -61321,7 +61363,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getColumns = exports.getBoard = void 0;
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
-const Inputs_1 = __webpack_require__(5968);
+const Client_1 = __webpack_require__(3861);
 /**
  * Fetches the board definition for the given project ID.
  *
@@ -61332,8 +61374,7 @@ const Inputs_1 = __webpack_require__(5968);
 const getBoard = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
     // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
     // We ignore pagination for now, and assume there is only one page of results.
-    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
-    const url = `${host}/rest/agile/1.0/board/`;
+    const url = `${Client_1.apiPrefix()}/rest/agile/1.0/board/`;
     const response = yield node_fetch_1.default(url);
     const data = (yield response.json());
     const board = data.values.find((brd) => brd.location.projectId.toString() === projectId);
@@ -61354,8 +61395,7 @@ const getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* ()
     }
     // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
     // We ignore pagination for now, and assume there is only one page of results.
-    const host = `https://${Inputs_1.jiraEmail()}:${Inputs_1.jiraToken()}@${Inputs_1.jiraHost()}/`;
-    const url = `${host}/rest/agile/1.0/board/${board.id}/configuration`;
+    const url = `${Client_1.apiPrefix()}/rest/agile/1.0/board/${board.id}/configuration`;
     const response = yield node_fetch_1.default(url);
     const data = (yield response.json());
     return data.columnConfig.columns;
@@ -61822,6 +61862,24 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     if (isNil_1.default(issue)) {
         core_1.info(`Issue ${issueKey} could not be found - giving up`);
         return;
+    }
+    // If we're not 'Ready for planning', we should move the issue to the board if it isn't already there.
+    if (issue.fields.status.name !== Jira_1.JiraStatusReadyForPlanning) {
+        if (isNil_1.default(issue.fields.project)) {
+            throw new Error(`No project attached to issue ${issueKey}`);
+        }
+        core_1.info(`Checking if issue ${issueKey} needs to be moved to the board...`);
+        const board = yield Jira_1.getBoard(issue.fields.project.id);
+        if (isNil_1.default(board)) {
+            throw new Error(`No board found for project ${issue.fields.project.id}`);
+        }
+        const isOnBoard = yield Jira_1.isIssueOnBoard(board.id, issue.id);
+        if (isOnBoard) {
+            core_1.info(`Issue ${issueKey} is already on board ${board.id}`);
+        }
+        else {
+            yield Jira_1.moveIssueToBoard(board.id, issue.id);
+        }
     }
     if (isNil_1.default(issue.fields.parent)) {
         core_1.info(`Issue ${issueKey} has no parent issue - nothing to do`);

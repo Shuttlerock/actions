@@ -1,7 +1,7 @@
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { jiraEmail, jiraHost, jiraToken } from '@sr-services/Inputs'
+import { apiPrefix } from '@sr-services/Jira/Client'
 
 export interface JiraBoard {
   id: number
@@ -42,8 +42,7 @@ export const getBoard = async (
 ): Promise<JiraBoard | undefined> => {
   // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
   // We ignore pagination for now, and assume there is only one page of results.
-  const host = `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`
-  const url = `${host}/rest/agile/1.0/board/`
+  const url = `${apiPrefix()}/rest/agile/1.0/board/`
   const response = await fetch(url)
   const data = (await response.json()) as JiraBoardList
   const board = data.values.find(
@@ -70,8 +69,7 @@ export const getColumns = async (
 
   // We can't look up a board by the projectId, so we need to fetch the list of boards and find it.
   // We ignore pagination for now, and assume there is only one page of results.
-  const host = `https://${jiraEmail()}:${jiraToken()}@${jiraHost()}/`
-  const url = `${host}/rest/agile/1.0/board/${board.id}/configuration`
+  const url = `${apiPrefix()}/rest/agile/1.0/board/${board.id}/configuration`
   const response = await fetch(url)
   const data = (await response.json()) as JiraBoardConfiguration
 
