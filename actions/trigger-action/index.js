@@ -61857,6 +61857,10 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     if (parent.fields.status.name === leftmost) {
         core_1.info(`The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`);
     }
+    else if (parent.fields.issuetype.name === Jira_1.JiraIssueTypeEpic &&
+        leftmost === Jira_1.JiraStatusValidated) {
+        core_1.info(`The parent issue ${parent.key} is an epic, so it can't be moved to '${leftmost}' automatically - nothing to do`);
+    }
     else {
         core_1.info(`Moved the parent issue ${parent.key} to '${leftmost}'`);
         yield Jira_1.setIssueStatus(parent.id, leftmost);

@@ -8,6 +8,8 @@ jest.mock('@sr-services/Jira', () => ({
   getChildIssues: jest.fn(),
   getColumns: jest.fn(),
   getIssue: jest.fn(),
+  JiraIssueTypeEpic: 'Epic',
+  JiraStatusValidated: 'Validated',
   setIssueStatus: jest.fn(),
 }))
 
@@ -78,6 +80,31 @@ describe('jiraIssueTransitioned', () => {
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     const message = `The parent issue ${parentIssue.key} is already in 'In development' - nothing to do`
+    expect(infoSpy).toHaveBeenLastCalledWith(message)
+  })
+
+  it("doesn't move epics to 'Validated' automatically", async () => {
+    const epic = {
+      ...parentIssue,
+      fields: {
+        ...parentIssue.fields,
+        issuetype: {
+          ...parentIssue.fields.issuetype,
+          name: Jira.JiraIssueTypeEpic,
+        },
+      },
+    }
+    getIssueSpy.mockImplementation((_key: string) => Promise.resolve(epic))
+    const validatedChild = {
+      ...childIssue,
+      fields: { ...childIssue.fields, status: { name: 'Validated' } },
+    }
+    getChildIssuesSpy.mockImplementation((_key: string) =>
+      Promise.resolve([validatedChild])
+    )
+    await jiraIssueTransitioned(email, issueKey)
+    expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
+    const message = `The parent issue ${parentIssue.key} is an epic, so it can't be moved to 'Validated' automatically - nothing to do`
     expect(infoSpy).toHaveBeenLastCalledWith(message)
   })
 

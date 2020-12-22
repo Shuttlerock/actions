@@ -3,11 +3,13 @@ import isNil from 'lodash/isNil'
 import minBy from 'lodash/minBy'
 
 import {
-  JiraBoardColumn,
   getChildIssues,
   getColumns,
   getIssue,
   Issue,
+  JiraBoardColumn,
+  JiraIssueTypeEpic,
+  JiraStatusValidated,
   setIssueStatus,
 } from '@sr-services/Jira'
 
@@ -86,6 +88,13 @@ export const jiraIssueTransitioned = async (
   if (parent.fields.status.name === leftmost) {
     info(
       `The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`
+    )
+  } else if (
+    parent.fields.issuetype.name === JiraIssueTypeEpic &&
+    leftmost === JiraStatusValidated
+  ) {
+    info(
+      `The parent issue ${parent.key} is an epic, so it can't be moved to '${leftmost}' automatically - nothing to do`
     )
   } else {
     info(`Moved the parent issue ${parent.key} to '${leftmost}'`)
