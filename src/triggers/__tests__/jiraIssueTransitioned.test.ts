@@ -11,6 +11,8 @@ jest.mock('@sr-services/Jira', () => ({
   getIssue: jest.fn(),
   isIssueOnBoard: jest.fn(),
   JiraIssueTypeEpic: 'Epic',
+  JiraStatusInDevelopment: 'In development',
+  JiraStatusTechnicalPlanning: 'Technical Planning',
   JiraStatusValidated: 'Validated',
   moveIssueToBoard: jest.fn(),
   setIssueStatus: jest.fn(),
@@ -97,14 +99,20 @@ describe('jiraIssueTransitioned', () => {
   it('moves the parent if necessary', async () => {
     const validatedChild = {
       ...childIssue,
-      fields: { ...childIssue.fields, status: { name: 'Validated' } },
+      fields: {
+        ...childIssue.fields,
+        status: { name: Jira.JiraStatusValidated },
+      },
     }
     getChildIssuesSpy.mockImplementation((_key: string) =>
       Promise.resolve([validatedChild])
     )
     await jiraIssueTransitioned(email, issueKey)
-    expect(setIssueStatusSpy).toHaveBeenCalledWith(parentIssue.id, 'Validated')
-    const message = `Moved the parent issue ${parentIssue.key} to 'Validated'`
+    expect(setIssueStatusSpy).toHaveBeenCalledWith(
+      parentIssue.id,
+      Jira.JiraStatusValidated
+    )
+    const message = `Moved the parent issue ${parentIssue.key} to '${Jira.JiraStatusValidated}'`
     expect(infoSpy).toHaveBeenLastCalledWith(message)
   })
 
@@ -132,15 +140,55 @@ describe('jiraIssueTransitioned', () => {
     getIssueSpy.mockImplementation((_key: string) => Promise.resolve(epic))
     const validatedChild = {
       ...childIssue,
-      fields: { ...childIssue.fields, status: { name: 'Validated' } },
+      fields: {
+        ...childIssue.fields,
+        status: { name: Jira.JiraStatusValidated },
+      },
     }
     getChildIssuesSpy.mockImplementation((_key: string) =>
       Promise.resolve([validatedChild])
     )
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
-    const message = `The parent issue ${parentIssue.key} is an epic, so it can't be moved to 'Validated' automatically - nothing to do`
+    const message = `The parent issue ${parentIssue.key} is an epic, so it can't be moved to '${Jira.JiraStatusValidated}' automatically - nothing to do`
     expect(infoSpy).toHaveBeenLastCalledWith(message)
+  })
+
+  it("marks epics as 'In development' if any of the children are 'In development'", async () => {
+    const epic = {
+      ...parentIssue,
+      fields: {
+        ...parentIssue.fields,
+        issuetype: {
+          ...parentIssue.fields.issuetype,
+          name: Jira.JiraIssueTypeEpic,
+        },
+        status: { name: Jira.JiraStatusValidated },
+      },
+    }
+    getIssueSpy.mockImplementation((_key: string) => Promise.resolve(epic))
+    const inDevelopmentChild = {
+      ...childIssue,
+      fields: {
+        ...childIssue.fields,
+        status: { name: Jira.JiraStatusInDevelopment },
+      },
+    }
+    const planningChild = {
+      ...childIssue,
+      fields: {
+        ...childIssue.fields,
+        status: { name: Jira.JiraStatusTechnicalPlanning },
+      },
+    }
+    getChildIssuesSpy.mockImplementation((_key: string) =>
+      Promise.resolve([inDevelopmentChild, planningChild])
+    )
+    await jiraIssueTransitioned(email, issueKey)
+    expect(setIssueStatusSpy).toHaveBeenCalledWith(
+      parentIssue.id,
+      Jira.JiraStatusInDevelopment
+    )
   })
 
   it('does nothing the issue has no parent', async () => {

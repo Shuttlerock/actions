@@ -53590,7 +53590,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
 const core_1 = __webpack_require__(2186);
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const node_fetch_1 = __importDefault(__webpack_require__(467));
@@ -53600,6 +53600,7 @@ const Client_1 = __webpack_require__(3861);
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
+exports.JiraStatusTechnicalPlanning = 'Technical Planning';
 exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
 // Jira issue types.

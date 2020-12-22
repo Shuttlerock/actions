@@ -11,6 +11,7 @@ import {
   Issue,
   JiraBoardColumn,
   JiraIssueTypeEpic,
+  JiraStatusInDevelopment,
   JiraStatusReadyForPlanning,
   JiraStatusValidated,
   moveIssueToBoard,
@@ -116,13 +117,24 @@ export const jiraIssueTransitioned = async (
   const statuses = [
     ...new Set(children.map((child: Issue) => child.fields.status.name)),
   ]
-  const leftmost = minBy(statuses, (status: string) =>
+  let leftmost = minBy(statuses, (status: string) =>
     columnNames.indexOf(status)
   )
   if (isNil(leftmost)) {
     throw new Error(
       `Couldn't find the leftomost issue status for children of ${parent.key}`
     )
+  }
+
+  // If any child of an epic is 'In development', then the epic is also 'In development'.
+  if (parent.fields.issuetype.name === JiraIssueTypeEpic) {
+    if (
+      children.find(
+        (child: Issue) => child.fields.status.name === JiraStatusInDevelopment
+      )
+    ) {
+      leftmost = JiraStatusInDevelopment
+    }
   }
 
   if (parent.fields.status.name === leftmost) {
