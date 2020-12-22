@@ -93,6 +93,13 @@ export const createPullRequestForJiraIssue = async (
     return
   }
 
+  if (isNil(issue.fields.storyPointEstimate)) {
+    const message = `No point estimate is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`
+    error(message)
+    await sendUserMessage(credentials.slack_id, message)
+    return
+  }
+
   info('Checking if there is an open pull request for this issue...')
   let pullRequestNumber
   const repo = await getRepository(issue.fields.repository)

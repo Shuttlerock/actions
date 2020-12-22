@@ -151,6 +151,19 @@ describe('createPullRequestForJiraIssue', () => {
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
 
+  it('sends an error message if no Story  is set for the issue', async () => {
+    const noEstimate = {
+      ...mockJiraIssue,
+      fields: { ...mockJiraIssue.fields, storyPointEstimate: undefined },
+    }
+    jiraIssueSpy.mockImplementation((_key: string) =>
+      Promise.resolve(noEstimate)
+    )
+    await createPullRequestForJiraIssue(email, issueKey)
+    const message = `No point estimate is set for issue <https://${jiraHost()}/browse/${issueKey}|${issueKey}>, so no pull request was created`
+    expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
+  })
+
   it('returns an existing PR if there is one', async () => {
     jiraPrsSpy.mockImplementation((_issueId: string) => Promise.resolve([123]))
     await createPullRequestForJiraIssue(email, issueKey)

@@ -61679,6 +61679,12 @@ const createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, voi
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
         return;
     }
+    if (isNil_1.default(issue.fields.storyPointEstimate)) {
+        const message = `No point estimate is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
+        core_1.error(message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, message);
+        return;
+    }
     core_1.info('Checking if there is an open pull request for this issue...');
     let pullRequestNumber;
     const repo = yield Github_1.getRepository(issue.fields.repository);
