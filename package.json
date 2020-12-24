@@ -42,7 +42,7 @@
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
     "@slack/web-api": "^5.14.0",
-    "@types/lodash": "^4.14.165",
+    "@types/lodash": "^4.14.166",
     "jira-client": "^6.21.0",
     "lodash": "^4.17.20",
     "mustache": "^4.1.0",
