@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { EventPayloads } from '@octokit/webhooks'
 
 import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
 import { PleaseReviewLabel } from '@sr-services/Constants'
@@ -28,7 +29,7 @@ describe('pull-request-ready-for-review-action', () => {
     const payload = {
       ...mockGithubPullRequestPayload,
       action: 'ready_for_review',
-    }
+    } as EventPayloads.WebhookPayloadPullRequest
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
     let assignReviewersSpy: jest.SpyInstance
