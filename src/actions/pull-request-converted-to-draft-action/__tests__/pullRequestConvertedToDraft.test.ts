@@ -22,10 +22,10 @@ jest.mock('@sr-services/Github', () => ({
 
 describe('pull-request-converted-to-draft-action', () => {
   describe('pullRequestConvertedToDraft', () => {
-    const payload = {
+    const payload = ({
       ...mockGithubPullRequestPayload,
       action: 'converted_to_draft',
-    }
+    } as unknown) as EventPayloads.WebhookPayloadPullRequest // 'converted_to_draft' is missing from types - see http://srck.me/38H79hV
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
     let getIssueSpy: jest.SpyInstance
