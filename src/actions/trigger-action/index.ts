@@ -4,6 +4,7 @@ import { context } from '@actions/github'
 import { sendErrorMessage } from '@sr-services/Slack'
 import {
   createPullRequestForJiraIssue,
+  createRelease,
   jiraIssueTransitioned,
   jiraStoryPointsUpdated,
 } from '@sr-triggers/index'
@@ -31,6 +32,9 @@ export const run = async (): Promise<void> => {
   switch (event) {
     case 'createPullRequestForJiraIssue':
       await createPullRequestForJiraIssue(email, param)
+      break
+    case 'createRelease':
+      await createRelease(email, param)
       break
     case 'jiraStoryPointsUpdated':
       await jiraStoryPointsUpdated(email, param)

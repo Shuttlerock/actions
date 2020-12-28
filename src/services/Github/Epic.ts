@@ -2,7 +2,11 @@ import { info } from '@actions/core'
 import { PullsGetResponseData } from '@octokit/types'
 import isNil from 'lodash/isNil'
 
-import { EpicLabel, InProgressLabel } from '@sr-services/Constants'
+import {
+  EpicLabel,
+  GithubWriteUser,
+  InProgressLabel,
+} from '@sr-services/Constants'
 import { createBranch, getBranch } from '@sr-services/Github/Branch'
 import { addLabels } from '@sr-services/Github/Label'
 import {
@@ -29,9 +33,9 @@ export const createEpicPullRequest = async (
   epic: Issue,
   repositoryName: string
 ): Promise<PullsGetResponseData> => {
-  const newBranchName = `sr-devops/${parameterize(epic.key)}-${parameterize(
-    epic.fields.summary
-  )}`
+  const newBranchName = `${GithubWriteUser}/${parameterize(
+    epic.key
+  )}-${parameterize(epic.fields.summary)}`
   const jiraUrl = issueUrl(epic.key)
   info(`The Jira URL is ${jiraUrl}`)
 
