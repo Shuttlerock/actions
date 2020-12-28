@@ -10,3 +10,7 @@ export const UnderDiscussionLabel = 'under-discussion'
 
 // The Github user our actions use.
 export const GithubWriteUser = 'sr-devops'
+
+// Standard branch names.
+export const DevelopBranchName = 'develop'
+export const MasterbranchName = 'master'

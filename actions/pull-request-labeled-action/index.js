@@ -52864,7 +52864,7 @@ exports.pullRequestLabeled = pullRequestLabeled;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.MasterbranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
 // Labels.
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
@@ -52876,6 +52876,9 @@ exports.PleaseReviewLabel = 'please-review';
 exports.UnderDiscussionLabel = 'under-discussion';
 // The Github user our actions use.
 exports.GithubWriteUser = 'sr-devops';
+// Standard branch names.
+exports.DevelopBranchName = 'develop';
+exports.MasterbranchName = 'master';
 
 
 /***/ }),
@@ -53013,7 +53016,7 @@ const Template_1 = __webpack_require__(4346);
  * @returns {PullsGetResponseData} The pull request data.
  */
 const createEpicPullRequest = (epic, repositoryName) => __awaiter(void 0, void 0, void 0, function* () {
-    const newBranchName = `sr-devops/${String_1.parameterize(epic.key)}-${String_1.parameterize(epic.fields.summary)}`;
+    const newBranchName = `${Constants_1.GithubWriteUser}/${String_1.parameterize(epic.key)}-${String_1.parameterize(epic.fields.summary)}`;
     const jiraUrl = Jira_1.issueUrl(epic.key);
     core_1.info(`The Jira URL is ${jiraUrl}`);
     core_1.info('Checking if there is an open pull request for this epic...');
@@ -53434,9 +53437,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getRepository = exports.getNextPullRequestNumber = void 0;
+exports.getRepository = exports.getNextPullRequestNumber = exports.compareCommits = void 0;
 const Client_1 = __webpack_require__(2818);
 const Inputs_1 = __webpack_require__(5968);
+/**
+ * Returns details about the diff between the two commits¥.
+ *
+ * @param {Repository} repo The name of the repository to fetch.
+ * @param {Sha}        base The base commit to merge INTO (eg. master, when making a release).
+ * @param {Sha}        head The head commit to merge FROM (eg. develop, when making a release).
+ *
+ * @returns {ReposCompareCommitsResponseData} The diff data.
+ */
+const compareCommits = (repo, base, head) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.repos.compareCommits({
+        owner: Inputs_1.organizationName(),
+        repo,
+        base,
+        head,
+    });
+    return response.data;
+});
+exports.compareCommits = compareCommits;
 /**
  * Decides what number the next pull request will be.
  *

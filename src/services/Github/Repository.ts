@@ -1,8 +1,35 @@
-import { ReposGetResponseData } from '@octokit/types'
+import {
+  ReposCompareCommitsResponseData,
+  ReposGetResponseData,
+} from '@octokit/types'
 
 import { readClient } from '@sr-services/Github/Client'
-import { Repository } from '@sr-services/Github/Git'
+import { Repository, Sha } from '@sr-services/Github/Git'
 import { organizationName } from '@sr-services/Inputs'
+
+/**
+ * Returns details about the diff between the two commits¥.
+ *
+ * @param {Repository} repo The name of the repository to fetch.
+ * @param {Sha}        base The base commit to merge INTO (eg. master, when making a release).
+ * @param {Sha}        head The head commit to merge FROM (eg. develop, when making a release).
+ *
+ * @returns {ReposCompareCommitsResponseData} The diff data.
+ */
+export const compareCommits = async (
+  repo: Repository,
+  base: Sha,
+  head: Sha
+): Promise<ReposCompareCommitsResponseData> => {
+  const response = await readClient.repos.compareCommits({
+    owner: organizationName(),
+    repo,
+    base,
+    head,
+  })
+
+  return response.data
+}
 
 /**
  * Decides what number the next pull request will be.
