@@ -13,4 +13,5 @@ export const GithubWriteUser = 'sr-devops'
 
 // Standard branch names.
 export const DevelopBranchName = 'develop'
-export const MasterbranchName = 'master'
+export const MasterBranchName = 'master'
+export const ReleaseBranchName = `${GithubWriteUser}/release-candidate`

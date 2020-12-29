@@ -18511,6 +18511,14 @@ function objectToString(o) {
 
 /***/ }),
 
+/***/ 1512:
+/***/ ((module, exports) => {
+
+"use strict";
+function _typeof(obj){"@babel/helpers - typeof";if(typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"){_typeof=function _typeof(obj){return typeof obj}}else{_typeof=function _typeof(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj}}return _typeof(obj)}(function(global){var _arguments=arguments;var dateFormat=function(){var token=/d{1,4}|D{3,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LlopSZWN]|"[^"]*"|'[^']*'/g;var timezone=/\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;var timezoneClip=/[^-+\dA-Z]/g;return function(date,mask,utc,gmt){if(_arguments.length===1&&kindOf(date)==="string"&&!/\d/.test(date)){mask=date;date=undefined}date=date||date===0?date:new Date;if(!(date instanceof Date)){date=new Date(date)}if(isNaN(date)){throw TypeError("Invalid date")}mask=String(dateFormat.masks[mask]||mask||dateFormat.masks["default"]);var maskSlice=mask.slice(0,4);if(maskSlice==="UTC:"||maskSlice==="GMT:"){mask=mask.slice(4);utc=true;if(maskSlice==="GMT:"){gmt=true}}var _=function _(){return utc?"getUTC":"get"};var _d=function d(){return date[_()+"Date"]()};var D=function D(){return date[_()+"Day"]()};var _m=function m(){return date[_()+"Month"]()};var y=function y(){return date[_()+"FullYear"]()};var _H=function H(){return date[_()+"Hours"]()};var _M=function M(){return date[_()+"Minutes"]()};var _s=function s(){return date[_()+"Seconds"]()};var _L=function L(){return date[_()+"Milliseconds"]()};var _o=function o(){return utc?0:date.getTimezoneOffset()};var _W=function W(){return getWeek(date)};var _N=function N(){return getDayOfWeek(date)};var flags={d:function d(){return _d()},dd:function dd(){return pad(_d())},ddd:function ddd(){return dateFormat.i18n.dayNames[D()]},DDD:function DDD(){return getDayName({y:y(),m:_m(),D:D(),_:_(),dayName:dateFormat.i18n.dayNames[D()],short:true})},dddd:function dddd(){return dateFormat.i18n.dayNames[D()+7]},DDDD:function DDDD(){return getDayName({y:y(),m:_m(),D:D(),_:_(),dayName:dateFormat.i18n.dayNames[D()+7]})},m:function m(){return _m()+1},mm:function mm(){return pad(_m()+1)},mmm:function mmm(){return dateFormat.i18n.monthNames[_m()]},mmmm:function mmmm(){return dateFormat.i18n.monthNames[_m()+12]},yy:function yy(){return String(y()).slice(2)},yyyy:function yyyy(){return pad(y(),4)},h:function h(){return _H()%12||12},hh:function hh(){return pad(_H()%12||12)},H:function H(){return _H()},HH:function HH(){return pad(_H())},M:function M(){return _M()},MM:function MM(){return pad(_M())},s:function s(){return _s()},ss:function ss(){return pad(_s())},l:function l(){return pad(_L(),3)},L:function L(){return pad(Math.floor(_L()/10))},t:function t(){return _H()<12?dateFormat.i18n.timeNames[0]:dateFormat.i18n.timeNames[1]},tt:function tt(){return _H()<12?dateFormat.i18n.timeNames[2]:dateFormat.i18n.timeNames[3]},T:function T(){return _H()<12?dateFormat.i18n.timeNames[4]:dateFormat.i18n.timeNames[5]},TT:function TT(){return _H()<12?dateFormat.i18n.timeNames[6]:dateFormat.i18n.timeNames[7]},Z:function Z(){return gmt?"GMT":utc?"UTC":(String(date).match(timezone)||[""]).pop().replace(timezoneClip,"").replace(/GMT\+0000/g,"UTC")},o:function o(){return(_o()>0?"-":"+")+pad(Math.floor(Math.abs(_o())/60)*100+Math.abs(_o())%60,4)},p:function p(){return(_o()>0?"-":"+")+pad(Math.floor(Math.abs(_o())/60),2)+":"+pad(Math.floor(Math.abs(_o())%60),2)},S:function S(){return["th","st","nd","rd"][_d()%10>3?0:(_d()%100-_d()%10!=10)*_d()%10]},W:function W(){return _W()},N:function N(){return _N()}};return mask.replace(token,function(match){if(match in flags){return flags[match]()}return match.slice(1,match.length-1)})}}();dateFormat.masks={default:"ddd mmm dd yyyy HH:MM:ss",shortDate:"m/d/yy",paddedShortDate:"mm/dd/yyyy",mediumDate:"mmm d, yyyy",longDate:"mmmm d, yyyy",fullDate:"dddd, mmmm d, yyyy",shortTime:"h:MM TT",mediumTime:"h:MM:ss TT",longTime:"h:MM:ss TT Z",isoDate:"yyyy-mm-dd",isoTime:"HH:MM:ss",isoDateTime:"yyyy-mm-dd'T'HH:MM:sso",isoUtcDateTime:"UTC:yyyy-mm-dd'T'HH:MM:ss'Z'",expiresHeaderFormat:"ddd, dd mmm yyyy HH:MM:ss Z"};dateFormat.i18n={dayNames:["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","January","February","March","April","May","June","July","August","September","October","November","December"],timeNames:["a","p","am","pm","A","P","AM","PM"]};var pad=function pad(val,len){val=String(val);len=len||2;while(val.length<len){val="0"+val}return val};var getDayName=function getDayName(_ref){var y=_ref.y,m=_ref.m,D=_ref.D,_=_ref._,dayName=_ref.dayName,_ref$short=_ref["short"],_short=_ref$short===void 0?false:_ref$short;var today=new Date;var yesterday=new Date;yesterday.setDate(yesterday[_+"Date"]()-1);var tomorrow=new Date;tomorrow.setDate(tomorrow[_+"Date"]()+1);var today_D=function today_D(){return today[_+"Day"]()};var today_m=function today_m(){return today[_+"Month"]()};var today_y=function today_y(){return today[_+"FullYear"]()};var yesterday_D=function yesterday_D(){return yesterday[_+"Day"]()};var yesterday_m=function yesterday_m(){return yesterday[_+"Month"]()};var yesterday_y=function yesterday_y(){return yesterday[_+"FullYear"]()};var tomorrow_D=function tomorrow_D(){return tomorrow[_+"Day"]()};var tomorrow_m=function tomorrow_m(){return tomorrow[_+"Month"]()};var tomorrow_y=function tomorrow_y(){return tomorrow[_+"FullYear"]()};if(today_y()===y&&today_m()===m&&today_D()===D){return _short?"Tdy":"Today"}else if(yesterday_y()===y&&yesterday_m()===m&&yesterday_D()===D){return _short?"Ysd":"Yesterday"}else if(tomorrow_y()===y&&tomorrow_m()===m&&tomorrow_D()===D){return _short?"Tmw":"Tomorrow"}return dayName};var getWeek=function getWeek(date){var targetThursday=new Date(date.getFullYear(),date.getMonth(),date.getDate());targetThursday.setDate(targetThursday.getDate()-(targetThursday.getDay()+6)%7+3);var firstThursday=new Date(targetThursday.getFullYear(),0,4);firstThursday.setDate(firstThursday.getDate()-(firstThursday.getDay()+6)%7+3);var ds=targetThursday.getTimezoneOffset()-firstThursday.getTimezoneOffset();targetThursday.setHours(targetThursday.getHours()-ds);var weekDiff=(targetThursday-firstThursday)/(864e5*7);return 1+Math.floor(weekDiff)};var getDayOfWeek=function getDayOfWeek(date){var dow=date.getDay();if(dow===0){dow=7}return dow};var kindOf=function kindOf(val){if(val===null){return"null"}if(val===undefined){return"undefined"}if(_typeof(val)!=="object"){return _typeof(val)}if(Array.isArray(val)){return"array"}return{}.toString.call(val).slice(8,-1).toLowerCase()};if(typeof define==="function"&&define.amd){define(function(){return dateFormat})}else if(( false?0:_typeof(exports))==="object"){module.exports=dateFormat}else{global.dateFormat=dateFormat}})(void 0);
+
+/***/ }),
+
 /***/ 8611:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -52864,7 +52872,7 @@ exports.pullRequestLabeled = pullRequestLabeled;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MasterbranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
 // Labels.
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
@@ -52878,7 +52886,8 @@ exports.UnderDiscussionLabel = 'under-discussion';
 exports.GithubWriteUser = 'sr-devops';
 // Standard branch names.
 exports.DevelopBranchName = 'develop';
-exports.MasterbranchName = 'master';
+exports.MasterBranchName = 'master';
+exports.ReleaseBranchName = `${exports.GithubWriteUser}/release-candidate`;
 
 
 /***/ }),
@@ -53422,6 +53431,123 @@ exports.pullRequestUrl = pullRequestUrl;
 
 /***/ }),
 
+/***/ 4600:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createReleasePullRequest = exports.getReleasePullRequest = exports.getReleasebranch = void 0;
+const core_1 = __webpack_require__(2186);
+const dateformat_1 = __importDefault(__webpack_require__(1512));
+const isNil_1 = __importDefault(__webpack_require__(4977));
+const Constants_1 = __webpack_require__(7682);
+const Branch_1 = __webpack_require__(7866);
+const Client_1 = __webpack_require__(2818);
+const Git_1 = __webpack_require__(8433);
+const PullRequest_1 = __webpack_require__(8028);
+const Repository_1 = __webpack_require__(5015);
+const Inputs_1 = __webpack_require__(5968);
+const Log_1 = __webpack_require__(3637);
+/**
+ * Looks for an existing branch for a release, and creates one if it doesn't already exist.
+ *
+ * @param {Repository} repoName    The name of the repository that the branch will belong to.
+ * @param {string} releaseName The name of the release.
+ * @param sha
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Looking for an existing release branch (${Constants_1.ReleaseBranchName})...`);
+    const releaseBranch = yield Branch_1.getBranch(repoName, Constants_1.ReleaseBranchName);
+    if (isNil_1.default(releaseBranch)) {
+        core_1.info('Existing release branch not found - creating it...');
+        yield Git_1.createGitBranch(repoName, Constants_1.ReleaseBranchName, sha);
+        // This is inefficient, but we look up the branch we just created to keep types consistent.
+        return exports.getReleasebranch(repoName, sha);
+    }
+    if (releaseBranch.commit.sha === sha) {
+        core_1.info(`The release branch already exists, and is up to date (${sha})`);
+        return releaseBranch;
+    }
+    core_1.info('The release branch already exists, but is out of date - updating the head...');
+    return releaseBranch;
+});
+exports.getReleasebranch = getReleasebranch;
+/**
+ * Looks for an existing open pull request for a release.
+ *
+ * @param {Repository} repoName The name of the repository that the PR will belong to.
+ *
+ * @returns {PullsGetResponseData | void} The pull request, if it exists.
+ */
+const getReleasePullRequest = (repoName) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.pulls.list({
+        base: Constants_1.MasterBranchName,
+        direction: 'desc',
+        head: `${Inputs_1.organizationName()}:${Constants_1.ReleaseBranchName}`,
+        owner: Inputs_1.organizationName(),
+        page: 1,
+        per_page: 1,
+        repo: repoName,
+        sort: 'created',
+        state: 'open',
+    });
+    if (response.data.length === 0) {
+        return undefined;
+    }
+    // Look up the PR again to keep types consistent.
+    return PullRequest_1.getPullRequest(repoName, response.data[0].number);
+});
+exports.getReleasePullRequest = getReleasePullRequest;
+/**
+ * Creates a release pull request for the given repository.
+ *
+ * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
+ *
+ * @returns {void}
+ */
+const createReleasePullRequest = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
+    if (isNil_1.default(develop)) {
+        core_1.error(`Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`);
+        return;
+    }
+    const master = yield Branch_1.getBranch(repo.name, Constants_1.MasterBranchName);
+    if (isNil_1.default(master)) {
+        core_1.error(`Branch '${Constants_1.MasterBranchName}' could not be found for repository ${repo.name} - giving up`);
+        return;
+    }
+    core_1.info(`Checking if '${Constants_1.DevelopBranchName}' is ahead of '${Constants_1.MasterBranchName}' (${master.commit.sha}..${develop.commit.sha})`);
+    const diff = yield Repository_1.compareCommits(repo.name, master.commit.sha, develop.commit.sha);
+    if (diff.total_commits === 0) {
+        core_1.info(`Branch '${Constants_1.MasterBranchName}' already contains the latest release - nothing to do`);
+        return;
+    }
+    core_1.info(`Found ${diff.total_commits} commits to release`);
+    const releaseName = dateformat_1.default(new Date(), 'yyyy-mm-dd-hhss');
+    const releaseBranch = yield exports.getReleasebranch(repo.name, develop.commit.sha);
+    Log_1.debug('-------------------------');
+    Log_1.debug(releaseBranch);
+    Log_1.debug(releaseName);
+});
+exports.createReleasePullRequest = createReleasePullRequest;
+
+
+/***/ }),
+
 /***/ 5015:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -53463,6 +53589,7 @@ exports.compareCommits = compareCommits;
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
+ *
  * @returns {number}   The number of the next PR.
  */
 const getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53521,6 +53648,7 @@ __exportStar(__webpack_require__(8999), exports);
 __exportStar(__webpack_require__(8433), exports);
 __exportStar(__webpack_require__(3146), exports);
 __exportStar(__webpack_require__(8028), exports);
+__exportStar(__webpack_require__(4600), exports);
 __exportStar(__webpack_require__(5015), exports);
 
 
@@ -53937,6 +54065,29 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__webpack_require__(8273), exports);
 __exportStar(__webpack_require__(4465), exports);
+
+
+/***/ }),
+
+/***/ 3637:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.debug = void 0;
+const core_1 = __webpack_require__(2186);
+/**
+ * Logs the given message. This is a wrapper around the Github debug() method
+ * allowing it to log objects as well as strings.
+ *
+ * @param {unknown} message The string or object to log.
+ */
+const debug = (message) => {
+    const payload = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
+    core_1.debug(payload);
+};
+exports.debug = debug;
 
 
 /***/ }),

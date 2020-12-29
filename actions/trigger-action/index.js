@@ -60296,6 +60296,7 @@ exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.error(err);
     core_1.error(err.stack);
     yield Slack_1.sendErrorMessage(err.message);
+    //
     core_1.setFailed(err.message);
 }));
 
@@ -60308,7 +60309,7 @@ exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MasterbranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
 // Labels.
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
@@ -60322,7 +60323,8 @@ exports.UnderDiscussionLabel = 'under-discussion';
 exports.GithubWriteUser = 'sr-devops';
 // Standard branch names.
 exports.DevelopBranchName = 'develop';
-exports.MasterbranchName = 'master';
+exports.MasterBranchName = 'master';
+exports.ReleaseBranchName = `${exports.GithubWriteUser}/release-candidate`;
 
 
 /***/ }),
@@ -60942,6 +60944,123 @@ exports.pullRequestUrl = pullRequestUrl;
 
 /***/ }),
 
+/***/ 54600:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createReleasePullRequest = exports.getReleasePullRequest = exports.getReleasebranch = void 0;
+const core_1 = __webpack_require__(42186);
+const dateformat_1 = __importDefault(__webpack_require__(51512));
+const isNil_1 = __importDefault(__webpack_require__(84977));
+const Constants_1 = __webpack_require__(17682);
+const Branch_1 = __webpack_require__(37866);
+const Client_1 = __webpack_require__(32818);
+const Git_1 = __webpack_require__(8433);
+const PullRequest_1 = __webpack_require__(88028);
+const Repository_1 = __webpack_require__(35015);
+const Inputs_1 = __webpack_require__(25968);
+const Log_1 = __webpack_require__(53637);
+/**
+ * Looks for an existing branch for a release, and creates one if it doesn't already exist.
+ *
+ * @param {Repository} repoName    The name of the repository that the branch will belong to.
+ * @param {string} releaseName The name of the release.
+ * @param sha
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Looking for an existing release branch (${Constants_1.ReleaseBranchName})...`);
+    const releaseBranch = yield Branch_1.getBranch(repoName, Constants_1.ReleaseBranchName);
+    if (isNil_1.default(releaseBranch)) {
+        core_1.info('Existing release branch not found - creating it...');
+        yield Git_1.createGitBranch(repoName, Constants_1.ReleaseBranchName, sha);
+        // This is inefficient, but we look up the branch we just created to keep types consistent.
+        return exports.getReleasebranch(repoName, sha);
+    }
+    if (releaseBranch.commit.sha === sha) {
+        core_1.info(`The release branch already exists, and is up to date (${sha})`);
+        return releaseBranch;
+    }
+    core_1.info('The release branch already exists, but is out of date - updating the head...');
+    return releaseBranch;
+});
+exports.getReleasebranch = getReleasebranch;
+/**
+ * Looks for an existing open pull request for a release.
+ *
+ * @param {Repository} repoName The name of the repository that the PR will belong to.
+ *
+ * @returns {PullsGetResponseData | void} The pull request, if it exists.
+ */
+const getReleasePullRequest = (repoName) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.pulls.list({
+        base: Constants_1.MasterBranchName,
+        direction: 'desc',
+        head: `${Inputs_1.organizationName()}:${Constants_1.ReleaseBranchName}`,
+        owner: Inputs_1.organizationName(),
+        page: 1,
+        per_page: 1,
+        repo: repoName,
+        sort: 'created',
+        state: 'open',
+    });
+    if (response.data.length === 0) {
+        return undefined;
+    }
+    // Look up the PR again to keep types consistent.
+    return PullRequest_1.getPullRequest(repoName, response.data[0].number);
+});
+exports.getReleasePullRequest = getReleasePullRequest;
+/**
+ * Creates a release pull request for the given repository.
+ *
+ * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
+ *
+ * @returns {void}
+ */
+const createReleasePullRequest = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+    const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
+    if (isNil_1.default(develop)) {
+        core_1.error(`Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`);
+        return;
+    }
+    const master = yield Branch_1.getBranch(repo.name, Constants_1.MasterBranchName);
+    if (isNil_1.default(master)) {
+        core_1.error(`Branch '${Constants_1.MasterBranchName}' could not be found for repository ${repo.name} - giving up`);
+        return;
+    }
+    core_1.info(`Checking if '${Constants_1.DevelopBranchName}' is ahead of '${Constants_1.MasterBranchName}' (${master.commit.sha}..${develop.commit.sha})`);
+    const diff = yield Repository_1.compareCommits(repo.name, master.commit.sha, develop.commit.sha);
+    if (diff.total_commits === 0) {
+        core_1.info(`Branch '${Constants_1.MasterBranchName}' already contains the latest release - nothing to do`);
+        return;
+    }
+    core_1.info(`Found ${diff.total_commits} commits to release`);
+    const releaseName = dateformat_1.default(new Date(), 'yyyy-mm-dd-hhss');
+    const releaseBranch = yield exports.getReleasebranch(repo.name, develop.commit.sha);
+    Log_1.debug('-------------------------');
+    Log_1.debug(releaseBranch);
+    Log_1.debug(releaseName);
+});
+exports.createReleasePullRequest = createReleasePullRequest;
+
+
+/***/ }),
+
 /***/ 35015:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -60983,6 +61102,7 @@ exports.compareCommits = compareCommits;
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
+ *
  * @returns {number}   The number of the next PR.
  */
 const getNextPullRequestNumber = (repo) => __awaiter(void 0, void 0, void 0, function* () {
@@ -61041,6 +61161,7 @@ __exportStar(__webpack_require__(68999), exports);
 __exportStar(__webpack_require__(8433), exports);
 __exportStar(__webpack_require__(13146), exports);
 __exportStar(__webpack_require__(88028), exports);
+__exportStar(__webpack_require__(54600), exports);
 __exportStar(__webpack_require__(35015), exports);
 
 
@@ -61865,17 +61986,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createRelease = void 0;
 const core_1 = __webpack_require__(42186);
-const dateformat_1 = __importDefault(__webpack_require__(51512));
-const isNil_1 = __importDefault(__webpack_require__(84977));
-const Constants_1 = __webpack_require__(17682);
 const Github_1 = __webpack_require__(24390);
-const Log_1 = __webpack_require__(53637);
 /**
  * To trigger this event manually:
  *
@@ -61896,34 +62010,7 @@ const createRelease = (email, repositoryName) => __awaiter(void 0, void 0, void 
     core_1.info(`User ${email} requested a release for repository ${repositoryName}...`);
     core_1.info(`Checking if the repository '${repositoryName}' exists...`);
     const repo = yield Github_1.getRepository(repositoryName);
-    const develop = yield Github_1.getBranch(repo.name, Constants_1.DevelopBranchName);
-    if (isNil_1.default(develop)) {
-        core_1.error(`Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`);
-        return;
-    }
-    const master = yield Github_1.getBranch(repo.name, Constants_1.MasterbranchName);
-    if (isNil_1.default(master)) {
-        core_1.error(`Branch '${Constants_1.MasterbranchName}' could not be found for repository ${repo.name} - giving up`);
-        return;
-    }
-    core_1.info(`Checking if '${Constants_1.DevelopBranchName}' is ahead of '${Constants_1.MasterbranchName}' (${master.commit.sha}..${develop.commit.sha})`);
-    const diff = yield Github_1.compareCommits(repo.name, master.commit.sha, develop.commit.sha);
-    if (diff.total_commits === 0) {
-        core_1.info(`Branch '${Constants_1.MasterbranchName}' already contains the latest release - nothing to do`);
-        return;
-    }
-    core_1.info(`Found ${diff.total_commits} commits to release`);
-    const releaseBranchName = `${Constants_1.GithubWriteUser}/release-${dateformat_1.default(new Date(), 'yyyy-mm-dd-hhss')}`;
-    core_1.info(`Looking for an existing release branch (${releaseBranchName})...`);
-    const releaseBranch = yield Github_1.getBranch(repo.name, releaseBranchName);
-    if (isNil_1.default(releaseBranch)) {
-        core_1.info('Existing release branch not found - creating it...');
-    }
-    else {
-        core_1.info('Release branch already exists');
-    }
-    Log_1.debug(releaseBranchName);
-    Log_1.debug(releaseBranch);
+    yield Github_1.createReleasePullRequest(repo);
 });
 exports.createRelease = createRelease;
 

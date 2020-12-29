@@ -35,6 +35,7 @@ export const compareCommits = async (
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
+ *
  * @returns {number}   The number of the next PR.
  */
 export const getNextPullRequestNumber = async (
