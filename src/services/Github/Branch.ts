@@ -4,7 +4,7 @@ import {
 } from '@octokit/types'
 import isUndefined from 'lodash/isUndefined'
 
-import { readClient } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import {
   Branch,
   createGitBlob,
@@ -17,6 +17,37 @@ import {
 } from '@sr-services/Github/Git'
 import { getNextPullRequestNumber } from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
+
+/**
+ * Deletes the given branch via the Github API.
+ *
+ * @param {Repository} repo   The name of the repository that the branch belongs to.
+ * @param {Branch}     branch The name of the branch to fetch.
+ *
+ * @returns {void}
+ */
+export const deleteBranch = async (
+  repo: Repository,
+  branch: Branch
+): Promise<void> => {
+  try {
+    const response = await client.git.deleteRef({
+      owner: organizationName(),
+      repo,
+      ref: `heads/${branch}`,
+    })
+
+    if (response.status !== 204) {
+      throw new Error(
+        `Couldn't delete branch '${branch}' - Github returned status ${response.status}`
+      )
+    }
+  } catch (err) {
+    if (err.message !== 'Branch not found') {
+      throw err
+    }
+  }
+}
 
 /**
  * Fetches a branch from the Github API.
