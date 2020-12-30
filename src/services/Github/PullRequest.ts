@@ -72,6 +72,14 @@ export const createPullRequest = async (
   return response.data
 }
 
+/**
+ * Returns the Jira issue key for the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number} number The pull request number to fetch.
+ * @param pr
+ * @returns {string | undefined} The Jira issue key.
+ */
 export const getIssueKey = (pr: PullRequestContent): string | undefined => {
   // Try to get the key from the title.
   let matches = /^\[([A-Z]+-[\d]+)\] .*$/.exec(pr.title)
@@ -96,7 +104,7 @@ export const getIssueKey = (pr: PullRequestContent): string | undefined => {
 /**
  * Fetches the pull request with the given number.
  *
- * @param {Repository} repo   The name of the repository that the PR will belong to.
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number to fetch.
  *
  * @returns {PullsGetResponseData} The pull request data.

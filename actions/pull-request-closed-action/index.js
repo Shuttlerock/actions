@@ -52944,6 +52944,18 @@ const getBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* 
     return undefined;
 });
 exports.getBranch = getBranch;
+/**
+ * Creates a branch vis the Github API.
+ *
+ * @param {Repository} repo           The name of the repository that the branch will belong to.
+ * @param {Branch}     baseBranchName The name of the base branch to branch off.
+ * @param {Branch}     newBranchName  The name of the branch to create.
+ * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
+ * @param {string}     fileContent    The text that the file will contain.
+ * @param {string}     commitMessage  The text to use as the commit message.
+ *
+ * @returns {GitCreateRefResponseData} The new branch data.
+ */
 const createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => __awaiter(void 0, void 0, void 0, function* () {
     const baseBranch = yield exports.getBranch(repo, baseBranchName);
     if (isUndefined_1.default(baseBranch)) {
@@ -53108,8 +53120,8 @@ exports.TreeTypes = {
 /**
  * Creates a new blob, which can be used to make a tree.
  *
- * @param {string} repo    The name of the repository that the blob will belong to.
- * @param {string} content The content to put in the blob.
+ * @param {Repository} repo    The name of the repository that the blob will belong to.
+ * @param {string}     content The content to put in the blob.
  *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
@@ -53125,10 +53137,10 @@ exports.createGitBlob = createGitBlob;
 /**
  * Creates a new commit.
  *
- * @param {string} repo    The name of the repository that the commit will belong to.
- * @param {string} message The commit message.
- * @param {Sha}    tree    The tree to attach the commit to.
- * @param {Sha}    parent  The parent to attach the commit to.
+ * @param {Repository} repo    The name of the repository that the commit will belong to.
+ * @param {string}     message The commit message.
+ * @param {Sha}        tree    The tree to attach the commit to.
+ * @param {Sha}        parent  The parent to attach the commit to.
  *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
@@ -53146,9 +53158,9 @@ exports.createGitCommit = createGitCommit;
 /**
  * Creates a new branch.
  *
- * @param {string} repo   The name of the repository that the branch will belong to.
- * @param {Branch} branch The name of the branch to create.
- * @param {Sha}    sha    The commit sha to base the branch on.
+ * @param {Repository} repo   The name of the repository that the branch will belong to.
+ * @param {Branch}     branch The name of the branch to create.
+ * @param {Sha}        sha    The commit sha to base the branch on.
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
@@ -53165,9 +53177,9 @@ exports.createGitBranch = createGitBranch;
 /**
  * Creates a new tree, which can be used to make a commit.
  *
- * @param {string} repo     The name of the repository that the branch will belong to.
- * @param {Tree[]} tree     The data to use when creating the tree.
- * @param {Sha}    baseTree The tree to base the new tree on.
+ * @param {Repository} repo     The name of the repository that the branch will belong to.
+ * @param {Tree[]}     tree     The data to use when creating the tree.
+ * @param {Sha}        baseTree The tree to base the new tree on.
  *
  * @returns {GitCreateTreeResponseData} The branch data.
  */
@@ -53351,6 +53363,14 @@ const createPullRequest = (repo, base, head, title, body, token) => __awaiter(vo
     return response.data;
 });
 exports.createPullRequest = createPullRequest;
+/**
+ * Returns the Jira issue key for the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number} number The pull request number to fetch.
+ * @param pr
+ * @returns {string | undefined} The Jira issue key.
+ */
 const getIssueKey = (pr) => {
     // Try to get the key from the title.
     let matches = /^\[([A-Z]+-[\d]+)\] .*$/.exec(pr.title);
@@ -53371,7 +53391,7 @@ exports.getIssueKey = getIssueKey;
 /**
  * Fetches the pull request with the given number.
  *
- * @param {Repository} repo   The name of the repository that the PR will belong to.
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number to fetch.
  *
  * @returns {PullsGetResponseData} The pull request data.
@@ -53451,7 +53471,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createReleasePullRequest = exports.getReleasePullRequest = exports.getReleasebranch = void 0;
+exports.createReleasePullRequest = void 0;
 const core_1 = __webpack_require__(2186);
 const dateformat_1 = __importDefault(__webpack_require__(1512));
 const isNil_1 = __importDefault(__webpack_require__(4977));
@@ -53466,19 +53486,54 @@ const Log_1 = __webpack_require__(3637);
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
  *
+ * @param {Repository} repoName    The name of the repository that the release belongs to.
+ * @param {string}     releaseName The name of the release.
+ * @param {Commit[]}   commits     The list of commits that make up the release.
+ *
+ * @returns {string} The pull request description.
+ */
+const getPullRequestDescription = (repoName, releaseName, commits) => __awaiter(void 0, void 0, void 0, function* () {
+    const dependencies = commits.filter((commit) => commit.author.login.startsWith('dependabot') &&
+        commit.commit.message.startsWith('Bump '));
+    const prNumbers = [
+        ...new Set(commits
+            .map((commit) => parseInt(commit.commit.message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10))
+            .filter((prNumber) => prNumber)),
+    ];
+    const pulls = (yield Promise.all(prNumbers.map((prNumber) => __awaiter(void 0, void 0, void 0, function* () { return PullRequest_1.getPullRequest(repoName, prNumber); })))).filter((pull) => pull && !/^Bump .+ from .+ to .*$/.exec(pull.title));
+    let description = `## Release Candidate ${releaseName}\n\n`;
+    if (pulls.length > 0) {
+        description += '### Pull Requests\n\n';
+        pulls.forEach((pull) => {
+            const title = pull.title.replace(/(\[[^\]]+\])/g, '').trim();
+            description += `- #${pull.number} ${title}\n`;
+        });
+        description += '\n';
+    }
+    if (dependencies.length > 0) {
+        description += '### Dependency updates\n\n';
+        dependencies.forEach((commit) => {
+            description += `- ${commit.sha.substring(0, 7)} ${commit.commit.message.split('\n')[0]}\n`;
+        });
+    }
+    return description;
+});
+/**
+ * Looks for an existing branch for a release, and creates one if it doesn't already exist.
+ *
  * @param {Repository} repoName The name of the repository that the branch will belong to.
  * @param {string}     sha      The commit sha to branch from.
  *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
-const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, function* () {
+const ensureReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.info(`Looking for an existing release branch (${Constants_1.ReleaseBranchName})...`);
     const releaseBranch = yield Branch_1.getBranch(repoName, Constants_1.ReleaseBranchName);
     if (isNil_1.default(releaseBranch)) {
         core_1.info('Existing release branch not found - creating it...');
         yield Git_1.createGitBranch(repoName, Constants_1.ReleaseBranchName, sha);
         // This is inefficient, but we look up the branch we just created to keep types consistent.
-        return exports.getReleasebranch(repoName, sha);
+        return ensureReleasebranch(repoName, sha);
     }
     if (releaseBranch.commit.sha === sha) {
         core_1.info(`The release branch already exists, and is up to date (${sha})`);
@@ -53486,17 +53541,18 @@ const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, fu
     }
     core_1.info('The release branch already exists, but is out of date - re-creating it...');
     yield Branch_1.deleteBranch(repoName, Constants_1.ReleaseBranchName);
-    return exports.getReleasebranch(repoName, sha);
+    return ensureReleasebranch(repoName, sha);
 });
-exports.getReleasebranch = getReleasebranch;
 /**
  * Looks for an existing open pull request for a release.
  *
- * @param {Repository} repoName The name of the repository that the PR will belong to.
+ * @param {Repository} repoName    The name of the repository that the PR will belong to.
+ * @param {string}     releaseName The name of the release (basically a formatted datetime).
  *
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
-const getReleasePullRequest = (repoName) => __awaiter(void 0, void 0, void 0, function* () {
+const getReleasePullRequest = (repoName, releaseName) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info('Searching for an existing release pull request...');
     const response = yield Client_1.readClient.pulls.list({
         base: Constants_1.MasterBranchName,
         direction: 'desc',
@@ -53508,13 +53564,20 @@ const getReleasePullRequest = (repoName) => __awaiter(void 0, void 0, void 0, fu
         sort: 'created',
         state: 'open',
     });
+    let prNumber;
     if (response.data.length === 0) {
-        return undefined;
+        core_1.info('No existing release pull request was found - creating it...');
+        const pullRequest = yield PullRequest_1.createPullRequest(repoName, Constants_1.MasterBranchName, Constants_1.ReleaseBranchName, `Release Candidate ${releaseName}`, 'TODO: pull request body', Inputs_1.githubWriteToken());
+        prNumber = pullRequest.number;
+    }
+    else {
+        prNumber = response.data[0].number;
+        core_1.info(`An existing release pull request was found (${repoName}#${prNumber})`);
     }
     // Look up the PR again to keep types consistent.
-    return PullRequest_1.getPullRequest(repoName, response.data[0].number);
+    core_1.info('Reloading the release pull request...');
+    return PullRequest_1.getPullRequest(repoName, prNumber);
 });
-exports.getReleasePullRequest = getReleasePullRequest;
 /**
  * Creates a release pull request for the given repository.
  *
@@ -53541,10 +53604,12 @@ const createReleasePullRequest = (repo) => __awaiter(void 0, void 0, void 0, fun
     }
     core_1.info(`Found ${diff.total_commits} commits to release`);
     const releaseName = dateformat_1.default(new Date(), 'yyyy-mm-dd-hhss');
-    const releaseBranch = yield exports.getReleasebranch(repo.name, develop.commit.sha);
+    yield ensureReleasebranch(repo.name, develop.commit.sha);
+    const pullRequest = yield getReleasePullRequest(repo.name, releaseName);
     Log_1.debug('-------------------------');
-    Log_1.debug(releaseBranch);
-    Log_1.debug(releaseName);
+    Log_1.debug(pullRequest);
+    Log_1.debug('-------------------------');
+    yield getPullRequestDescription(repo.name, releaseName, diff.commits);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
 

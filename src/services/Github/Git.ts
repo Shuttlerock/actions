@@ -9,7 +9,23 @@ import { client } from '@sr-services/Github/Client'
 import { organizationName } from '@sr-services/Inputs'
 
 export type Branch = string
+
 export type Sha = string
+
+export interface Commit {
+  author: {
+    login: string
+  }
+  node_id: string
+  sha: Sha
+  commit: {
+    message: string
+    tree: {
+      sha: Sha
+    }
+  }
+}
+
 export type Repository = string
 
 // Mode is one of:
