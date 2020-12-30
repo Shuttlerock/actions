@@ -12,7 +12,7 @@ import {
   MasterBranchName,
   ReleaseBranchName,
 } from '@sr-services/Constants'
-import { getBranch } from '@sr-services/Github/Branch'
+import { deleteBranch, getBranch } from '@sr-services/Github/Branch'
 import { readClient } from '@sr-services/Github/Client'
 import { createGitBranch, Repository, Sha } from '@sr-services/Github/Git'
 import { getPullRequest } from '@sr-services/Github/PullRequest'
@@ -47,9 +47,10 @@ export const getReleasebranch = async (
   }
 
   info(
-    'The release branch already exists, but is out of date - updating the head...'
+    'The release branch already exists, but is out of date - re-creating it...'
   )
-  return releaseBranch
+  await deleteBranch(repoName, ReleaseBranchName)
+  return getReleasebranch(repoName, sha)
 }
 
 /**

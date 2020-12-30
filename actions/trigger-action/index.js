@@ -1590,7 +1590,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __webpack_require__(70558);
+var isPlainObject = __webpack_require__(63287);
 var universalUserAgent = __webpack_require__(45030);
 
 function lowercaseKeys(object) {
@@ -1963,52 +1963,6 @@ const endpoint = withDefaults(null, DEFAULTS);
 
 exports.endpoint = endpoint;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 70558:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -3542,7 +3496,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __webpack_require__(59440);
 var universalUserAgent = __webpack_require__(45030);
-var isPlainObject = __webpack_require__(49062);
+var isPlainObject = __webpack_require__(63287);
 var nodeFetch = _interopDefault(__webpack_require__(80467));
 var requestError = __webpack_require__(10537);
 
@@ -3682,52 +3636,6 @@ const request = withDefaults(endpoint.endpoint, {
 
 exports.request = request;
 //# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 49062:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -26285,6 +26193,52 @@ module.exports = {
     return (h1.equals(h2));
   }
 };
+
+
+/***/ }),
+
+/***/ 63287:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
@@ -60423,12 +60377,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createBranch = exports.getBranch = void 0;
+exports.createBranch = exports.getBranch = exports.deleteBranch = void 0;
 const isUndefined_1 = __importDefault(__webpack_require__(2825));
 const Client_1 = __webpack_require__(32818);
 const Git_1 = __webpack_require__(8433);
 const Repository_1 = __webpack_require__(35015);
 const Inputs_1 = __webpack_require__(25968);
+/**
+ * Deletes the given branch via the Github API.
+ *
+ * @param {Repository} repo   The name of the repository that the branch belongs to.
+ * @param {Branch}     branch The name of the branch to fetch.
+ *
+ * @returns {void}
+ */
+const deleteBranch = (repo, branch) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield Client_1.client.git.deleteRef({
+            owner: Inputs_1.organizationName(),
+            repo,
+            ref: `heads/${branch}`,
+        });
+        if (response.status !== 204) {
+            throw new Error(`Couldn't delete branch '${branch}' - Github returned status ${response.status}`);
+        }
+    }
+    catch (err) {
+        if (err.message !== 'Branch not found') {
+            throw err;
+        }
+    }
+});
+exports.deleteBranch = deleteBranch;
 /**
  * Fetches a branch from the Github API.
  *
@@ -60977,9 +60957,9 @@ const Log_1 = __webpack_require__(53637);
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
  *
- * @param {Repository} repoName    The name of the repository that the branch will belong to.
- * @param {string} releaseName The name of the release.
- * @param sha
+ * @param {Repository} repoName The name of the repository that the branch will belong to.
+ * @param {string}     sha      The commit sha to branch from.
+ *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60995,8 +60975,9 @@ const getReleasebranch = (repoName, sha) => __awaiter(void 0, void 0, void 0, fu
         core_1.info(`The release branch already exists, and is up to date (${sha})`);
         return releaseBranch;
     }
-    core_1.info('The release branch already exists, but is out of date - updating the head...');
-    return releaseBranch;
+    core_1.info('The release branch already exists, but is out of date - re-creating it...');
+    yield Branch_1.deleteBranch(repoName, Constants_1.ReleaseBranchName);
+    return exports.getReleasebranch(repoName, sha);
 });
 exports.getReleasebranch = getReleasebranch;
 /**
