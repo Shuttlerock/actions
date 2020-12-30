@@ -1,6 +1,5 @@
 import {
   IssuesAddAssigneesResponseData,
-  PullsCreateResponseData,
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
 } from '@octokit/types'
@@ -49,7 +48,7 @@ export const assignOwners = async (
  * @param {string}     body  The body of the PR.
  * @param {string}     token The Github API token to use when creating the PR.
  *
- * @returns {PullsCreateResponseData} The PR data.
+ * @returns {PullsGetResponseData} The PR data.
  */
 export const createPullRequest = async (
   repo: Repository,
@@ -58,7 +57,7 @@ export const createPullRequest = async (
   title: string,
   body: string,
   token: string
-): Promise<PullsCreateResponseData> => {
+): Promise<PullsGetResponseData> => {
   const response = await clientForToken(token).pulls.create({
     base,
     body,
@@ -69,15 +68,14 @@ export const createPullRequest = async (
     title,
   })
 
-  return response.data
+  return response.data as PullsGetResponseData
 }
 
 /**
  * Returns the Jira issue key for the pull request with the given number.
  *
- * @param {Repository} repo   The name of the repository that the PR belongs to.
- * @param {number} number The pull request number to fetch.
- * @param pr
+ * @param {PullRequestContent} pr The body of the pull request which we will parse.
+ *
  * @returns {string | undefined} The Jira issue key.
  */
 export const getIssueKey = (pr: PullRequestContent): string | undefined => {
@@ -178,3 +176,27 @@ export const assignReviewers = async (
  */
 export const pullRequestUrl = (repo: Repository, number: number): string =>
   `https://github.com/${organizationName()}/${repo}/pull/${number}`
+
+/**
+ * Update the pull request with the given number, and assigns the given param hash.
+ *
+ * @param {Repository} repo       The name of the repository that the PR belongs to.
+ * @param {number}     number     The pull request number to update.
+ * @param {object}     attributes The data to update.
+ *
+ * @returns {PullsGetResponseData} The updated pull request data.
+ */
+export const updatePullRequest = async (
+  repo: Repository,
+  number: number,
+  attributes: { [key: string]: string }
+): Promise<PullsGetResponseData> => {
+  const response = await client.pulls.update({
+    ...attributes,
+    owner: organizationName(),
+    pull_number: number,
+    repo,
+  })
+
+  return response.data as PullsGetResponseData
+}

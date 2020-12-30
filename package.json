@@ -46,7 +46,8 @@
     "jira-client": "^6.21.0",
     "lodash": "^4.17.20",
     "mustache": "^4.1.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "unique-names-generator": "^4.3.1"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.21.0",
