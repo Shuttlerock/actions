@@ -79,6 +79,18 @@ export const getBranch = async (
   return undefined
 }
 
+/**
+ * Creates a branch vis the Github API.
+ *
+ * @param {Repository} repo           The name of the repository that the branch will belong to.
+ * @param {Branch}     baseBranchName The name of the base branch to branch off.
+ * @param {Branch}     newBranchName  The name of the branch to create.
+ * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
+ * @param {string}     fileContent    The text that the file will contain.
+ * @param {string}     commitMessage  The text to use as the commit message.
+ *
+ * @returns {GitCreateRefResponseData} The new branch data.
+ */
 export const createBranch = async (
   repo: Repository,
   baseBranchName: Branch,
