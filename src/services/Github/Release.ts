@@ -23,25 +23,29 @@ import {
 import {
   createPullRequest,
   getPullRequest,
+  updatePullRequest,
 } from '@sr-services/Github/PullRequest'
 import { compareCommits } from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
-import { debug } from '@sr-services/Log'
+import { generateReleaseName } from '@sr-services/String'
 
 /**
- * Looks for an existing branch for a release, and creates one if it doesn't already exist.
+ * Creates release notes from the list of commits in the release.
  *
  * @param {Repository} repoName    The name of the repository that the release belongs to.
+ * @param {string}     releaseDate The formatted date and time of the release.
  * @param {string}     releaseName The name of the release.
  * @param {Commit[]}   commits     The list of commits that make up the release.
  *
  * @returns {string} The pull request description.
  */
-const getPullRequestDescription = async (
+const getReleaseNotes = async (
   repoName: string,
+  releaseDate: string,
   releaseName: string,
   commits: Commit[]
 ): Promise<string> => {
+  info(`Making release notes from ${commits.length} commits...`)
   const dependencies = commits.filter(
     (commit: Commit) =>
       commit.author.login.startsWith('dependabot') &&
@@ -69,7 +73,14 @@ const getPullRequestDescription = async (
       pull && !/^Bump .+ from .+ to .*$/.exec(pull.title)
   ) as PullsGetResponseData[]
 
-  let description = `## Release Candidate ${releaseName}\n\n`
+  let description = `## Release Candidate ${releaseDate} (${releaseName})\n\n`
+
+  // Github only gives us 250 commits. This is usually enough, but add a note if we hit the limit.
+  if (commits.length === 250) {
+    description +=
+      ':warning: This release contains more than 250 commits, so the release notes may not be complete :warning:\n\n'
+  }
+
   if (pulls.length > 0) {
     description += '### Pull Requests\n\n'
     pulls.forEach((pull: PullsGetResponseData) => {
@@ -128,13 +139,17 @@ const ensureReleasebranch = async (
  * Looks for an existing open pull request for a release.
  *
  * @param {Repository} repoName    The name of the repository that the PR will belong to.
- * @param {string}     releaseName The name of the release (basically a formatted datetime).
+ * @param {string}     releaseDate The name of the release (basically a formatted datetime).
+ * @param {string}     releaseName The name of the release.
+ * @param {string}     body        The pull request release notes.
  *
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
 const getReleasePullRequest = async (
   repoName: Repository,
-  releaseName: string
+  releaseDate: string,
+  releaseName: string,
+  body: string
 ): Promise<PullsGetResponseData | undefined> => {
   info('Searching for an existing release pull request...')
   const response = await readClient.pulls.list({
@@ -149,27 +164,25 @@ const getReleasePullRequest = async (
     state: 'open',
   })
 
-  let prNumber
+  const title = `Release Candidate ${releaseDate} (${releaseName})`
 
   if (response.data.length === 0) {
     info('No existing release pull request was found - creating it...')
-    const pullRequest = await createPullRequest(
+    return createPullRequest(
       repoName,
       MasterBranchName,
       ReleaseBranchName,
-      `Release Candidate ${releaseName}`,
-      'TODO: pull request body',
+      title,
+      body,
       githubWriteToken()
     )
-    prNumber = pullRequest.number
-  } else {
-    prNumber = response.data[0].number
-    info(`An existing release pull request was found (${repoName}#${prNumber})`)
   }
 
-  // Look up the PR again to keep types consistent.
-  info('Reloading the release pull request...')
-  return getPullRequest(repoName, prNumber)
+  const prNumber = response.data[0].number
+  info(
+    `An existing release pull request was found (${repoName}#${prNumber}) - updating the release notes...`
+  )
+  return updatePullRequest(repoName, prNumber, { body, title })
 }
 
 /**
@@ -214,13 +227,26 @@ export const createReleasePullRequest = async (
   }
   info(`Found ${diff.total_commits} commits to release`)
 
-  const releaseName = dateFormat(new Date(), 'yyyy-mm-dd-hhss')
   await ensureReleasebranch(repo.name, develop.commit.sha)
-  const pullRequest = await getReleasePullRequest(repo.name, releaseName)
+  const releaseDate = dateFormat(new Date(), 'yyyy-mm-dd-hhss')
+  const releaseName = generateReleaseName()
+  const description = await getReleaseNotes(
+    repo.name,
+    releaseDate,
+    releaseName,
+    diff.commits
+  )
+  const pullRequest = await getReleasePullRequest(
+    repo.name,
+    releaseDate,
+    releaseName,
+    description
+  )
+  if (isNil(pullRequest)) {
+    throw new Error(`Failed to create release pull request for ${repo.name}`)
+  }
 
-  debug('-------------------------')
-  debug(pullRequest)
-  debug('-------------------------')
-
-  await getPullRequestDescription(repo.name, releaseName, diff.commits)
+  info(
+    `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`
+  )
 }
