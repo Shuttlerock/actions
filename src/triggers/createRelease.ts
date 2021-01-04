@@ -27,5 +27,5 @@ export const createRelease = async (
   info(`Checking if the repository '${repositoryName}' exists...`)
   const repo = await getRepository(repositoryName)
 
-  await createReleasePullRequest(repo)
+  await createReleasePullRequest(email, repo)
 }

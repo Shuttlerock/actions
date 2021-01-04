@@ -12,6 +12,7 @@ import {
   MasterBranchName,
   ReleaseBranchName,
 } from '@sr-services/Constants'
+import { fetchCredentials } from '@sr-services/Credentials'
 import { deleteBranch, getBranch } from '@sr-services/Github/Branch'
 import { readClient } from '@sr-services/Github/Client'
 import {
@@ -27,6 +28,7 @@ import {
 } from '@sr-services/Github/PullRequest'
 import { compareCommits } from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
+import { sendUserMessage } from '@sr-services/Slack'
 import { generateReleaseName } from '@sr-services/String'
 
 /**
@@ -186,29 +188,59 @@ const getReleasePullRequest = async (
 }
 
 /**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+const reportError = async (slackId: string, message: string) => {
+  await sendUserMessage(slackId, message)
+  error(message)
+  return undefined
+}
+
+/**
+ * Sends an informational message to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+const reportInfo = async (slackId: string, message: string) => {
+  await sendUserMessage(slackId, message)
+  info(message)
+  return undefined
+}
+
+/**
  * Creates a release pull request for the given repository.
  *
+ * @param {string} email         The email address of the user who requested the release be created.
  * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
  *
  * @returns {void}
  */
 export const createReleasePullRequest = async (
+  email: string,
   repo: ReposGetResponseData
 ): Promise<void> => {
+  info(`Creating a release pull request for repository ${repo.name}`)
+  info(`Fetching credentials for user '${email}'...`)
+  const credentials = await fetchCredentials(email)
+
   const develop = await getBranch(repo.name, DevelopBranchName)
   if (isNil(develop)) {
-    error(
-      `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`
-    )
-    return
+    const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`
+    return reportError(credentials.slack_id, message)
   }
 
   const master = await getBranch(repo.name, MasterBranchName)
   if (isNil(master)) {
-    error(
-      `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - giving up`
-    )
-    return
+    const message = `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - giving up`
+    return reportError(credentials.slack_id, message)
   }
 
   info(
@@ -220,10 +252,8 @@ export const createReleasePullRequest = async (
     develop.commit.sha
   )
   if (diff.total_commits === 0) {
-    info(
-      `Branch '${MasterBranchName}' already contains the latest release - nothing to do`
-    )
-    return
+    const message = `Branch '${MasterBranchName}' already contains the latest release - nothing to do`
+    return reportInfo(credentials.slack_id, message)
   }
   info(`Found ${diff.total_commits} commits to release`)
 
@@ -243,10 +273,10 @@ export const createReleasePullRequest = async (
     description
   )
   if (isNil(pullRequest)) {
-    throw new Error(`Failed to create release pull request for ${repo.name}`)
+    const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`
+    return reportError(credentials.slack_id, message)
   }
 
-  info(
-    `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`
-  )
+  const message = `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`
+  return reportInfo(credentials.slack_id, message)
 }

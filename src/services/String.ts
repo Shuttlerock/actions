@@ -23,7 +23,7 @@ export const parameterize = (str: string): string =>
  *
  * @returns {string} A letter.
  */
-export const getRandomLetter = (): string => {
+const getRandomLetter = (): string => {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz'
   return alphabet[Math.floor(Math.random() * alphabet.length)]
 }

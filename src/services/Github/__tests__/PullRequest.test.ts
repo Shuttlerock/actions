@@ -4,6 +4,7 @@ import {
   PullsCreateResponseData,
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
+  PullsUpdateResponseData,
 } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
 
@@ -16,10 +17,12 @@ import {
   getIssueKey,
   getPullRequest,
   pullRequestUrl,
+  updatePullRequest,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
   mockGithubPullRequestCreateResponse,
+  mockGithubPullRequestUpdateResponse,
   mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
   mockPullsRequestReviewersResponseData,
@@ -205,6 +208,35 @@ describe('PullRequest', () => {
     it('returns the URL', () => {
       const expected = 'https://github.com/octokit/actions/pull/123'
       expect(pullRequestUrl('actions', 123)).toEqual(expected)
+    })
+  })
+
+  describe('updatePullRequest', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(Client.client.pulls, 'update')
+        .mockImplementation(
+          (_args?: {
+            owner: string
+            pull_number: number
+            repo: Repository
+            title?: string
+          }) =>
+            Promise.resolve({
+              data: mockGithubPullRequestUpdateResponse,
+            } as OctokitResponse<PullsUpdateResponseData>)
+        )
+      const result = await updatePullRequest(repo, 123, {
+        title: 'Add a Widget',
+      })
+      expect(spy).toHaveBeenCalledWith({
+        owner: organizationName(),
+        pull_number: 123,
+        repo,
+        title: 'Add a Widget',
+      })
+      expect(result.id).toEqual(1234)
+      spy.mockRestore()
     })
   })
 })

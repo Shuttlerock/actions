@@ -1,21 +1,47 @@
 import {
   OctokitResponse,
   PullsListResponseData,
+  ReposCompareCommitsResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
 
 import { readClient } from '@sr-services/Github/Client'
-import { Repository } from '@sr-services/Github/Git'
+import { Repository, Sha } from '@sr-services/Github/Git'
 import {
+  compareCommits,
   getNextPullRequestNumber,
   getRepository,
 } from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
-import { mockGithubRepository } from '@sr-tests/Mocks'
+import { mockGitCommit, mockGithubRepository } from '@sr-tests/Mocks'
 
 const repo = mockGithubRepository.name
 
 describe('Repository', () => {
+  describe('compareCommits', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(readClient.repos, 'compareCommits')
+        .mockImplementation(
+          (_args?: { base: Sha; head: Sha; owner: string; repo: Repository }) =>
+            Promise.resolve({
+              data: { commits: [mockGitCommit] },
+            } as OctokitResponse<ReposCompareCommitsResponseData>)
+        )
+      const base = 'base-sha'
+      const head = 'head-sha'
+      const result = await compareCommits(repo, base, head)
+      expect(spy).toHaveBeenCalledWith({
+        base,
+        head,
+        owner: organizationName(),
+        repo,
+      })
+      expect(result.commits[0].node_id).toEqual('12345')
+      spy.mockRestore()
+    })
+  })
+
   describe('getNextPullRequestNumber', () => {
     it('calls the Github API', async () => {
       const spy = jest

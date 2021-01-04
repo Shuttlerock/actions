@@ -2,7 +2,7 @@ import { createHmac } from 'crypto'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { Repository as RepositoryType } from '@sr-services/Github'
+import { Repository as RepositoryType } from '@sr-services/Github/Git'
 import { credentialsApiPrefix, credentialsApiSecret } from '@sr-services/Inputs'
 
 export interface User {
