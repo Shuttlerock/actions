@@ -11,6 +11,7 @@ import {
   compareCommits,
   getNextPullRequestNumber,
   getRepository,
+  repositoryUrl,
 } from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
 import { mockGitCommit, mockGithubRepository } from '@sr-tests/Mocks'
@@ -91,6 +92,13 @@ describe('Repository', () => {
       expect(spy).toHaveBeenCalledWith({ owner: organizationName(), repo })
       expect(result.name).toEqual(repo)
       spy.mockRestore()
+    })
+  })
+
+  describe('repositoryUrl', () => {
+    it('returns the URL', () => {
+      const expected = 'https://github.com/octokit/actions'
+      expect(repositoryUrl('actions')).toEqual(expected)
     })
   })
 })

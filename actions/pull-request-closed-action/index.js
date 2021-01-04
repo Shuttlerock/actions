@@ -60634,6 +60634,7 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     core_1.info(`Creating a release pull request for repository ${repo.name}`);
     core_1.info(`Fetching credentials for user '${email}'...`);
     const credentials = yield Credentials_1.fetchCredentials(email);
+    yield Slack_1.sendUserMessage(credentials.slack_id, `Creating a release for <${Repository_1.repositoryUrl(repo.name)}|${Inputs_1.organizationName()}/${repo.name}>...`);
     const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
     if (isNil_1.default(develop)) {
         const message = `Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
@@ -60660,8 +60661,7 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
         const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
         return reportError(credentials.slack_id, message);
     }
-    const message = `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`;
-    return reportInfo(credentials.slack_id, message);
+    return reportInfo(credentials.slack_id, `Here's your release PR: ${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}`);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
 
@@ -60683,7 +60683,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getRepository = exports.getNextPullRequestNumber = exports.compareCommits = void 0;
+exports.repositoryUrl = exports.getRepository = exports.getNextPullRequestNumber = exports.compareCommits = void 0;
 const Client_1 = __webpack_require__(2818);
 const Inputs_1 = __webpack_require__(5968);
 /**
@@ -60743,6 +60743,15 @@ const getRepository = (repo) => __awaiter(void 0, void 0, void 0, function* () {
     return response.data;
 });
 exports.getRepository = getRepository;
+/**
+ * Returns the URL of the repository with the given name.
+ *
+ * @param {Repository} repo The name of the repository.
+ *
+ * @returns {string} The URL of the repository.
+ */
+const repositoryUrl = (repo) => `https://github.com/${Inputs_1.organizationName()}/${repo}`;
+exports.repositoryUrl = repositoryUrl;
 
 
 /***/ }),

@@ -74,3 +74,13 @@ export const getRepository = async (
   })
   return response.data
 }
+
+/**
+ * Returns the URL of the repository with the given name.
+ *
+ * @param {Repository} repo The name of the repository.
+ *
+ * @returns {string} The URL of the repository.
+ */
+export const repositoryUrl = (repo: Repository): string =>
+  `https://github.com/${organizationName()}/${repo}`
