@@ -14,4 +14,5 @@ jobs:
           jira-host:   ${{ secrets.JIRA_HOST }}
           jira-token:  ${{ secrets.JIRA_TOKEN }}
           repo-token:  ${{ secrets.GITHUB_TOKEN }}
+          slack-token: ${{ secrets.SLACK_TOKEN }}
           write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}

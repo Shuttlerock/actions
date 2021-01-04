@@ -10,5 +10,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: Shuttlerock/actions/actions/rebase-epic-action@master
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
           actions-write-token: ${{ secrets.ACTIONS_WRITE_TOKEN }}
+          repo-token:          ${{ secrets.GITHUB_TOKEN }}
+          slack-token:         ${{ secrets.SLACK_TOKEN }}
