@@ -1,6 +1,34 @@
-import { parameterize } from '@sr-services/String'
+import uniqueNamesGenerator from 'unique-names-generator'
+
+import { generateReleaseName, parameterize } from '@sr-services/String'
 
 describe('String', () => {
+  describe('generateReleaseName', () => {
+    const adjectives = ['Green']
+    const animals = ['Gecko']
+    jest.mock('unique-names-generator', () => ({
+      adjectives,
+      animals,
+      uniqueNamesGenerator: jest.fn(),
+    }))
+
+    it('generates a random name', () => {
+      const spy = jest
+        .spyOn(uniqueNamesGenerator, 'uniqueNamesGenerator')
+        .mockImplementation(
+          (_args?: { dictionaries: string[][]; separator?: string }) =>
+            'Green Gecko'
+        )
+      const release = generateReleaseName()
+      expect(uniqueNamesGenerator.uniqueNamesGenerator).toHaveBeenCalledWith({
+        dictionaries: expect.arrayContaining([]),
+        separator: ' ',
+      })
+      expect(release).toEqual('Green Gecko')
+      spy.mockRestore()
+    })
+  })
+
   describe('parameterize', () => {
     it('parameterizes the argument', () => {
       const cases: { [key: string]: string } = {

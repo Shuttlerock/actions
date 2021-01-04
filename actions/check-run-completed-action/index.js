@@ -60517,12 +60517,14 @@ const core_1 = __webpack_require__(2186);
 const dateformat_1 = __importDefault(__webpack_require__(1512));
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const Constants_1 = __webpack_require__(7682);
+const Credentials_1 = __webpack_require__(3543);
 const Branch_1 = __webpack_require__(7866);
 const Client_1 = __webpack_require__(2818);
 const Git_1 = __webpack_require__(8433);
 const PullRequest_1 = __webpack_require__(8028);
 const Repository_1 = __webpack_require__(5015);
 const Inputs_1 = __webpack_require__(5968);
+const Slack_1 = __webpack_require__(4745);
 const String_1 = __webpack_require__(5058);
 /**
  * Creates release notes from the list of commits in the release.
@@ -60624,28 +60626,58 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => __aw
     return PullRequest_1.updatePullRequest(repoName, prNumber, { body, title });
 });
 /**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+const reportError = (slackId, message) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Slack_1.sendUserMessage(slackId, message);
+    core_1.error(message);
+    return undefined;
+});
+/**
+ * Sends an informational message to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+const reportInfo = (slackId, message) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Slack_1.sendUserMessage(slackId, message);
+    core_1.info(message);
+    return undefined;
+});
+/**
  * Creates a release pull request for the given repository.
  *
+ * @param {string} email         The email address of the user who requested the release be created.
  * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
  *
  * @returns {void}
  */
-const createReleasePullRequest = (repo) => __awaiter(void 0, void 0, void 0, function* () {
+const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Creating a release pull request for repository ${repo.name}`);
+    core_1.info(`Fetching credentials for user '${email}'...`);
+    const credentials = yield Credentials_1.fetchCredentials(email);
     const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
     if (isNil_1.default(develop)) {
-        core_1.error(`Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`);
-        return;
+        const message = `Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
+        return reportError(credentials.slack_id, message);
     }
     const master = yield Branch_1.getBranch(repo.name, Constants_1.MasterBranchName);
     if (isNil_1.default(master)) {
-        core_1.error(`Branch '${Constants_1.MasterBranchName}' could not be found for repository ${repo.name} - giving up`);
-        return;
+        const message = `Branch '${Constants_1.MasterBranchName}' could not be found for repository ${repo.name} - giving up`;
+        return reportError(credentials.slack_id, message);
     }
     core_1.info(`Checking if '${Constants_1.DevelopBranchName}' is ahead of '${Constants_1.MasterBranchName}' (${master.commit.sha}..${develop.commit.sha})`);
     const diff = yield Repository_1.compareCommits(repo.name, master.commit.sha, develop.commit.sha);
     if (diff.total_commits === 0) {
-        core_1.info(`Branch '${Constants_1.MasterBranchName}' already contains the latest release - nothing to do`);
-        return;
+        const message = `Branch '${Constants_1.MasterBranchName}' already contains the latest release - nothing to do`;
+        return reportInfo(credentials.slack_id, message);
     }
     core_1.info(`Found ${diff.total_commits} commits to release`);
     yield ensureReleasebranch(repo.name, develop.commit.sha);
@@ -60654,9 +60686,11 @@ const createReleasePullRequest = (repo) => __awaiter(void 0, void 0, void 0, fun
     const description = yield getReleaseNotes(repo.name, releaseDate, releaseName, diff.commits);
     const pullRequest = yield getReleasePullRequest(repo.name, releaseDate, releaseName, description);
     if (isNil_1.default(pullRequest)) {
-        throw new Error(`Failed to create release pull request for ${repo.name}`);
+        const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
+        return reportError(credentials.slack_id, message);
     }
-    core_1.info(`Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`);
+    const message = `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`;
+    return reportInfo(credentials.slack_id, message);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
 
@@ -61297,7 +61331,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.generateReleaseName = exports.getRandomLetter = exports.parameterize = void 0;
+exports.generateReleaseName = exports.parameterize = void 0;
 const snakeCase_1 = __importDefault(__webpack_require__(1419));
 const startCase_1 = __importDefault(__webpack_require__(9274));
 const unique_names_generator_1 = __webpack_require__(4839);
@@ -61321,14 +61355,13 @@ const getRandomLetter = () => {
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
     return alphabet[Math.floor(Math.random() * alphabet.length)];
 };
-exports.getRandomLetter = getRandomLetter;
 /**
  * Generates an Ubuntu-style release name (eg. 'Elegant Elk').
  *
  * @returns {string} A randomly generated release name.
  */
 const generateReleaseName = () => {
-    const letter = exports.getRandomLetter();
+    const letter = getRandomLetter();
     const filteredAdjectives = unique_names_generator_1.adjectives.filter((word) => word.startsWith(letter));
     const filteredAnimals = unique_names_generator_1.animals.filter((word) => word.startsWith(letter));
     const releaseName = unique_names_generator_1.uniqueNamesGenerator({

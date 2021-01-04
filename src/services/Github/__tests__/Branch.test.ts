@@ -8,28 +8,28 @@ import {
 } from '@octokit/types'
 
 import * as Branch from '@sr-services/Github/Branch'
-import { readClient } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Repository from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
 import { mockGithubBranch } from '@sr-tests/Mocks'
 
-interface GetBranchParams {
-  owner: string
-  repo: Git.Repository
-  branch: Git.Branch
-}
-
 const repo = 'my-repo'
 const branch = 'my-branch'
-const fetchBranchParams = {
-  owner: organizationName(),
-  repo,
-  branch,
-}
 
 describe('Branch', () => {
   describe('getBranch', () => {
+    interface GetBranchParams {
+      owner: string
+      repo: Git.Repository
+      branch: Git.Branch
+    }
+    const fetchBranchParams = {
+      owner: organizationName(),
+      repo,
+      branch,
+    }
+
     it('calls the Github API', async () => {
       const spy = jest
         .spyOn(readClient.repos, 'getBranch')
@@ -150,6 +150,43 @@ describe('Branch', () => {
         new Error("Base branch not found for repository 'my-repo'")
       )
       spyGetBranch.mockRestore()
+    })
+  })
+
+  describe('deleteBranch', () => {
+    interface DeleteBranchParams {
+      owner: string
+      repo: Git.Repository
+      ref: string
+    }
+    const deleteBranchParams = {
+      owner: organizationName(),
+      repo,
+      ref: `heads/${branch}`,
+    }
+
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(client.git, 'deleteRef')
+        .mockImplementation((_args?: DeleteBranchParams) =>
+          Promise.resolve(({ status: 204 } as unknown) as OctokitResponse<void>)
+        )
+      const result = await Branch.deleteBranch(repo, branch)
+      expect(spy).toHaveBeenCalledWith(deleteBranchParams)
+      expect(result).toEqual(undefined)
+      spy.mockRestore()
+    })
+
+    it("returns undefined if the branch can't be found", async () => {
+      const spy = jest
+        .spyOn(client.git, 'deleteRef')
+        .mockImplementation((_args?: DeleteBranchParams) => {
+          throw new Error('Branch not found')
+        })
+      const result = await Branch.deleteBranch(repo, branch)
+      expect(spy).toHaveBeenCalledWith(deleteBranchParams)
+      expect(result).toEqual(undefined)
+      spy.mockRestore()
     })
   })
 })

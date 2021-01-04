@@ -5,6 +5,7 @@ import {
   PullsCreateResponseData,
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
+  PullsUpdateResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
@@ -40,7 +41,24 @@ export const mockForbiddenCredentials = {
   status: 'forbidden',
 } as Credentials
 
+export const mockGitCommit = {
+  author: {
+    login: 'dperrett',
+  },
+  node_id: '12345',
+  sha: '0000000000000000000000000000000000000000',
+  commit: {
+    message: 'Add widget tests',
+    tree: {
+      sha: '0000000000000000000000000000000000000000',
+    },
+  },
+}
+
 export const mockGithubBranch = ({
+  commit: {
+    sha: 'branch-sha',
+  },
   name: 'my-branch',
   sha: 'branch-sha',
 } as unknown) as ReposGetBranchResponseData
@@ -48,7 +66,14 @@ export const mockGithubBranch = ({
 export const mockGithubPullRequestCreateResponse = ({
   id: 1234,
   number: 123,
+  title: 'Add a Widget',
 } as unknown) as PullsCreateResponseData
+
+export const mockGithubPullRequestUpdateResponse = ({
+  id: 1234,
+  number: 123,
+  title: 'Add a Widget',
+} as unknown) as PullsUpdateResponseData
 
 export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
 
