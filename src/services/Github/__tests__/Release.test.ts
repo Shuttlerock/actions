@@ -49,6 +49,7 @@ jest.mock('@sr-services/Github/PullRequest', () => ({
 
 jest.mock('@sr-services/Github/Repository', () => ({
   compareCommits: jest.fn(),
+  repositoryUrl: jest.fn(),
 }))
 
 jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
@@ -65,6 +66,7 @@ describe('Release', () => {
     let getPullRequestSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let listPullsSpy: jest.SpyInstance
+    let repositoryUrlSpy: jest.SpyInstance
     let updatePullRequestSpy: jest.SpyInstance
 
     beforeEach(() => {
@@ -97,6 +99,7 @@ describe('Release', () => {
           data: [mockGithubPullRequest],
         } as unknown) as OctokitResponse<PullsListResponseData>)
       )
+      repositoryUrlSpy = jest.spyOn(Repository, 'repositoryUrl')
       updatePullRequestSpy = jest.spyOn(PullRequest, 'updatePullRequest')
     })
 
@@ -111,6 +114,7 @@ describe('Release', () => {
       getPullRequestSpy.mockRestore()
       infoSpy.mockRestore()
       listPullsSpy.mockRestore()
+      repositoryUrlSpy.mockRestore()
       updatePullRequestSpy.mockRestore()
     })
 

@@ -24,9 +24,10 @@ import {
 import {
   createPullRequest,
   getPullRequest,
+  pullRequestUrl,
   updatePullRequest,
 } from '@sr-services/Github/PullRequest'
-import { compareCommits } from '@sr-services/Github/Repository'
+import { compareCommits, repositoryUrl } from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
 import { sendUserMessage } from '@sr-services/Slack'
 import { generateReleaseName } from '@sr-services/String'
@@ -231,6 +232,13 @@ export const createReleasePullRequest = async (
   info(`Fetching credentials for user '${email}'...`)
   const credentials = await fetchCredentials(email)
 
+  await sendUserMessage(
+    credentials.slack_id,
+    `Creating a release for <${repositoryUrl(
+      repo.name
+    )}|${organizationName()}/${repo.name}>...`
+  )
+
   const develop = await getBranch(repo.name, DevelopBranchName)
   if (isNil(develop)) {
     const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`
@@ -277,6 +285,8 @@ export const createReleasePullRequest = async (
     return reportError(credentials.slack_id, message)
   }
 
-  const message = `Created release '${releaseDate} (${releaseName})' - ${repo.name}#${pullRequest.number}`
-  return reportInfo(credentials.slack_id, message)
+  return reportInfo(
+    credentials.slack_id,
+    `Here's your release PR: ${pullRequestUrl(repo.name, pullRequest.number)}`
+  )
 }
