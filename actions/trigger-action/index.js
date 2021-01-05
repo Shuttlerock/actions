@@ -62182,6 +62182,10 @@ const generateReleaseName = () => {
     const letter = getRandomLetter();
     const filteredAdjectives = unique_names_generator_1.adjectives.filter((word) => word.startsWith(letter));
     const filteredAnimals = unique_names_generator_1.animals.filter((word) => word.startsWith(letter));
+    // If either of the candidate dictionaries are empty, try again with (hopefully) a different letter.
+    if (filteredAdjectives.length === 0 || filteredAnimals.length === 0) {
+        return exports.generateReleaseName();
+    }
     const releaseName = unique_names_generator_1.uniqueNamesGenerator({
         dictionaries: [filteredAdjectives, filteredAnimals],
         separator: ' ',

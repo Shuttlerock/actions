@@ -41,6 +41,12 @@ export const generateReleaseName = (): string => {
   const filteredAnimals = animals.filter((word: string) =>
     word.startsWith(letter)
   )
+
+  // If either of the candidate dictionaries are empty, try again with (hopefully) a different letter.
+  if (filteredAdjectives.length === 0 || filteredAnimals.length === 0) {
+    return generateReleaseName()
+  }
+
   const releaseName = uniqueNamesGenerator({
     dictionaries: [filteredAdjectives, filteredAnimals],
     separator: ' ',
