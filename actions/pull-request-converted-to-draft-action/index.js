@@ -61331,7 +61331,7 @@ exports.parameterize = parameterize;
  * @returns {string} A letter.
  */
 const getRandomLetter = () => {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const alphabet = 'abcdefghijklmnopqrstuvwyz';
     return alphabet[Math.floor(Math.random() * alphabet.length)];
 };
 /**
