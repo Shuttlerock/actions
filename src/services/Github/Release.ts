@@ -5,12 +5,15 @@ import {
   ReposGetResponseData,
 } from '@octokit/types'
 import dateFormat from 'dateformat'
+import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
 import {
   DevelopBranchName,
+  InProgressLabel,
   MasterBranchName,
   ReleaseBranchName,
+  ReleaseLabel,
 } from '@sr-services/Constants'
 import { fetchCredentials } from '@sr-services/Credentials'
 import { deleteBranch, getBranch } from '@sr-services/Github/Branch'
@@ -21,7 +24,9 @@ import {
   Repository,
   Sha,
 } from '@sr-services/Github/Git'
+import { setLabels } from '@sr-services/Github/Label'
 import {
+  assignOwners,
   createPullRequest,
   getPullRequest,
   pullRequestUrl,
@@ -283,6 +288,29 @@ export const createReleasePullRequest = async (
   if (isNil(pullRequest)) {
     const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`
     return reportError(credentials.slack_id, message)
+  }
+
+  // Assign someone, if no-one has been assigned yet.
+  if (isEmpty(pullRequest.assignees)) {
+    if (isNil(credentials.github_username)) {
+      info(
+        `Credentials for ${email} don't have a Github account linked, so we can't assign an owner`
+      )
+    } else {
+      info(`Assigning @${credentials.github_username} as the owner...`)
+      await assignOwners(repo.name, pullRequest.number, [
+        credentials.github_username,
+      ])
+    }
+  }
+
+  // Add labels, if the PR has not been labeled yet.
+  if (isEmpty(pullRequest.labels)) {
+    info(`Adding labels '${InProgressLabel}' and '${ReleaseLabel}'...`)
+    await setLabels(repo.name, pullRequest.number, [
+      InProgressLabel,
+      ReleaseLabel,
+    ])
   }
 
   return reportInfo(

@@ -7,13 +7,16 @@ import {
 
 import {
   DevelopBranchName,
+  InProgressLabel,
   MasterBranchName,
   ReleaseBranchName,
+  ReleaseLabel,
 } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Branch from '@sr-services/Github/Branch'
 import { readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
+import * as Label from '@sr-services/Github/Label'
 import * as PullRequest from '@sr-services/Github/PullRequest'
 import { createReleasePullRequest } from '@sr-services/Github/Release'
 import * as Repository from '@sr-services/Github/Repository'
@@ -41,9 +44,15 @@ jest.mock('@sr-services/Github/Git', () => ({
   createGitBranch: jest.fn(),
 }))
 
+jest.mock('@sr-services/Github/Label', () => ({
+  setLabels: jest.fn(),
+}))
+
 jest.mock('@sr-services/Github/PullRequest', () => ({
+  assignOwners: jest.fn(),
   createPullRequest: jest.fn(),
   getPullRequest: jest.fn(),
+  pullRequestUrl: jest.fn(),
   updatePullRequest: jest.fn(),
 }))
 
@@ -56,6 +65,7 @@ jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
 
 describe('Release', () => {
   describe('createReleasePullRequest', () => {
+    let assignOwnersSpy: jest.SpyInstance
     let compareCommitsSpy: jest.SpyInstance
     let createGitBranchSpy: jest.SpyInstance
     let createPullRequestSpy: jest.SpyInstance
@@ -66,10 +76,13 @@ describe('Release', () => {
     let getPullRequestSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let listPullsSpy: jest.SpyInstance
+    let pullRequestUrlSpy: jest.SpyInstance
     let repositoryUrlSpy: jest.SpyInstance
+    let setLabelsSpy: jest.SpyInstance
     let updatePullRequestSpy: jest.SpyInstance
 
     beforeEach(() => {
+      assignOwnersSpy = jest.spyOn(PullRequest, 'assignOwners')
       compareCommitsSpy = jest
         .spyOn(Repository, 'compareCommits')
         .mockReturnValue(
@@ -99,11 +112,16 @@ describe('Release', () => {
           data: [mockGithubPullRequest],
         } as unknown) as OctokitResponse<PullsListResponseData>)
       )
+      pullRequestUrlSpy = jest.spyOn(PullRequest, 'pullRequestUrl')
       repositoryUrlSpy = jest.spyOn(Repository, 'repositoryUrl')
-      updatePullRequestSpy = jest.spyOn(PullRequest, 'updatePullRequest')
+      setLabelsSpy = jest.spyOn(Label, 'setLabels')
+      updatePullRequestSpy = jest
+        .spyOn(PullRequest, 'updatePullRequest')
+        .mockReturnValue(Promise.resolve(mockGithubPullRequest))
     })
 
     afterEach(() => {
+      assignOwnersSpy.mockRestore()
       compareCommitsSpy.mockRestore()
       createGitBranchSpy.mockRestore()
       createPullRequestSpy.mockRestore()
@@ -114,7 +132,9 @@ describe('Release', () => {
       getPullRequestSpy.mockRestore()
       infoSpy.mockRestore()
       listPullsSpy.mockRestore()
+      pullRequestUrlSpy.mockRestore()
       repositoryUrlSpy.mockRestore()
+      setLabelsSpy.mockRestore()
       updatePullRequestSpy.mockRestore()
     })
 
@@ -146,6 +166,7 @@ describe('Release', () => {
     })
 
     it('returns an existing pull request if one exists', async () => {
+      updatePullRequestSpy.mockReturnValue(Promise.resolve(undefined))
       listPullsSpy = jest.spyOn(readClient.pulls, 'list').mockReturnValue(
         Promise.resolve(({
           data: [mockGithubPullRequest],
@@ -157,7 +178,8 @@ describe('Release', () => {
     })
 
     it('reports an error if the pull request cannot be created', async () => {
-      createPullRequestSpy.mockReturnValue(undefined)
+      updatePullRequestSpy.mockReturnValue(Promise.resolve(undefined))
+      createPullRequestSpy.mockReturnValue(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
       const message = `An unknown error occurred while creating a release pull request for repository '${mockGithubRepository.name}'`
       expect(errorSpy).toHaveBeenLastCalledWith(message)
@@ -180,6 +202,28 @@ describe('Release', () => {
         expect.stringMatching(/^Release Candidate /), // Pull request title.
         expect.stringMatching(/## Release Candidate /), // Pull request body.
         githubWriteToken()
+      )
+    })
+
+    it('assigns an owner', async () => {
+      await createReleasePullRequest(email, mockGithubRepository)
+      expect(assignOwnersSpy).toHaveBeenCalledWith(
+        mockGithubRepository.name,
+        mockGithubPullRequest.number,
+        ['my-github-username']
+      )
+    })
+
+    it('sets labels', async () => {
+      const noLabels = { ...mockGithubPullRequest, labels: [] }
+      updatePullRequestSpy = jest
+        .spyOn(PullRequest, 'updatePullRequest')
+        .mockReturnValue(Promise.resolve(noLabels))
+      await createReleasePullRequest(email, mockGithubRepository)
+      expect(setLabelsSpy).toHaveBeenCalledWith(
+        mockGithubRepository.name,
+        mockGithubPullRequest.number,
+        [InProgressLabel, ReleaseLabel]
       )
     })
   })

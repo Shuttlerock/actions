@@ -34683,6 +34683,90 @@ module.exports = isBuffer;
 
 /***/ }),
 
+/***/ 2384:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseKeys = __webpack_require__(7164),
+    getTag = __webpack_require__(941),
+    isArguments = __webpack_require__(8495),
+    isArray = __webpack_require__(4869),
+    isArrayLike = __webpack_require__(8017),
+    isBuffer = __webpack_require__(4190),
+    isPrototype = __webpack_require__(10),
+    isTypedArray = __webpack_require__(2496);
+
+/** `Object#toString` result references. */
+var mapTag = '[object Map]',
+    setTag = '[object Set]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Checks if `value` is an empty object, collection, map, or set.
+ *
+ * Objects are considered empty if they have no own enumerable string keyed
+ * properties.
+ *
+ * Array-like values such as `arguments` objects, arrays, buffers, strings, or
+ * jQuery-like collections are considered empty if they have a `length` of `0`.
+ * Similarly, maps and sets are considered empty if they have a `size` of `0`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is empty, else `false`.
+ * @example
+ *
+ * _.isEmpty(null);
+ * // => true
+ *
+ * _.isEmpty(true);
+ * // => true
+ *
+ * _.isEmpty(1);
+ * // => true
+ *
+ * _.isEmpty([1, 2, 3]);
+ * // => false
+ *
+ * _.isEmpty({ 'a': 1 });
+ * // => false
+ */
+function isEmpty(value) {
+  if (value == null) {
+    return true;
+  }
+  if (isArrayLike(value) &&
+      (isArray(value) || typeof value == 'string' || typeof value.splice == 'function' ||
+        isBuffer(value) || isTypedArray(value) || isArguments(value))) {
+    return !value.length;
+  }
+  var tag = getTag(value);
+  if (tag == mapTag || tag == setTag) {
+    return !value.size;
+  }
+  if (isPrototype(value)) {
+    return !baseKeys(value).length;
+  }
+  for (var key in value) {
+    if (hasOwnProperty.call(value, key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+module.exports = isEmpty;
+
+
+/***/ }),
+
 /***/ 52:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -59771,7 +59855,7 @@ exports.pullRequestClosed = pullRequestClosed;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
 // Labels.
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
@@ -59780,6 +59864,7 @@ exports.HasIssuesLabel = 'has-issues';
 exports.InProgressLabel = 'in-progress';
 exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
+exports.ReleaseLabel = 'release';
 exports.UnderDiscussionLabel = 'under-discussion';
 // The Github user our actions use.
 exports.GithubWriteUser = 'sr-devops';
@@ -60486,12 +60571,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createReleasePullRequest = void 0;
 const core_1 = __webpack_require__(2186);
 const dateformat_1 = __importDefault(__webpack_require__(1512));
+const isEmpty_1 = __importDefault(__webpack_require__(2384));
 const isNil_1 = __importDefault(__webpack_require__(4977));
 const Constants_1 = __webpack_require__(7682);
 const Credentials_1 = __webpack_require__(3543);
 const Branch_1 = __webpack_require__(7866);
 const Client_1 = __webpack_require__(2818);
 const Git_1 = __webpack_require__(8433);
+const Label_1 = __webpack_require__(3146);
 const PullRequest_1 = __webpack_require__(8028);
 const Repository_1 = __webpack_require__(5015);
 const Inputs_1 = __webpack_require__(5968);
@@ -60660,6 +60747,26 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     if (isNil_1.default(pullRequest)) {
         const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
         return reportError(credentials.slack_id, message);
+    }
+    // Assign someone, if no-one has been assigned yet.
+    if (isEmpty_1.default(pullRequest.assignees)) {
+        if (isNil_1.default(credentials.github_username)) {
+            core_1.info(`Credentials for ${email} don't have a Github account linked, so we can't assign an owner`);
+        }
+        else {
+            core_1.info(`Assigning @${credentials.github_username} as the owner...`);
+            yield PullRequest_1.assignOwners(repo.name, pullRequest.number, [
+                credentials.github_username,
+            ]);
+        }
+    }
+    // Add labels, if the PR has not been labeled yet.
+    if (isEmpty_1.default(pullRequest.labels)) {
+        core_1.info(`Adding labels '${Constants_1.InProgressLabel}' and '${Constants_1.ReleaseLabel}'...`);
+        yield Label_1.setLabels(repo.name, pullRequest.number, [
+            Constants_1.InProgressLabel,
+            Constants_1.ReleaseLabel,
+        ]);
     }
     return reportInfo(credentials.slack_id, `Here's your release PR: ${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}`);
 });

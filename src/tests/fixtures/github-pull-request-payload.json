@@ -1,6 +1,7 @@
 {
   "action": "closed",
   "pull_request": {
+    "assignees": [],
     "body": "## When a PR is merged, move to `Validated`\n\n[Jira Tech task](https://example.atlassian.net/browse/ISSUE-123)\n\n## How to test the PR",
     "head": {
       "ref": "feature/create-epic-prs"
