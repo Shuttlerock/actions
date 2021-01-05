@@ -60597,7 +60597,6 @@ exports.run().catch((err) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.error(err);
     core_1.error(err.stack);
     yield Slack_1.sendErrorMessage(err.message);
-    //
     core_1.setFailed(err.message);
 }));
 
@@ -62171,7 +62170,7 @@ exports.parameterize = parameterize;
  * @returns {string} A letter.
  */
 const getRandomLetter = () => {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const alphabet = 'abcdefghijklmnopqrstuvwyz';
     return alphabet[Math.floor(Math.random() * alphabet.length)];
 };
 /**
