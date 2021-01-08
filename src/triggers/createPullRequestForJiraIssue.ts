@@ -1,5 +1,6 @@
 import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
+import truncate from 'lodash/truncate'
 
 import { InProgressLabel } from '@sr-services/Constants'
 import { fetchCredentials } from '@sr-services/Credentials'
@@ -74,9 +75,12 @@ export const createPullRequestForJiraIssue = async (
   const credentials = await fetchCredentials(credentialLookup)
   const assigneeEmail = credentials.email
   const assigneeName = assigneeEmail.replace(/^([^@.]+).*$/, '$1') // Grab the first name from the email address.
-  const newBranchName = `${parameterize(assigneeName)}/${parameterize(
-    issue.key
-  )}-${parameterize(issue.fields.summary)}`
+  const newBranchName = truncate(
+    `${parameterize(assigneeName)}/${parameterize(issue.key)}-${parameterize(
+      issue.fields.summary
+    )}`,
+    { length: 80, separator: '-' }
+  )
   info(`The pull request will be assigned to @${credentials.github_username}`)
 
   if ((issue.fields.subtasks || []).length > 0) {
