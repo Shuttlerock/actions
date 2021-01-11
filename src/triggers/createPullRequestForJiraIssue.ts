@@ -79,7 +79,7 @@ export const createPullRequestForJiraIssue = async (
     `${parameterize(assigneeName)}/${parameterize(issue.key)}-${parameterize(
       issue.fields.summary
     )}`,
-    { length: 80, separator: '-' }
+    { length: 80, omission: '', separator: '-' }
   )
   info(`The pull request will be assigned to @${credentials.github_username}`)
 
