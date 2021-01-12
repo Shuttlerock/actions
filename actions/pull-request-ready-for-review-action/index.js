@@ -60294,6 +60294,13 @@ const Jira_1 = __nccwpck_require__(404);
  */
 const pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { pull_request: pullRequest, repository } = payload;
+    core_1.info('Fetching repository details...');
+    const repo = yield Credentials_1.fetchRepository(repository.name);
+    const reviewers = repo.reviewers.map((user) => user.github_username);
+    core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
+    if (reviewers.length > 0) {
+        yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
+    }
     // Used for log messages.
     const prName = `${repository.name}#${pullRequest.number}`;
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
@@ -60307,13 +60314,6 @@ const pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0,
     if (isNil_1.default(issue)) {
         core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
         return;
-    }
-    core_1.info('Fetching repository details...');
-    const repo = yield Credentials_1.fetchRepository(repository.name);
-    const reviewers = repo.reviewers.map((user) => user.github_username);
-    core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
-    if (reviewers.length > 0) {
-        yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
     }
     if (issue.fields.status.name === Jira_1.JiraStatusTechReview) {
         core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusTechReview}' - ignoring`);
