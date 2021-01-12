@@ -21,6 +21,18 @@ export const pullRequestReadyForReview = async (
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
 
+  info('Fetching repository details...')
+  const repo = await fetchRepository(repository.name)
+  const reviewers = repo.reviewers.map((user: User) => user.github_username)
+
+  info(`Assigning reviewers (${reviewers.join(', ')})...`)
+  if (reviewers.length > 0) {
+    await assignReviewers(repository.name, pullRequest.number, reviewers)
+  }
+
+  info(`Adding the '${PleaseReviewLabel}' label...`)
+  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
+
   // Used for log messages.
   const prName = `${repository.name}#${pullRequest.number}`
 
@@ -38,15 +50,6 @@ export const pullRequestReadyForReview = async (
     return
   }
 
-  info('Fetching repository details...')
-  const repo = await fetchRepository(repository.name)
-  const reviewers = repo.reviewers.map((user: User) => user.github_username)
-
-  info(`Assigning reviewers (${reviewers.join(', ')})...`)
-  if (reviewers.length > 0) {
-    await assignReviewers(repository.name, pullRequest.number, reviewers)
-  }
-
   if (issue.fields.status.name === JiraStatusTechReview) {
     info(
       `Jira issue ${issueKey} is already in '${JiraStatusTechReview}' - ignoring`
@@ -56,7 +59,4 @@ export const pullRequestReadyForReview = async (
 
   info(`Moving Jira issue ${issueKey} to '${JiraStatusTechReview}'...`)
   await setIssueStatus(issue.id, JiraStatusTechReview)
-
-  info(`Adding the '${PleaseReviewLabel}' label...`)
-  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
 }
