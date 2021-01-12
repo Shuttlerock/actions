@@ -1,6 +1,7 @@
 import { error, info } from '@actions/core'
 import {
   PullsGetResponseData,
+  ReposCreateReleaseResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
@@ -17,7 +18,7 @@ import {
 } from '@sr-services/Constants'
 import { fetchCredentials } from '@sr-services/Credentials'
 import { deleteBranch, getBranch } from '@sr-services/Github/Branch'
-import { readClient } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import {
   createGitBranch,
   Commit,
@@ -317,4 +318,34 @@ export const createReleasePullRequest = async (
     credentials.slack_id,
     `Here's your release PR: ${pullRequestUrl(repo.name, pullRequest.number)}`
   )
+}
+
+/**
+ * Creates a release tag for the given repository.
+ *
+ * @param {Repository} repo         The name of the repository we will create the release tag for.
+ * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
+ * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
+ * @param {string}     releaseNotes The notes to include as the body of the release.
+ *
+ * @returns {ReposCreateReleaseResponseData} The resulting release.
+ */
+export const createReleaseTag = async (
+  repo: Repository,
+  tagName: string,
+  releaseName: string,
+  releaseNotes: string
+): Promise<ReposCreateReleaseResponseData> => {
+  const name = `${tagName} (${releaseName})`
+  const response = await client.repos.createRelease({
+    body: releaseNotes,
+    draft: false,
+    name,
+    owner: organizationName(),
+    repo,
+    tag_name: tagName,
+    target_commitish: MasterBranchName,
+  })
+
+  return response.data
 }

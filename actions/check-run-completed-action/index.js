@@ -61070,7 +61070,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createReleasePullRequest = void 0;
+exports.createReleaseTag = exports.createReleasePullRequest = void 0;
 const core_1 = __nccwpck_require__(2186);
 const dateformat_1 = __importDefault(__nccwpck_require__(1512));
 const isEmpty_1 = __importDefault(__nccwpck_require__(2384));
@@ -61273,6 +61273,30 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     return reportInfo(credentials.slack_id, `Here's your release PR: ${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}`);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
+/**
+ * Creates a release tag for the given repository.
+ *
+ * @param {Repository} repo         The name of the repository we will create the release tag for.
+ * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
+ * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
+ * @param {string}     releaseNotes The notes to include as the body of the release.
+ *
+ * @returns {ReposCreateReleaseResponseData} The resulting release.
+ */
+const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => __awaiter(void 0, void 0, void 0, function* () {
+    const name = `${tagName} (${releaseName})`;
+    const response = yield Client_1.client.repos.createRelease({
+        body: releaseNotes,
+        draft: false,
+        name,
+        owner: Inputs_1.organizationName(),
+        repo,
+        tag_name: tagName,
+        target_commitish: Constants_1.MasterBranchName,
+    });
+    return response.data;
+});
+exports.createReleaseTag = createReleaseTag;
 
 
 /***/ }),
