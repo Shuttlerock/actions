@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import {
   OctokitResponse,
   PullsListResponseData,
+  ReposCreateReleaseResponseData,
   ReposCompareCommitsResponseData,
 } from '@octokit/types'
 
@@ -14,18 +15,22 @@ import {
 } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Branch from '@sr-services/Github/Branch'
-import { readClient } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Label from '@sr-services/Github/Label'
 import * as PullRequest from '@sr-services/Github/PullRequest'
-import { createReleasePullRequest } from '@sr-services/Github/Release'
+import {
+  createReleasePullRequest,
+  createReleaseTag,
+} from '@sr-services/Github/Release'
 import * as Repository from '@sr-services/Github/Repository'
-import { githubWriteToken } from '@sr-services/Inputs'
+import { githubWriteToken, organizationName } from '@sr-services/Inputs'
 import {
   mockCredentials,
   mockGitCommit,
   mockGithubBranch,
   mockGithubPullRequest,
+  mockGithubRelease,
   mockGithubRepository,
 } from '@sr-tests/Mocks'
 
@@ -225,6 +230,34 @@ describe('Release', () => {
         mockGithubPullRequest.number,
         [InProgressLabel, ReleaseLabel]
       )
+    })
+  })
+
+  describe('createReleaseTag', () => {
+    it('calls the Github API', async () => {
+      const repo = 'my-repo'
+      const spy = jest.spyOn(client.repos, 'createRelease').mockReturnValue(
+        Promise.resolve(({
+          data: mockGithubRelease,
+        } as unknown) as OctokitResponse<ReposCreateReleaseResponseData>)
+      )
+      const result = await createReleaseTag(
+        repo,
+        mockGithubRelease.tag_name,
+        'Energetic Eagle',
+        'My release notes'
+      )
+      expect(spy).toHaveBeenCalledWith({
+        body: 'My release notes',
+        draft: false,
+        name: mockGithubRelease.name,
+        owner: organizationName(),
+        repo,
+        tag_name: mockGithubRelease.tag_name,
+        target_commitish: MasterBranchName,
+      })
+      expect(result.name).toEqual(mockGithubRelease.name)
+      spy.mockRestore()
     })
   })
 })
