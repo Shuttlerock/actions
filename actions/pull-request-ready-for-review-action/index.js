@@ -60301,6 +60301,8 @@ const pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0,
     if (reviewers.length > 0) {
         yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
     }
+    core_1.info(`Adding the '${Constants_1.PleaseReviewLabel}' label...`);
+    yield Github_1.addLabels(repository.name, pullRequest.number, [Constants_1.PleaseReviewLabel]);
     // Used for log messages.
     const prName = `${repository.name}#${pullRequest.number}`;
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
@@ -60321,8 +60323,6 @@ const pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0,
     }
     core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusTechReview}'...`);
     yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusTechReview);
-    core_1.info(`Adding the '${Constants_1.PleaseReviewLabel}' label...`);
-    yield Github_1.addLabels(repository.name, pullRequest.number, [Constants_1.PleaseReviewLabel]);
 });
 exports.pullRequestReadyForReview = pullRequestReadyForReview;
 
