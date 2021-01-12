@@ -6,6 +6,7 @@ import {
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
+  ReposCreateReleaseResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
@@ -78,6 +79,11 @@ export const mockGithubPullRequestUpdateResponse = ({
 export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
 
 export const mockGithubPullRequest = (mockGithubPullRequestPayload.pull_request as unknown) as PullsGetResponseData
+
+export const mockGithubRelease = ({
+  name: 'v2021-01-12-0426 (Energetic Eagle)',
+  tag_name: 'v2021-01-12-0426',
+} as unknown) as ReposCreateReleaseResponseData
 
 export const mockGithubRepository = (repository as unknown) as ReposGetResponseData
 

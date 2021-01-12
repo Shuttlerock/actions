@@ -1,15 +1,23 @@
 import * as core from '@actions/core'
 
 import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
+import { ReleaseBranchName } from '@sr-services/Constants'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
-import { mockGithubPullRequestPayload, mockJiraIssue } from '@sr-tests/Mocks'
+import {
+  mockGithubPullRequestPayload,
+  mockGithubRelease,
+  mockJiraIssue,
+} from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
   getIssue: jest.fn(),
   setIssueStatus: jest.fn(),
 }))
-jest.mock('@sr-services/Github', () => ({ getIssueKey: jest.fn() }))
+jest.mock('@sr-services/Github', () => ({
+  createReleaseTag: jest.fn(),
+  getIssueKey: jest.fn(),
+}))
 
 describe('pull-request-closed-action', () => {
   describe('pullRequestClosed', () => {
@@ -51,6 +59,29 @@ describe('pull-request-closed-action', () => {
         mockJiraIssue.id,
         Jira.JiraStatusValidated
       )
+    })
+
+    it(`creates a release if the branch name is '${ReleaseBranchName}'`, async () => {
+      const createReleaseTagSpy = jest.spyOn(Github, 'createReleaseTag')
+      const releasePayload = {
+        ...mockGithubPullRequestPayload,
+        pull_request: {
+          ...mockGithubPullRequestPayload.pull_request,
+          head: {
+            ...mockGithubPullRequestPayload.pull_request.head,
+            ref: ReleaseBranchName,
+          },
+          title: 'Release Candidate 2021-01-12-0426 (Energetic Eagle)',
+        },
+      }
+      await pullRequestClosed(releasePayload)
+      expect(createReleaseTagSpy).toHaveBeenCalledWith(
+        mockGithubPullRequestPayload.repository.name,
+        mockGithubRelease.tag_name,
+        'Energetic Eagle',
+        expect.anything() // Release notes.
+      )
+      createReleaseTagSpy.mockRestore()
     })
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {

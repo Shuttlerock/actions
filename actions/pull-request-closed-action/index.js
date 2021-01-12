@@ -60283,6 +60283,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.pullRequestClosed = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
+const Constants_1 = __nccwpck_require__(7682);
 const Github_1 = __nccwpck_require__(4390);
 const Jira_1 = __nccwpck_require__(404);
 /**
@@ -60297,6 +60298,23 @@ const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, functio
     if (!pullRequest.merged) {
         core_1.info(`${prName} is not merged - ignoring`);
         return;
+    }
+    if (pullRequest.head.ref === Constants_1.ReleaseBranchName) {
+        core_1.info(`${prName} looks like a release - creating a release tag...`);
+        // The title looks like 'Release Candidate 2021-01-12-0426 (Energetic Eagle)'.
+        const matches = /^Release Candidate ([0-9-]+) \(([A-Za-z\s]+)\)$/.exec(pullRequest.title || '');
+        if (isNil_1.default(matches) || isNil_1.default(matches[1]) || isNil_1.default(matches[2])) {
+            core_1.info(`Couldn't extract the tag name and release name from the pull request title ('${pullRequest.title}') - no tag will be created`);
+        }
+        else {
+            // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
+            const [, ...releaseNotes] = pullRequest.body.split('\n');
+            yield Github_1.createReleaseTag(repository.name, `v${matches[1]}`, // v2021-01-12-0426
+            matches[2], // Energetic Eagle
+            releaseNotes.join('\n') // Release notes.
+            );
+            core_1.info(`Created the release v${matches[1]}`);
+        }
     }
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
     const issueKey = Github_1.getIssueKey(pullRequest);
@@ -61041,7 +61059,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createReleasePullRequest = void 0;
+exports.createReleaseTag = exports.createReleasePullRequest = void 0;
 const core_1 = __nccwpck_require__(2186);
 const dateformat_1 = __importDefault(__nccwpck_require__(1512));
 const isEmpty_1 = __importDefault(__nccwpck_require__(2384));
@@ -61244,6 +61262,30 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     return reportInfo(credentials.slack_id, `Here's your release PR: ${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}`);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
+/**
+ * Creates a release tag for the given repository.
+ *
+ * @param {Repository} repo         The name of the repository we will create the release tag for.
+ * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
+ * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
+ * @param {string}     releaseNotes The notes to include as the body of the release.
+ *
+ * @returns {ReposCreateReleaseResponseData} The resulting release.
+ */
+const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => __awaiter(void 0, void 0, void 0, function* () {
+    const name = `${tagName} (${releaseName})`;
+    const response = yield Client_1.client.repos.createRelease({
+        body: releaseNotes,
+        draft: false,
+        name,
+        owner: Inputs_1.organizationName(),
+        repo,
+        tag_name: tagName,
+        target_commitish: Constants_1.MasterBranchName,
+    });
+    return response.data;
+});
+exports.createReleaseTag = createReleaseTag;
 
 
 /***/ }),
