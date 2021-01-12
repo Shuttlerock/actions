@@ -30,6 +30,9 @@ export const pullRequestReadyForReview = async (
     await assignReviewers(repository.name, pullRequest.number, reviewers)
   }
 
+  info(`Adding the '${PleaseReviewLabel}' label...`)
+  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
+
   // Used for log messages.
   const prName = `${repository.name}#${pullRequest.number}`
 
@@ -56,7 +59,4 @@ export const pullRequestReadyForReview = async (
 
   info(`Moving Jira issue ${issueKey} to '${JiraStatusTechReview}'...`)
   await setIssueStatus(issue.id, JiraStatusTechReview)
-
-  info(`Adding the '${PleaseReviewLabel}' label...`)
-  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
 }
