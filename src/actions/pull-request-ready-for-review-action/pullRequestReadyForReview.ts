@@ -21,6 +21,15 @@ export const pullRequestReadyForReview = async (
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
 
+  info('Fetching repository details...')
+  const repo = await fetchRepository(repository.name)
+  const reviewers = repo.reviewers.map((user: User) => user.github_username)
+
+  info(`Assigning reviewers (${reviewers.join(', ')})...`)
+  if (reviewers.length > 0) {
+    await assignReviewers(repository.name, pullRequest.number, reviewers)
+  }
+
   // Used for log messages.
   const prName = `${repository.name}#${pullRequest.number}`
 
@@ -36,15 +45,6 @@ export const pullRequestReadyForReview = async (
   if (isNil(issue)) {
     info(`Couldn't find a Jira issue for ${prName} - ignoring`)
     return
-  }
-
-  info('Fetching repository details...')
-  const repo = await fetchRepository(repository.name)
-  const reviewers = repo.reviewers.map((user: User) => user.github_username)
-
-  info(`Assigning reviewers (${reviewers.join(', ')})...`)
-  if (reviewers.length > 0) {
-    await assignReviewers(repository.name, pullRequest.number, reviewers)
   }
 
   if (issue.fields.status.name === JiraStatusTechReview) {
