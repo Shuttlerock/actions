@@ -61124,7 +61124,11 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
     if (dependencies.length > 0) {
         description += '### Dependency updates\n\n';
         dependencies.forEach((commit) => {
-            description += `- ${commit.sha.substring(0, 7)} ${commit.commit.message.split('\n')[0]}\n`;
+            // Linkify the last word to point to the commit (the new version, for bumps).
+            const message = commit.commit.message
+                .split('\n')[0]
+                .replace(/ (\S*$)/, ` [$1](https://github.com/${Inputs_1.organizationName()}/${repoName}/commit/${commit.sha})`);
+            description += `- ${message}\n`;
         });
     }
     return description;
