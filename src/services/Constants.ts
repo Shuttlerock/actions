@@ -1,4 +1,5 @@
 // Labels.
+export const DependenciesLabel = 'dependencies'
 export const EpicLabel = 'epic'
 export const HasConflictsLabel = 'has-conflicts'
 export const HasFailuresLabel = 'has-failures'

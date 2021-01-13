@@ -60327,8 +60327,9 @@ exports.pullRequestConvertedToDraft = pullRequestConvertedToDraft;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
+exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
 exports.HasFailuresLabel = 'has-failures';
