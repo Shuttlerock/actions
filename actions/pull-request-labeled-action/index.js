@@ -60280,6 +60280,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.pullRequestLabeled = void 0;
 const core_1 = __nccwpck_require__(2186);
 const Constants_1 = __nccwpck_require__(7682);
+const Credentials_1 = __nccwpck_require__(3543);
 const Github_1 = __nccwpck_require__(4390);
 /**
  * Runs whenever a pull request is labeled.
@@ -60292,8 +60293,22 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
         core_1.info(`This label was added by @${Constants_1.GithubWriteUser} - nothing to do`);
         return;
     }
-    const added = label === null || label === void 0 ? void 0 : label.name; // We know we have a label for this event.
-    yield Github_1.addLabels(repository.name, pullRequest.number, [added]);
+    let added = [label === null || label === void 0 ? void 0 : label.name]; // We know we have a label for this event.
+    // If this is a dependabot PR, we want to start review straight away.
+    if (added[0] === Constants_1.DependenciesLabel) {
+        core_1.info('This looks like a dependency update - adding reviewers...');
+        added = [...added, Constants_1.PleaseReviewLabel];
+        const repo = yield Credentials_1.fetchRepository(repository.name);
+        const reviewers = repo.reviewers.map((user) => user.github_username);
+        if (reviewers.length > 0) {
+            core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
+            yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
+        }
+        else {
+            core_1.info('No reviewers to assign');
+        }
+    }
+    yield Github_1.addLabels(repository.name, pullRequest.number, added);
 });
 exports.pullRequestLabeled = pullRequestLabeled;
 
@@ -60306,8 +60321,9 @@ exports.pullRequestLabeled = pullRequestLabeled;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
+exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
 exports.HasConflictsLabel = 'has-conflicts';
 exports.HasFailuresLabel = 'has-failures';
