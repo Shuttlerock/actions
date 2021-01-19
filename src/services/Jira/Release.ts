@@ -4,6 +4,7 @@ import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 import { escape } from 'querystring'
 
+import { fetchRepository } from '@sr-services/Credentials'
 import { Commit, Repository } from '@sr-services/Github/Git'
 import {
   getPullRequest,
@@ -141,13 +142,24 @@ export const createRelease = async (
     Object.assign(issueKeysByProject, { [projectKey]: [...existing, issueKey] })
   })
 
-  const projectKeys = Object.keys(issueKeysByProject)
-  info(
-    `Found ${projectKeys.length} Jira project(s) to release (${projectKeys.join(
-      ', '
-    )})`
-  )
   const fullReleaseName = `${releaseVersion} (${releaseName})`
+  let projectKeys = Object.keys(issueKeysByProject)
+  if (projectKeys.length > 0) {
+    info(
+      `Found ${
+        projectKeys.length
+      } Jira project(s) to release (${projectKeys.join(', ')})`
+    )
+  } else {
+    info(
+      'Found no Jira projects - looking for a default project for this repository...'
+    )
+    const repo = await fetchRepository(repoName)
+    if (repo?.jira_project_id) {
+      info(`Assuming the default project with ID '${repo.jira_project_id}'`)
+      projectKeys = [`${repo?.jira_project_id}`]
+    }
+  }
 
   await Promise.all(
     Object.keys(issueKeysByProject).map(async (projectKey: string) => {

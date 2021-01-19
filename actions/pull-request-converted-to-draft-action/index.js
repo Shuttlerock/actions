@@ -61860,6 +61860,7 @@ const isEmpty_1 = __importDefault(__nccwpck_require__(2384));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 const querystring_1 = __nccwpck_require__(1191);
+const Credentials_1 = __nccwpck_require__(3543);
 const PullRequest_1 = __nccwpck_require__(8028);
 const Client_1 = __nccwpck_require__(3861);
 const Issue_1 = __nccwpck_require__(8273);
@@ -61948,9 +61949,19 @@ const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awa
         const existing = issueKeysByProject[projectKey] || [];
         Object.assign(issueKeysByProject, { [projectKey]: [...existing, issueKey] });
     });
-    const projectKeys = Object.keys(issueKeysByProject);
-    core_1.info(`Found ${projectKeys.length} Jira project(s) to release (${projectKeys.join(', ')})`);
     const fullReleaseName = `${releaseVersion} (${releaseName})`;
+    let projectKeys = Object.keys(issueKeysByProject);
+    if (projectKeys.length > 0) {
+        core_1.info(`Found ${projectKeys.length} Jira project(s) to release (${projectKeys.join(', ')})`);
+    }
+    else {
+        core_1.info('Found no Jira projects - looking for a default project for this repository...');
+        const repo = yield Credentials_1.fetchRepository(repoName);
+        if (repo === null || repo === void 0 ? void 0 : repo.jira_project_id) {
+            core_1.info(`Assuming the default project with ID '${repo.jira_project_id}'`);
+            projectKeys = [`${repo === null || repo === void 0 ? void 0 : repo.jira_project_id}`];
+        }
+    }
     yield Promise.all(Object.keys(issueKeysByProject).map((projectKey) => __awaiter(void 0, void 0, void 0, function* () {
         core_1.info(`Releasing project ${projectKey}...`);
         core_1.info(`Looking for an existing release with the name '${fullReleaseName}' in project ${projectKey}...`);
