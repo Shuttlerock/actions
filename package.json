@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "TypeScript template action",
+  "engines": {
+    "node": ">=12.13.0"
+  },
   "main": "build/index.js",
   "scripts": {
     "all": "yarn clean && yarn build && yarn format && yarn package && yarn test",
