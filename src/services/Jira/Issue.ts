@@ -66,6 +66,7 @@ interface IssueSearchResults {
 }
 
 // Jira statuses.
+export const JiraStatusDone = 'Done'
 export const JiraStatusHasIssues = 'Has issues'
 export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusReadyForPlanning = 'Ready for planning'
@@ -329,6 +330,24 @@ export const setIssueStatus = async (
   }
 
   await client.transitionIssue(issueId, { transition })
+}
+
+/**
+ * Sets the 'fixVersions' of the issue with the given ID.
+ *
+ * @param {string} issueId     The issue whose version we want to set.
+ * @param {string} versionId The name of the version to add the issue to.
+ */
+export const setVersion = async (
+  issueId: string,
+  versionId: string
+): Promise<void> => {
+  const data = {
+    fields: {
+      fixVersions: [{ id: versionId }],
+    },
+  }
+  await client.updateIssue(issueId, data)
 }
 
 /**

@@ -80,8 +80,10 @@ export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as E
 
 export const mockGithubPullRequest = (mockGithubPullRequestPayload.pull_request as unknown) as PullsGetResponseData
 
+export const mockGithubReleaseName = 'Energetic Eagle'
+
 export const mockGithubRelease = ({
-  name: 'v2021-01-12-0426 (Energetic Eagle)',
+  name: `v2021-01-12-0426 (${mockGithubReleaseName})`,
   tag_name: 'v2021-01-12-0426',
 } as unknown) as ReposCreateReleaseResponseData
 
@@ -131,6 +133,13 @@ export const mockJiraIssue = issue as Issue
 export const mockJiraTransitions = transitions as TransitionObject[]
 
 export const mockJiraPullRequests = pullRequests
+
+export const mockJiraRelease = {
+  id: '102030',
+  description: 'See https://github.com/octokit/webhooks/pull/1',
+  name: mockGithubRelease.name,
+  released: true,
+}
 
 export const mockRepository = {
   leads: [{ github_username: 'dhh' }],

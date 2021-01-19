@@ -6,7 +6,7 @@ module.exports =
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"@slack/web-api\",\"version\":\"5.15.0\",\"description\":\"Official library for using the Slack Platform's Web API\",\"author\":\"Slack Technologies, Inc.\",\"license\":\"MIT\",\"keywords\":[\"slack\",\"web-api\",\"bot\",\"client\",\"http\",\"api\",\"proxy\",\"rate-limiting\",\"pagination\"],\"main\":\"dist/index.js\",\"types\":\"./dist/index.d.ts\",\"files\":[\"dist/**/*\"],\"engines\":{\"node\":\">= 8.9.0\",\"npm\":\">= 5.5.1\"},\"repository\":\"slackapi/node-slack-sdk\",\"homepage\":\"https://slack.dev/node-slack-sdk/web-api\",\"publishConfig\":{\"access\":\"public\"},\"bugs\":{\"url\":\"https://github.com/slackapi/node-slack-sdk/issues\"},\"scripts\":{\"prepare\":\"npm run build\",\"build\":\"npm run build:clean && tsc\",\"build:clean\":\"shx rm -rf ./dist ./coverage ./.nyc_output\",\"lint\":\"tslint --project .\",\"test\":\"npm run build && npm run test:mocha && npm run test:types\",\"test:mocha\":\"nyc mocha --config .mocharc.json src/*.spec.js\",\"test:types\":\"tsd\",\"coverage\":\"codecov -F webapi --root=$PWD\",\"ref-docs:model\":\"api-extractor run\",\"watch\":\"npx nodemon --watch 'src' --ext 'ts' --exec npm run build\"},\"dependencies\":{\"@slack/logger\":\">=1.0.0 <3.0.0\",\"@slack/types\":\"^1.7.0\",\"@types/is-stream\":\"^1.1.0\",\"@types/node\":\">=8.9.0\",\"axios\":\"^0.21.1\",\"eventemitter3\":\"^3.1.0\",\"form-data\":\"^2.5.0\",\"is-stream\":\"^1.1.0\",\"p-queue\":\"^6.6.1\",\"p-retry\":\"^4.0.0\"},\"devDependencies\":{\"@aoberoi/capture-console\":\"^1.1.0\",\"@microsoft/api-extractor\":\"^7.3.4\",\"@types/chai\":\"^4.1.7\",\"@types/mocha\":\"^5.2.6\",\"busboy\":\"^0.3.0\",\"chai\":\"^4.2.0\",\"codecov\":\"^3.2.0\",\"mocha\":\"^6.0.2\",\"nock\":\"^10.0.6\",\"nyc\":\"^14.1.1\",\"shelljs\":\"^0.8.3\",\"shx\":\"^0.3.2\",\"sinon\":\"^7.2.7\",\"source-map-support\":\"^0.5.10\",\"ts-node\":\"^8.0.3\",\"tsd\":\"^0.13.1\",\"tslint\":\"^5.13.1\",\"tslint-config-airbnb\":\"^5.11.1\",\"typescript\":\"^3.3.3333\"},\"tsd\":{\"directory\":\"test/types\"}}");
+module.exports = JSON.parse("{\"name\":\"@slack/web-api\",\"version\":\"6.0.0\",\"description\":\"Official library for using the Slack Platform's Web API\",\"author\":\"Slack Technologies, Inc.\",\"license\":\"MIT\",\"keywords\":[\"slack\",\"web-api\",\"bot\",\"client\",\"http\",\"api\",\"proxy\",\"rate-limiting\",\"pagination\"],\"main\":\"dist/index.js\",\"types\":\"./dist/index.d.ts\",\"files\":[\"dist/**/*\"],\"engines\":{\"node\":\">= 12.13.0\",\"npm\":\">= 6.12.0\"},\"repository\":\"slackapi/node-slack-sdk\",\"homepage\":\"https://slack.dev/node-slack-sdk/web-api\",\"publishConfig\":{\"access\":\"public\"},\"bugs\":{\"url\":\"https://github.com/slackapi/node-slack-sdk/issues\"},\"scripts\":{\"prepare\":\"npm run build\",\"build\":\"npm run build:clean && tsc\",\"build:clean\":\"shx rm -rf ./dist ./coverage ./.nyc_output\",\"lint\":\"tslint --project .\",\"test\":\"npm run build && npm run test:mocha && npm run test:types\",\"test:mocha\":\"nyc mocha --config .mocharc.json src/*.spec.js\",\"test:types\":\"tsd\",\"coverage\":\"codecov -F webapi --root=$PWD\",\"ref-docs:model\":\"api-extractor run\",\"watch\":\"npx nodemon --watch 'src' --ext 'ts' --exec npm run build\"},\"dependencies\":{\"@slack/logger\":\">=1.0.0 <3.0.0\",\"@slack/types\":\"^1.7.0\",\"@types/is-stream\":\"^1.1.0\",\"@types/node\":\">=12.0.0\",\"axios\":\"^0.21.1\",\"eventemitter3\":\"^3.1.0\",\"form-data\":\"^2.5.0\",\"is-stream\":\"^1.1.0\",\"p-queue\":\"^6.6.1\",\"p-retry\":\"^4.0.0\"},\"devDependencies\":{\"@aoberoi/capture-console\":\"^1.1.0\",\"@microsoft/api-extractor\":\"^7.3.4\",\"@types/chai\":\"^4.1.7\",\"@types/mocha\":\"^5.2.6\",\"busboy\":\"^0.3.0\",\"chai\":\"^4.2.0\",\"codecov\":\"^3.2.0\",\"mocha\":\"^6.0.2\",\"nock\":\"^10.0.6\",\"nyc\":\"^14.1.1\",\"shelljs\":\"^0.8.3\",\"shx\":\"^0.3.2\",\"sinon\":\"^7.2.7\",\"source-map-support\":\"^0.5.10\",\"ts-node\":\"^9.0.0\",\"tsd\":\"^0.13.1\",\"tslint\":\"^5.13.1\",\"tslint-config-airbnb\":\"^5.11.1\",\"typescript\":\"^4.1\"},\"tsd\":{\"directory\":\"test/types\"}}");
 
 /***/ }),
 
@@ -3886,7 +3886,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -4413,9 +4413,9 @@ exports.delay = void 0;
  * @param ms milliseconds to wait
  * @param value value for eventual resolution
  */
-function delay(ms, value) {
+function delay(ms) {
     return new Promise((resolve) => {
-        setTimeout(() => resolve(value), ms);
+        setTimeout(() => resolve(), ms);
     });
 }
 exports.delay = delay;
@@ -4437,9 +4437,13 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     o[k2] = m[k];
 }));
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.addAppMetadata = exports.retryPolicies = exports.ErrorCode = exports.LogLevel = exports.WebClientEvent = exports.WebClient = void 0;
 var WebClient_1 = __nccwpck_require__(61424);
 Object.defineProperty(exports, "WebClient", ({ enumerable: true, get: function () { return WebClient_1.WebClient; } }));
 Object.defineProperty(exports, "WebClientEvent", ({ enumerable: true, get: function () { return WebClient_1.WebClientEvent; } }));
@@ -4448,7 +4452,7 @@ Object.defineProperty(exports, "LogLevel", ({ enumerable: true, get: function ()
 var errors_1 = __nccwpck_require__(79781);
 Object.defineProperty(exports, "ErrorCode", ({ enumerable: true, get: function () { return errors_1.ErrorCode; } }));
 var retry_policies_1 = __nccwpck_require__(42156);
-Object.defineProperty(exports, "retryPolicies", ({ enumerable: true, get: function () { return retry_policies_1.default; } }));
+Object.defineProperty(exports, "retryPolicies", ({ enumerable: true, get: function () { return __importDefault(retry_policies_1).default; } }));
 var instrument_1 = __nccwpck_require__(27763);
 Object.defineProperty(exports, "addAppMetadata", ({ enumerable: true, get: function () { return instrument_1.addAppMetadata; } }));
 __exportStar(__nccwpck_require__(31571), exports);
@@ -4476,7 +4480,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -4522,7 +4526,7 @@ exports.getUserAgent = getUserAgent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getLogger = void 0;
+exports.getLogger = exports.LogLevel = void 0;
 const logger_1 = __nccwpck_require__(32704);
 var logger_2 = __nccwpck_require__(32704);
 Object.defineProperty(exports, "LogLevel", ({ enumerable: true, get: function () { return logger_2.LogLevel; } }));
@@ -4565,7 +4569,7 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     o[k2] = m[k];
 }));
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cursorPaginationEnabledMethods = exports.Methods = void 0;
@@ -4698,6 +4702,9 @@ class Methods extends eventemitter3_1.EventEmitter {
             test: bindApiCall(this, 'api.test'),
         };
         this.apps = {
+            connections: {
+                open: bindApiCall(this, 'apps.connections.open'),
+            },
             event: {
                 authorizations: {
                     list: bindApiCall(this, 'apps.event.authorizations.list'),
@@ -62148,7 +62155,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updatePullRequest = exports.pullRequestUrl = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const Client_1 = __nccwpck_require__(32818);
 const Inputs_1 = __nccwpck_require__(25968);
@@ -62271,6 +62278,23 @@ const assignReviewers = (repo, number, usernames) => __awaiter(void 0, void 0, v
     return response.data;
 });
 exports.assignReviewers = assignReviewers;
+/**
+ * Lists the commits in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose commits we want to fetch.
+ *
+ * @returns {PullsListCommitsResponseData} The pull request data.
+ */
+const listPullRequestCommits = (repo, number) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.pulls.listCommits({
+        owner: Inputs_1.organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+exports.listPullRequestCommits = listPullRequestCommits;
 /**
  * Returns the URL of the pull request with the given number and repo.
  *
@@ -62753,13 +62777,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = void 0;
+exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
 const core_1 = __nccwpck_require__(42186);
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
 const Inputs_1 = __nccwpck_require__(25968);
 const Client_1 = __nccwpck_require__(13861);
 // Jira statuses.
+exports.JiraStatusDone = 'Done';
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
@@ -62974,6 +62999,21 @@ const setIssueStatus = (issueId, status) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.setIssueStatus = setIssueStatus;
 /**
+ * Sets the 'fixVersions' of the issue with the given ID.
+ *
+ * @param {string} issueId     The issue whose version we want to set.
+ * @param {string} versionId The name of the version to add the issue to.
+ */
+const setVersion = (issueId, versionId) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = {
+        fields: {
+            fixVersions: [{ id: versionId }],
+        },
+    };
+    yield Client_1.client.updateIssue(issueId, data);
+});
+exports.setVersion = setVersion;
+/**
  * Sets the custom field with the given name to the given value.
  *
  * @param {Issue}           issue     The issue to update.
@@ -63015,7 +63055,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getColumns = exports.getBoard = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
 const Client_1 = __nccwpck_require__(13861);
@@ -63056,6 +63096,161 @@ const getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* ()
     return data.columnConfig.columns;
 });
 exports.getColumns = getColumns;
+/**
+ * Fetches the project with the given ID.
+ *
+ * @param {string} projectKey The key of the Jira project (eg. 'STUDIO').
+ *
+ * @returns {JiraProject} The project.
+ */
+const getProject = (projectKey) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield Client_1.client.getProject(projectKey);
+    return data;
+});
+exports.getProject = getProject;
+
+
+/***/ }),
+
+/***/ 8812:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createRelease = exports.findJiraRelease = exports.createJiraRelease = void 0;
+const core_1 = __nccwpck_require__(42186);
+const isEmpty_1 = __importDefault(__nccwpck_require__(53912));
+const isNil_1 = __importDefault(__nccwpck_require__(84977));
+const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
+const querystring_1 = __nccwpck_require__(71191);
+const PullRequest_1 = __nccwpck_require__(88028);
+const Client_1 = __nccwpck_require__(13861);
+const Issue_1 = __nccwpck_require__(8273);
+const Project_1 = __nccwpck_require__(54465);
+/**
+ * Creates a release in Jira with the given name.
+ *
+ * @param {string} projectKey  The key of the project which we will create a release for.
+ * @param {string} name        The name of the release.
+ * @param {string} description The release description.
+ *
+ * @returns {JiraRelease} The newly created release.
+ */
+const createJiraRelease = (projectKey, name, description) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Fetching the project '${projectKey}'...`);
+    const project = yield Project_1.getProject(projectKey);
+    const args = {
+        description,
+        name,
+        projectId: project.id,
+        released: true,
+        releaseDate: new Date(),
+    };
+    // The types for createVersion() are messed up, and expect a string.
+    const data = (yield Client_1.client.createVersion(args));
+    return data;
+});
+exports.createJiraRelease = createJiraRelease;
+/**
+ * Tries to find a release in Jira with the given name.
+ *
+ * @param {string} projectKey The key of the project whose release we are looking for.
+ * @param {string} name       The name of the release.
+ *
+ * @returns {JiraRelease | undefined} The release if it exists, or undefined if it doesn't.
+ */
+const findJiraRelease = (projectKey, name) => __awaiter(void 0, void 0, void 0, function* () {
+    const url = `${Client_1.apiPrefix()}/rest/api/3/project/${projectKey}/version?orderBy=-sequence&query=${querystring_1.escape(name)}`;
+    const response = yield node_fetch_1.default(url);
+    const data = (yield response.json());
+    if (data.values.length === 0) {
+        return undefined;
+    }
+    if (data.values.length > 1) {
+        throw new Error(`Found multiple Jira releases with the name '${name}'`);
+    }
+    return data.values[0];
+});
+exports.findJiraRelease = findJiraRelease;
+/**
+ * Creates a Jira release for the given release pull request.
+ *
+ * @param {Repository} repoName       The name of the repository that is being released.
+ * @param {number}     prNumber       The release PR number.
+ * @param {string}     releaseVersion The version tag for teh release (eg. v2021-01-12-0426).
+ * @param {string}     releaseName    The release name (eg. 'Energetic Eagle').
+ */
+const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awaiter(void 0, void 0, void 0, function* () {
+    // Used for log messages.
+    const prName = `${repoName}#${prNumber}`;
+    core_1.info(`Fetching the release pull request ${prName}`);
+    const pullRequest = yield PullRequest_1.getPullRequest(repoName, prNumber);
+    if (isNil_1.default(pullRequest)) {
+        core_1.error(`Could not fetch the release pull request ${prName}`);
+        return;
+    }
+    const commits = yield PullRequest_1.listPullRequestCommits(repoName, prNumber);
+    if (isNil_1.default(commits)) {
+        core_1.error(`Could not list commits for the release pull request ${prName}`);
+        return;
+    }
+    if (isEmpty_1.default(commits)) {
+        core_1.error('The release pull request is empty - giving up');
+        return;
+    }
+    // Extract the Jira issue keys from the commit list.
+    const issueKeys = [
+        ...new Set(commits
+            .map((commit) => commit.commit.message.replace(/^.*\[([A-Z]+-\d+)\].*$/, '$1'))
+            .filter((issueKey) => issueKey)),
+    ];
+    // Group the issue keys by project ID. We should only have one project per repo, but for future-proofing
+    // we will allow multiple. This gives us eg. "{ PROJECT: ['PROJECT-1200', 'PROJECT-1201'] }".
+    const issueKeysByProject = {};
+    issueKeys.forEach((issueKey) => {
+        const projectKey = issueKey.replace(/^([A-Z]+)-\d+$/, '$1');
+        const existing = issueKeysByProject[projectKey] || [];
+        Object.assign(issueKeysByProject, { [projectKey]: [...existing, issueKey] });
+    });
+    const projectKeys = Object.keys(issueKeysByProject);
+    core_1.info(`Found ${projectKeys.length} Jira project(s) to release (${projectKeys.join(', ')})`);
+    const fullReleaseName = `${releaseVersion} (${releaseName})`;
+    yield Promise.all(Object.keys(issueKeysByProject).map((projectKey) => __awaiter(void 0, void 0, void 0, function* () {
+        core_1.info(`Releasing project ${projectKey}...`);
+        core_1.info(`Looking for an existing release with the name '${fullReleaseName}'...`);
+        let release = yield exports.findJiraRelease(projectKey, fullReleaseName);
+        if (isNil_1.default(release)) {
+            core_1.info('No existing release found - creating one...');
+            release = yield exports.createJiraRelease(projectKey, fullReleaseName, `See ${PullRequest_1.pullRequestUrl(repoName, prNumber)}`);
+            core_1.info(`Created a new release with ID ${release.id}`);
+        }
+        else {
+            core_1.info(`Found an existing release with ID ${release.id}`);
+        }
+        const issueIds = issueKeysByProject[projectKey];
+        core_1.info(`Adding ${issueIds.length} Jira issues(s) to the release...`);
+        yield Promise.all(issueIds.map((issueId) => __awaiter(void 0, void 0, void 0, function* () {
+            core_1.info(`Adding ${issueId} to the release...`);
+            yield Issue_1.setVersion(issueId, release === null || release === void 0 ? void 0 : release.id);
+            core_1.info(`Moving ${issueId} to '${Issue_1.JiraStatusDone}'...`);
+            yield Issue_1.setIssueStatus(issueId, Issue_1.JiraStatusDone);
+        })));
+    })));
+});
+exports.createRelease = createRelease;
 
 
 /***/ }),
@@ -63078,6 +63273,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(8273), exports);
 __exportStar(__nccwpck_require__(54465), exports);
+__exportStar(__nccwpck_require__(8812), exports);
 
 
 /***/ }),

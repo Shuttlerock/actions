@@ -1,7 +1,7 @@
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
-import { apiPrefix } from '@sr-services/Jira/Client'
+import { apiPrefix, client } from '@sr-services/Jira/Client'
 
 export interface JiraBoard {
   id: number
@@ -28,6 +28,10 @@ export interface JiraBoardConfiguration {
   }
   id: number
   name: string
+}
+
+interface JiraProject {
+  id: string
 }
 
 /**
@@ -74,4 +78,16 @@ export const getColumns = async (
   const data = (await response.json()) as JiraBoardConfiguration
 
   return data.columnConfig.columns
+}
+
+/**
+ * Fetches the project with the given ID.
+ *
+ * @param {string} projectKey The key of the Jira project (eg. 'STUDIO').
+ *
+ * @returns {JiraProject} The project.
+ */
+export const getProject = async (projectKey: string): Promise<JiraProject> => {
+  const data = await client.getProject(projectKey)
+  return data as JiraProject
 }
