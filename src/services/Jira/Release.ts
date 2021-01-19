@@ -118,21 +118,19 @@ export const createRelease = async (
     return
   }
 
-  if (isEmpty(commits)) {
-    error('The release pull request is empty - giving up')
-    return
-  }
-
   // Extract the Jira issue keys from the commit list.
   const issueKeys = [
     ...new Set(
       commits
-        .map((commit: Commit) =>
-          commit.commit.message.replace(/^.*\[([A-Z]+-\d+)\].*$/, '$1')
-        )
-        .filter((issueKey: string) => issueKey)
+        .map((commit: Commit) => {
+          const matches = /\[([A-Z]+-\d+)\]/.exec(
+            commit.commit.message.split('\n')[0]
+          )
+          return matches && matches[1]
+        })
+        .filter((issueKey: string | null) => !isEmpty(issueKey))
     ),
-  ]
+  ] as string[]
 
   // Group the issue keys by project ID. We should only have one project per repo, but for future-proofing
   // we will allow multiple. This gives us eg. "{ PROJECT: ['PROJECT-1200', 'PROJECT-1201'] }".
@@ -156,7 +154,7 @@ export const createRelease = async (
       info(`Releasing project ${projectKey}...`)
 
       info(
-        `Looking for an existing release with the name '${fullReleaseName}'...`
+        `Looking for an existing release with the name '${fullReleaseName}' in project ${projectKey}...`
       )
       let release = await findJiraRelease(projectKey, fullReleaseName)
 

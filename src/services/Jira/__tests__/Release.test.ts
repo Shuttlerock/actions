@@ -60,11 +60,13 @@ describe('Release', () => {
       )
 
       const commits = [
+        mockGitCommit,
         {
           ...mockGitCommit,
           commit: {
             ...mockGitCommit.commit,
-            message: '[ISSUE-123] Make a widget',
+            message:
+              '[#456] [ISSUE-123] Make a widget\nAnother line because this broke before',
           },
         },
         {
@@ -118,13 +120,6 @@ describe('Release', () => {
       listPullRequestCommitsSpy.mockReturnValue(Promise.resolve(undefined))
       await payload()
       const message = `Could not list commits for the release pull request ${prName}`
-      expect(errorSpy).toHaveBeenLastCalledWith(message)
-    })
-
-    it('does nothing if the commit list is empty', async () => {
-      listPullRequestCommitsSpy.mockReturnValue(Promise.resolve([]))
-      await payload()
-      const message = 'The release pull request is empty - giving up'
       expect(errorSpy).toHaveBeenLastCalledWith(message)
     })
 

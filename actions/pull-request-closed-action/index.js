@@ -61955,15 +61955,14 @@ const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awa
         core_1.error(`Could not list commits for the release pull request ${prName}`);
         return;
     }
-    if (isEmpty_1.default(commits)) {
-        core_1.error('The release pull request is empty - giving up');
-        return;
-    }
     // Extract the Jira issue keys from the commit list.
     const issueKeys = [
         ...new Set(commits
-            .map((commit) => commit.commit.message.replace(/^.*\[([A-Z]+-\d+)\].*$/, '$1'))
-            .filter((issueKey) => issueKey)),
+            .map((commit) => {
+            const matches = /\[([A-Z]+-\d+)\]/.exec(commit.commit.message.split('\n')[0]);
+            return matches && matches[1];
+        })
+            .filter((issueKey) => !isEmpty_1.default(issueKey))),
     ];
     // Group the issue keys by project ID. We should only have one project per repo, but for future-proofing
     // we will allow multiple. This gives us eg. "{ PROJECT: ['PROJECT-1200', 'PROJECT-1201'] }".
@@ -61978,7 +61977,7 @@ const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awa
     const fullReleaseName = `${releaseVersion} (${releaseName})`;
     yield Promise.all(Object.keys(issueKeysByProject).map((projectKey) => __awaiter(void 0, void 0, void 0, function* () {
         core_1.info(`Releasing project ${projectKey}...`);
-        core_1.info(`Looking for an existing release with the name '${fullReleaseName}'...`);
+        core_1.info(`Looking for an existing release with the name '${fullReleaseName}' in project ${projectKey}...`);
         let release = yield exports.findJiraRelease(projectKey, fullReleaseName);
         if (isNil_1.default(release)) {
             core_1.info('No existing release found - creating one...');
