@@ -45,13 +45,20 @@ export const createJiraRelease = async (
   name: string,
   description: string
 ): Promise<JiraRelease> => {
-  info(`Fetching the project '${projectKey}'...`)
-  const project = await getProject(projectKey)
+  // The projectKey may actually already be an ID - we can tell because it will be numeric.
+  let projectId: string
+  if (/^\d+$/.exec(projectKey)) {
+    projectId = projectKey
+  } else {
+    info(`Fetching the project '${projectKey}'...`)
+    const project = await getProject(projectKey)
+    projectId = project.id
+  }
 
   const args = {
     description,
     name,
-    projectId: project.id,
+    projectId,
     released: true,
     releaseDate: new Date(),
   }
@@ -162,7 +169,7 @@ export const createRelease = async (
   }
 
   await Promise.all(
-    Object.keys(issueKeysByProject).map(async (projectKey: string) => {
+    projectKeys.map(async (projectKey: string) => {
       info(`Releasing project ${projectKey}...`)
 
       info(
@@ -182,7 +189,7 @@ export const createRelease = async (
         info(`Found an existing release with ID ${release.id}`)
       }
 
-      const issueIds = issueKeysByProject[projectKey]
+      const issueIds = issueKeysByProject[projectKey] || []
       info(`Adding ${issueIds.length} Jira issues(s) to the release...`)
       await Promise.all(
         issueIds.map(async (issueId: string) => {
