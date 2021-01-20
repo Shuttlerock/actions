@@ -5,6 +5,10 @@ runs:
   using: 'node12'
   main: 'index.js'
 inputs:
+  credentials-api-prefix:
+    description: 'The prefix of the REST API method to fetch user credentials'
+  credentials-api-secret:
+    description: 'The shared signing secret used to fetch user credentials'
   organization-name:
     description: 'The name of the Github organization'
   repo-token:

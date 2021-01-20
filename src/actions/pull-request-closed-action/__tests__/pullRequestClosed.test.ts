@@ -11,6 +11,7 @@ import {
 } from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
+  createRelease: jest.fn(),
   getIssue: jest.fn(),
   setIssueStatus: jest.fn(),
 }))
@@ -61,8 +62,9 @@ describe('pull-request-closed-action', () => {
       )
     })
 
-    it(`creates a release if the branch name is '${ReleaseBranchName}'`, async () => {
-      const createReleaseTagSpy = jest.spyOn(Github, 'createReleaseTag')
+    describe(`branch name is '${ReleaseBranchName}'`, () => {
+      const releaseName = 'Energetic Eagle'
+      const releaseVersion = '2021-01-12-0426'
       const releasePayload = {
         ...mockGithubPullRequestPayload,
         pull_request: {
@@ -71,17 +73,33 @@ describe('pull-request-closed-action', () => {
             ...mockGithubPullRequestPayload.pull_request.head,
             ref: ReleaseBranchName,
           },
-          title: 'Release Candidate 2021-01-12-0426 (Energetic Eagle)',
+          title: `Release Candidate ${releaseVersion} (${releaseName})`,
         },
       }
-      await pullRequestClosed(releasePayload)
-      expect(createReleaseTagSpy).toHaveBeenCalledWith(
-        mockGithubPullRequestPayload.repository.name,
-        mockGithubRelease.tag_name,
-        'Energetic Eagle',
-        expect.anything() // Release notes.
-      )
-      createReleaseTagSpy.mockRestore()
+
+      it('creates a Jira release', async () => {
+        const createJiraReleaseSpy = jest.spyOn(Jira, 'createRelease')
+        await pullRequestClosed(releasePayload)
+        expect(createJiraReleaseSpy).toHaveBeenCalledWith(
+          mockGithubPullRequestPayload.repository.name,
+          mockGithubPullRequestPayload.pull_request.number,
+          `v${releaseVersion}`,
+          releaseName
+        )
+        createJiraReleaseSpy.mockRestore()
+      })
+
+      it('creates a Github release', async () => {
+        const createReleaseTagSpy = jest.spyOn(Github, 'createReleaseTag')
+        await pullRequestClosed(releasePayload)
+        expect(createReleaseTagSpy).toHaveBeenCalledWith(
+          mockGithubPullRequestPayload.repository.name,
+          mockGithubRelease.tag_name,
+          releaseName,
+          expect.anything() // Release notes.
+        )
+        createReleaseTagSpy.mockRestore()
+      })
     })
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {
