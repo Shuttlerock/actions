@@ -3,6 +3,7 @@ import {
   OctokitResponse,
   PullsCreateResponseData,
   PullsGetResponseData,
+  PullsListCommitsResponseData,
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
 } from '@octokit/types'
@@ -16,14 +17,16 @@ import {
   createPullRequest,
   getIssueKey,
   getPullRequest,
+  listPullRequestCommits,
   pullRequestUrl,
   updatePullRequest,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
+  mockGitCommit,
+  mockGithubPullRequest,
   mockGithubPullRequestCreateResponse,
   mockGithubPullRequestUpdateResponse,
-  mockGithubPullRequest,
   mockIssuesAddAssigneesResponseData,
   mockPullsRequestReviewersResponseData,
 } from '@sr-tests/Mocks'
@@ -200,6 +203,26 @@ describe('PullRequest', () => {
       const result = await getPullRequest(repo, pull_number)
       expect(spy).toHaveBeenCalledWith(fetchPullParams)
       expect(result).toEqual(undefined)
+      spy.mockRestore()
+    })
+  })
+
+  describe('listPullRequestCommits', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(Client.readClient.pulls, 'listCommits')
+        .mockReturnValue(
+          Promise.resolve(({
+            data: [mockGitCommit],
+          } as unknown) as OctokitResponse<PullsListCommitsResponseData>)
+        )
+      const result = await listPullRequestCommits(repo, 123)
+      expect(spy).toHaveBeenCalledWith({
+        owner: organizationName(),
+        pull_number: 123,
+        repo,
+      })
+      expect((result || [])[0].author.login).toEqual('dperrett')
       spy.mockRestore()
     })
   })

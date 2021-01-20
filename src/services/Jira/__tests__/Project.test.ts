@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
 
+import { client } from '@sr-services/Jira/Client'
 import * as Project from '@sr-services/Jira/Project'
 import {
   mockJiraBoard,
@@ -36,6 +37,19 @@ describe('Project', () => {
       expect(columns.length).toEqual(1)
       expect(columns[0].name).toEqual(mockJiraBoardColumn.name)
       spy.mockRestore()
+    })
+  })
+
+  describe('getProject', () => {
+    it('calls the Jira API', async () => {
+      const project = { id: 'my-project-id', key: 'my-project-key' }
+      const getProjectSpy = jest
+        .spyOn(client, 'getProject')
+        .mockReturnValue(Promise.resolve(project))
+      const returned = await Project.getProject(project.key)
+      expect(getProjectSpy).toHaveBeenCalledWith(project.key)
+      expect(returned.id).toEqual(project.id)
+      getProjectSpy.mockRestore()
     })
   })
 })

@@ -14,6 +14,7 @@ import {
   JiraStatusValidated,
   moveIssueToBoard,
   setIssueStatus,
+  setVersion,
   updateCustomField,
 } from '@sr-services/Jira/Issue'
 import * as Issue from '@sr-services/Jira/Issue'
@@ -200,6 +201,25 @@ describe('Issue', () => {
       })
       spyListTransitions.mockRestore()
       spyTransitionIssue.mockRestore()
+    })
+  })
+
+  describe('setVersion', () => {
+    it('calls the Jira API', async () => {
+      const spyUpdateIssue = jest
+        .spyOn(client, 'updateIssue')
+        .mockImplementation(
+          (_issueId: string, _data: Record<string, unknown>) =>
+            Promise.resolve({})
+        )
+      await setVersion(mockJiraIssue.id, 'my-version-id')
+      const expected = {
+        fields: {
+          fixVersions: [{ id: 'my-version-id' }],
+        },
+      }
+      expect(spyUpdateIssue).toHaveBeenCalledWith(mockJiraIssue.id, expected)
+      spyUpdateIssue.mockRestore()
     })
   })
 

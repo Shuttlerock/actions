@@ -19,6 +19,7 @@ export interface Credentials extends User {
 }
 
 export interface Repository {
+  jira_project_id?: number
   leads: User[]
   reviewers: User[]
   status: 'forbidden' | 'not_found' | 'ok'

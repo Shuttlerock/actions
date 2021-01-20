@@ -1,6 +1,7 @@
 import {
   IssuesAddAssigneesResponseData,
   PullsGetResponseData,
+  PullsListCommitsResponseData,
   PullsRequestReviewersResponseData,
 } from '@octokit/types'
 import isNil from 'lodash/isNil'
@@ -160,6 +161,27 @@ export const assignReviewers = async (
     reviewers,
     pull_number: number,
     owner: organizationName(),
+    repo,
+  })
+
+  return response.data
+}
+
+/**
+ * Lists the commits in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose commits we want to fetch.
+ *
+ * @returns {PullsListCommitsResponseData} The pull request data.
+ */
+export const listPullRequestCommits = async (
+  repo: Repository,
+  number: number
+): Promise<PullsListCommitsResponseData | undefined> => {
+  const response = await readClient.pulls.listCommits({
+    owner: organizationName(),
+    pull_number: number,
     repo,
   })
 

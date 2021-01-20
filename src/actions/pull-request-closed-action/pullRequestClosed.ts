@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil'
 import { ReleaseBranchName } from '@sr-services/Constants'
 import { createReleaseTag, getIssueKey } from '@sr-services/Github'
 import {
+  createRelease as createJiraRelease,
   getIssue,
   JiraStatusValidated,
   setIssueStatus,
@@ -29,7 +30,7 @@ export const pullRequestClosed = async (
   }
 
   if (pullRequest.head.ref === ReleaseBranchName) {
-    info(`${prName} looks like a release - creating a release tag...`)
+    info(`${prName} looks like a release - creating Github + Jira releases...`)
     // The title looks like 'Release Candidate 2021-01-12-0426 (Energetic Eagle)'.
     const matches = /^Release Candidate ([0-9-]+) \(([A-Za-z\s]+)\)$/.exec(
       pullRequest.title || ''
@@ -39,15 +40,27 @@ export const pullRequestClosed = async (
         `Couldn't extract the tag name and release name from the pull request title ('${pullRequest.title}') - no tag will be created`
       )
     } else {
+      const releaseVersion = `v${matches[1]}` // v2021-01-12-0426
+      const releaseName = matches[2] // Energetic Eagle
+
+      info(`Creating Jira release ${releaseVersion} (${releaseName})...`)
+      await createJiraRelease(
+        repository.name,
+        pullRequest.number,
+        releaseVersion,
+        releaseName
+      )
+
       // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
+      info(`Creating Github release ${releaseVersion} (${releaseName})...`)
       const [, ...releaseNotes] = pullRequest.body.split('\n')
       await createReleaseTag(
         repository.name,
-        `v${matches[1]}`, // v2021-01-12-0426
-        matches[2], // Energetic Eagle
+        releaseVersion, // v2021-01-12-0426
+        releaseName, // Energetic Eagle
         releaseNotes.join('\n') // Release notes.
       )
-      info(`Created the release v${matches[1]}`)
+      info(`Created the release ${releaseVersion}`)
     }
   }
 
