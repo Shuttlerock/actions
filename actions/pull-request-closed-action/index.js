@@ -61899,12 +61899,20 @@ const Project_1 = __nccwpck_require__(4465);
  * @returns {JiraRelease} The newly created release.
  */
 const createJiraRelease = (projectKey, name, description) => __awaiter(void 0, void 0, void 0, function* () {
-    core_1.info(`Fetching the project '${projectKey}'...`);
-    const project = yield Project_1.getProject(projectKey);
+    // The projectKey may actually already be an ID - we can tell because it will be numeric.
+    let projectId;
+    if (/^\d+$/.exec(projectKey)) {
+        projectId = projectKey;
+    }
+    else {
+        core_1.info(`Fetching the project '${projectKey}'...`);
+        const project = yield Project_1.getProject(projectKey);
+        projectId = project.id;
+    }
     const args = {
         description,
         name,
-        projectId: project.id,
+        projectId,
         released: true,
         releaseDate: new Date(),
     };
@@ -61986,7 +61994,7 @@ const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awa
             projectKeys = [`${repo === null || repo === void 0 ? void 0 : repo.jira_project_id}`];
         }
     }
-    yield Promise.all(Object.keys(issueKeysByProject).map((projectKey) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Promise.all(projectKeys.map((projectKey) => __awaiter(void 0, void 0, void 0, function* () {
         core_1.info(`Releasing project ${projectKey}...`);
         core_1.info(`Looking for an existing release with the name '${fullReleaseName}' in project ${projectKey}...`);
         let release = yield exports.findJiraRelease(projectKey, fullReleaseName);
@@ -61998,7 +62006,7 @@ const createRelease = (repoName, prNumber, releaseVersion, releaseName) => __awa
         else {
             core_1.info(`Found an existing release with ID ${release.id}`);
         }
-        const issueIds = issueKeysByProject[projectKey];
+        const issueIds = issueKeysByProject[projectKey] || [];
         core_1.info(`Adding ${issueIds.length} Jira issues(s) to the release...`);
         yield Promise.all(issueIds.map((issueId) => __awaiter(void 0, void 0, void 0, function* () {
             core_1.info(`Adding ${issueId} to the release...`);
