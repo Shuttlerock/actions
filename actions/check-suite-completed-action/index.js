@@ -35153,7 +35153,7 @@ module.exports = isBuffer;
 
 /***/ }),
 
-/***/ 2384:
+/***/ 3912:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var baseKeys = __nccwpck_require__(7164),
@@ -40128,7 +40128,7 @@ module.exports = {
 
 
 var stringify = __nccwpck_require__(9954);
-var parse = __nccwpck_require__(3912);
+var parse = __nccwpck_require__(316);
 var formats = __nccwpck_require__(4907);
 
 module.exports = {
@@ -40140,7 +40140,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3912:
+/***/ 316:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -60248,6 +60248,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkSuiteCompleted = void 0;
 const core_1 = __nccwpck_require__(2186);
+const isEmpty_1 = __importDefault(__nccwpck_require__(3912));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Constants_1 = __nccwpck_require__(7682);
 const Credentials_1 = __nccwpck_require__(3543);
@@ -60296,21 +60297,26 @@ const handleSuccess = (checkName, pullRequest) => {
  * @param checkSuite The check suite payload from Github sent when the suite completes.
  */
 const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$');
     const repoName = checkSuite.url.replace(rgx, '$1');
-    if (isNil_1.default(checkSuite.after)) {
-        core_1.error('No commit associated with this check - giving up');
+    let prNumber;
+    // We need to figure out what pull request this check suite is associated with.
+    if (isNil_1.default(checkSuite.after) && isEmpty_1.default(checkSuite.pull_requests)) {
+        core_1.error('No commit or pull request associated with this check - giving up');
         return;
     }
-    core_1.info(`Fetching the commit ${checkSuite.after} for repository '${repoName}'...`);
-    const commit = yield Github_1.getCommit(repoName, checkSuite.after);
-    if (isNil_1.default(commit)) {
-        core_1.error(`Couldn't find commit ${checkSuite.after} - giving up`);
-        return;
+    if (!isNil_1.default(checkSuite.after)) {
+        core_1.info(`Fetching the commit ${checkSuite.after} for repository '${repoName}'...`);
+        const commit = yield Github_1.getCommit(repoName, checkSuite.after);
+        if (isNil_1.default(commit)) {
+            core_1.error(`Couldn't find commit ${checkSuite.after} - giving up`);
+            return;
+        }
+        core_1.info('Looking for an associated pull request number...');
+        prNumber = Github_1.extractPullRequestNumber(commit.message);
     }
-    core_1.info('Looking for an associated pull request number...');
-    let prNumber = Github_1.extractPullRequestNumber(commit.message);
-    if (isNil_1.default(prNumber) && checkSuite.pull_requests.length > 0) {
+    if (isNil_1.default(prNumber) && ((_a = checkSuite.pull_requests) === null || _a === void 0 ? void 0 : _a.length) > 0) {
         prNumber = checkSuite.pull_requests[0].number;
     }
     if (isNil_1.default(prNumber)) {
@@ -61173,7 +61179,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createReleaseTag = exports.createReleasePullRequest = void 0;
 const core_1 = __nccwpck_require__(2186);
 const dateformat_1 = __importDefault(__nccwpck_require__(1512));
-const isEmpty_1 = __importDefault(__nccwpck_require__(2384));
+const isEmpty_1 = __importDefault(__nccwpck_require__(3912));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Constants_1 = __nccwpck_require__(7682);
 const Credentials_1 = __nccwpck_require__(3543);
@@ -61961,7 +61967,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createRelease = exports.findJiraRelease = exports.createJiraRelease = void 0;
 const core_1 = __nccwpck_require__(2186);
-const isEmpty_1 = __importDefault(__nccwpck_require__(2384));
+const isEmpty_1 = __importDefault(__nccwpck_require__(3912));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 const querystring_1 = __nccwpck_require__(1191);

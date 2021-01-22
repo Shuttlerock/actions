@@ -1,6 +1,7 @@
 import { error, info } from '@actions/core'
 import { PullsGetResponseData } from '@octokit/types'
 import { EventPayloads } from '@octokit/webhooks'
+import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
 import { GithubWriteUser, HasIssuesLabel } from '@sr-services/Constants'
@@ -85,24 +86,29 @@ export const checkSuiteCompleted = async (
 ): Promise<void> => {
   const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$')
   const repoName = checkSuite.url.replace(rgx, '$1')
+  let prNumber: number | undefined
 
-  if (isNil(checkSuite.after)) {
-    error('No commit associated with this check - giving up')
+  // We need to figure out what pull request this check suite is associated with.
+  if (isNil(checkSuite.after) && isEmpty(checkSuite.pull_requests)) {
+    error('No commit or pull request associated with this check - giving up')
     return
   }
 
-  info(
-    `Fetching the commit ${checkSuite.after} for repository '${repoName}'...`
-  )
-  const commit = await getCommit(repoName, checkSuite.after)
-  if (isNil(commit)) {
-    error(`Couldn't find commit ${checkSuite.after} - giving up`)
-    return
+  if (!isNil(checkSuite.after)) {
+    info(
+      `Fetching the commit ${checkSuite.after} for repository '${repoName}'...`
+    )
+    const commit = await getCommit(repoName, checkSuite.after)
+    if (isNil(commit)) {
+      error(`Couldn't find commit ${checkSuite.after} - giving up`)
+      return
+    }
+
+    info('Looking for an associated pull request number...')
+    prNumber = extractPullRequestNumber(commit.message)
   }
 
-  info('Looking for an associated pull request number...')
-  let prNumber = extractPullRequestNumber(commit.message)
-  if (isNil(prNumber) && checkSuite.pull_requests.length > 0) {
+  if (isNil(prNumber) && checkSuite.pull_requests?.length > 0) {
     prNumber = checkSuite.pull_requests[0].number
   }
 
