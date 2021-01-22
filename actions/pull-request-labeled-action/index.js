@@ -60662,7 +60662,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
+exports.getCommit = exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
 const Client_1 = __nccwpck_require__(2818);
 const Inputs_1 = __nccwpck_require__(5968);
 exports.TreeModes = {
@@ -60751,6 +60751,23 @@ const createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0
     return response.data;
 });
 exports.createGitTree = createGitTree;
+/**
+ * Returns the commit with the given sha.
+ *
+ * @param {Repository} repo The name of the repository whose commit we want to fetch.
+ * @param {Sha}        sha  The sha hash of the commit.
+ *
+ * @returns {GitGetCommitResponseData} The commit data.
+ */
+const getCommit = (repo, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.git.getCommit({
+        owner: Inputs_1.organizationName(),
+        repo,
+        commit_sha: sha,
+    });
+    return response.data;
+});
+exports.getCommit = getCommit;
 
 
 /***/ }),
@@ -60873,7 +60890,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Client_1 = __nccwpck_require__(2818);
 const Inputs_1 = __nccwpck_require__(5968);
@@ -60997,6 +61014,15 @@ const assignReviewers = (repo, number, usernames) => __awaiter(void 0, void 0, v
 });
 exports.assignReviewers = assignReviewers;
 /**
+ * Extracts a pull request from a commit message, in the format "[#123] Do something".
+ *
+ * @param {string} message The commit message to extract the pull request number from.
+ *
+ * @returns {number | undefined} The number of the pull request, if one can be found.
+ */
+const extractPullRequestNumber = (message) => parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) || undefined;
+exports.extractPullRequestNumber = extractPullRequestNumber;
+/**
  * Lists the commits in the pull request with the given number.
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
@@ -61091,7 +61117,7 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
         commit.commit.message.startsWith('Bump '));
     const prNumbers = [
         ...new Set(commits
-            .map((commit) => parseInt(commit.commit.message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10))
+            .map((commit) => PullRequest_1.extractPullRequestNumber(commit.commit.message))
             .filter((prNumber) => prNumber)),
     ];
     const pulls = (yield Promise.all(prNumbers.map((prNumber) => __awaiter(void 0, void 0, void 0, function* () { return PullRequest_1.getPullRequest(repoName, prNumber); })))).filter((pull) => pull && !/^Bump .+ from .+ to .*$/.exec(pull.title));
@@ -62048,10 +62074,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.positiveEmoji = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Inputs_1 = __nccwpck_require__(5968);
 const Client_1 = __nccwpck_require__(7589);
+/**
+ * Returns a random 'positive' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+const positiveEmoji = () => {
+    const emoji = [
+        'thumbsup',
+        'clap',
+        'tada',
+        'dart',
+        'drunken_parrot',
+        'star-struck',
+        '100',
+        'boom',
+        'confetti_ball',
+        'fire',
+    ];
+    return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`;
+};
+exports.positiveEmoji = positiveEmoji;
 /**
  * Sends an error message to the default slack group.
  *
@@ -62066,6 +62113,8 @@ const sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function
     yield Client_1.client.chat.postMessage({
         channel: Inputs_1.slackErrorChannelId(),
         text: message,
+        unfurl_links: false,
+        unfurl_media: false,
     });
 });
 exports.sendErrorMessage = sendErrorMessage;
@@ -62083,7 +62132,12 @@ const sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, f
     }
     try {
         // See: https://api.slack.com/methods/chat.postMessage
-        yield Client_1.client.chat.postMessage({ channel: userId, text: message });
+        yield Client_1.client.chat.postMessage({
+            channel: userId,
+            text: message,
+            unfurl_links: false,
+            unfurl_media: false,
+        });
     }
     catch (err) {
         if (err.message.match(/channel_not_found/)) {

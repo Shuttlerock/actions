@@ -4,6 +4,27 @@ import { slackErrorChannelId } from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 
 /**
+ * Returns a random 'positive' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+export const positiveEmoji = (): string => {
+  const emoji = [
+    'thumbsup',
+    'clap',
+    'tada',
+    'dart',
+    'drunken_parrot',
+    'star-struck',
+    '100',
+    'boom',
+    'confetti_ball',
+    'fire',
+  ]
+  return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`
+}
+
+/**
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
@@ -18,6 +39,8 @@ export const sendErrorMessage = async (message: string): Promise<void> => {
   await client.chat.postMessage({
     channel: slackErrorChannelId(),
     text: message,
+    unfurl_links: false,
+    unfurl_media: false,
   })
 }
 
@@ -39,7 +62,12 @@ export const sendUserMessage = async (
 
   try {
     // See: https://api.slack.com/methods/chat.postMessage
-    await client.chat.postMessage({ channel: userId, text: message })
+    await client.chat.postMessage({
+      channel: userId,
+      text: message,
+      unfurl_links: false,
+      unfurl_media: false,
+    })
   } catch (err) {
     if (err.message.match(/channel_not_found/)) {
       return

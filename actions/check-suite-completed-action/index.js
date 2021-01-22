@@ -60228,48 +60228,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5809:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
-const core_1 = __nccwpck_require__(2186);
-const github_1 = __nccwpck_require__(5438);
-const pullRequestClosed_1 = __nccwpck_require__(8665);
-/**
- * Runs whenever a pull request is closed (not necessarily merged).
- *
- * To trigger this event manually:
- *
- * $ act --job pull_request_closed_action --eventpath src/actions/pull-request-closed-action/__tests__/fixtures/pull-request-closed.json
- */
-const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload } = (yield github_1.context);
-    yield pullRequestClosed_1.pullRequestClosed(payload);
-});
-exports.run = run;
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-exports.run().catch(err => {
-    core_1.error(err);
-    core_1.error(err.stack);
-    core_1.setFailed(err.message);
-});
-
-
-/***/ }),
-
-/***/ 8665:
+/***/ 1887:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -60287,46 +60246,76 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pullRequestClosed = void 0;
+exports.checkSuiteCompleted = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Constants_1 = __nccwpck_require__(7682);
+const Credentials_1 = __nccwpck_require__(3543);
 const Github_1 = __nccwpck_require__(4390);
 const Jira_1 = __nccwpck_require__(404);
+const Slack_1 = __nccwpck_require__(4745);
 /**
- * Runs whenever a pull request is closed (not necessarily merged).
+ * Performs actions when a check suite fails.
  *
- * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is closed.
+ * @param {string}               checkName   The name of the Github app running the check.
+ * @param {Issue}                issue       The Jira issue that the PR is linked to.
+ * @param {Repository}           repoName    The name of the Github repository.
+ * @param {PullsGetResponseData} pullRequest The pull request being checked.
+ *
+ * @returns {string | undefined} A message to be sent to the user in Slack.
  */
-const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pull_request: pullRequest, repository } = payload;
-    // Used for log messages.
-    const prName = `${repository.name}#${pullRequest.number}`;
-    if (!pullRequest.merged) {
-        core_1.info(`${prName} is not merged - ignoring`);
+const handleFailure = (checkName, issue, repoName, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Adding the '${Constants_1.HasIssuesLabel}' label...`);
+    yield Github_1.addLabels(repoName, pullRequest.number, [Constants_1.HasIssuesLabel]);
+    if (issue.fields.status.name === Jira_1.JiraStatusHasIssues) {
+        core_1.info(`Issue ${issue.key} is already in '${Jira_1.JiraStatusHasIssues}' - giving up`);
+        return undefined;
+    }
+    core_1.info(`Moving Jira issue ${issue.key} to '${Jira_1.JiraStatusHasIssues}'...`);
+    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusHasIssues);
+    return `Check suite _*${checkName}*_ failed for _<${pullRequest.html_url}|${pullRequest.title}>_`;
+});
+/**
+ * Performs actions when a check suite succeeds.
+ *
+ * @param {string}               checkName   The name of the Github app running the check.
+ * @param {PullsGetResponseData} pullRequest The pull request being checked.
+ *
+ * @returns {string | undefined} A message to be sent to the user in Slack.
+ */
+const handleSuccess = (checkName, pullRequest) => {
+    return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${pullRequest.title}>_ ${Slack_1.positiveEmoji()}`;
+};
+/**
+ * Runs whenever a check suite completes.
+ *
+ * @param checkSuite The check suite payload from Github sent when the suite completes.
+ */
+const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, function* () {
+    const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$');
+    const repoName = checkSuite.url.replace(rgx, '$1');
+    core_1.info(`Fetching the commit ${checkSuite.after} for repository '${repoName}'...`);
+    const commit = yield Github_1.getCommit(repoName, checkSuite.after);
+    if (isNil_1.default(commit)) {
+        core_1.error(`Couldn't find commit ${checkSuite.after} - giving up`);
         return;
     }
-    if (pullRequest.head.ref === Constants_1.ReleaseBranchName) {
-        core_1.info(`${prName} looks like a release - creating Github + Jira releases...`);
-        // The title looks like 'Release Candidate 2021-01-12-0426 (Energetic Eagle)'.
-        const matches = /^Release Candidate ([0-9-]+) \(([A-Za-z\s]+)\)$/.exec(pullRequest.title || '');
-        if (isNil_1.default(matches) || isNil_1.default(matches[1]) || isNil_1.default(matches[2])) {
-            core_1.info(`Couldn't extract the tag name and release name from the pull request title ('${pullRequest.title}') - no tag will be created`);
-        }
-        else {
-            const releaseVersion = `v${matches[1]}`; // v2021-01-12-0426
-            const releaseName = matches[2]; // Energetic Eagle
-            core_1.info(`Creating Jira release ${releaseVersion} (${releaseName})...`);
-            yield Jira_1.createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
-            // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
-            core_1.info(`Creating Github release ${releaseVersion} (${releaseName})...`);
-            const [, ...releaseNotes] = pullRequest.body.split('\n');
-            yield Github_1.createReleaseTag(repository.name, releaseVersion, // v2021-01-12-0426
-            releaseName, // Energetic Eagle
-            releaseNotes.join('\n') // Release notes.
-            );
-            core_1.info(`Created the release ${releaseVersion}`);
-        }
+    core_1.info('Looking for an associated pull request number...');
+    let prNumber = Github_1.extractPullRequestNumber(commit.message);
+    if (isNil_1.default(prNumber) && checkSuite.pull_requests.length > 0) {
+        prNumber = checkSuite.pull_requests[0].number;
+    }
+    if (isNil_1.default(prNumber)) {
+        core_1.info('There are no pull requests associated with this check suite - ignoring');
+        return;
+    }
+    // Used for log messages.
+    const prName = `${repoName}#${prNumber}`;
+    core_1.info(`Fetching the pull request ${prName}`);
+    const pullRequest = yield Github_1.getPullRequest(repoName, prNumber);
+    if (isNil_1.default(pullRequest)) {
+        core_1.error(`Could not fetch the pull request ${prName}`);
+        return;
     }
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
     const issueKey = Github_1.getIssueKey(pullRequest);
@@ -60340,14 +60329,72 @@ const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, functio
         core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
         return;
     }
-    if (issue.fields.status.name === Jira_1.JiraStatusValidated) {
-        core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusValidated}' - ignoring`);
-        return;
+    let message;
+    const checkName = checkSuite.app.name;
+    if (checkSuite.conclusion === 'failure') {
+        core_1.info('The suite has failed');
+        message = yield handleFailure(checkName, issue, repoName, pullRequest);
     }
-    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusValidated}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusValidated);
+    else if (checkSuite.conclusion === 'success') {
+        core_1.info('The suite has passed');
+        message = handleSuccess(checkName, pullRequest);
+    }
+    if (issue.fields.assignee && !isNil_1.default(message)) {
+        core_1.info('Sending a Slack message to the Jira assignee...');
+        const credentialLookup = issue.fields.assignee.emailAddress || issue.fields.assignee.displayName;
+        try {
+            const credentials = yield Credentials_1.fetchCredentials(credentialLookup);
+            if (credentials.github_username !== Constants_1.GithubWriteUser) {
+                yield Slack_1.sendUserMessage(credentials.slack_id, message);
+            }
+        }
+        catch (err) {
+            core_1.error(err);
+        }
+    }
 });
-exports.pullRequestClosed = pullRequestClosed;
+exports.checkSuiteCompleted = checkSuiteCompleted;
+
+
+/***/ }),
+
+/***/ 8934:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+const checkSuiteCompleted_1 = __nccwpck_require__(1887);
+/**
+ * Runs whenever a check run completes.
+ *
+ * To trigger this event manually:
+ *
+ * $ act --job check_suite_completed_action --eventpath src/actions/check-suite-completed-action/__tests__/fixtures/check-suite-success-payload.json
+ */
+const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { payload: { check_suite: checkSuite }, } = (yield github_1.context);
+    yield checkSuiteCompleted_1.checkSuiteCompleted(checkSuite);
+});
+exports.run = run;
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+exports.run().catch(err => {
+    core_1.error(err);
+    core_1.error(err.stack);
+    core_1.setFailed(err.message);
+});
 
 
 /***/ }),
@@ -62736,6 +62783,6 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(5809);
+/******/ 	return __nccwpck_require__(8934);
 /******/ })()
 ;

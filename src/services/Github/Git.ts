@@ -3,9 +3,10 @@ import {
   GitCreateCommitResponseData,
   GitCreateRefResponseData,
   GitCreateTreeResponseData,
+  GitGetCommitResponseData,
 } from '@octokit/types'
 
-import { client } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import { organizationName } from '@sr-services/Inputs'
 
 export type Branch = string
@@ -148,5 +149,25 @@ export const createGitTree = async (
     base_tree: baseTree,
   })
 
+  return response.data
+}
+
+/**
+ * Returns the commit with the given sha.
+ *
+ * @param {Repository} repo The name of the repository whose commit we want to fetch.
+ * @param {Sha}        sha  The sha hash of the commit.
+ *
+ * @returns {GitGetCommitResponseData} The commit data.
+ */
+export const getCommit = async (
+  repo: Repository,
+  sha: Sha
+): Promise<GitGetCommitResponseData> => {
+  const response = await readClient.git.getCommit({
+    owner: organizationName(),
+    repo,
+    commit_sha: sha,
+  })
   return response.data
 }

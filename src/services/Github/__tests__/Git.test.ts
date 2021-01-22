@@ -3,16 +3,18 @@ import {
   GitCreateCommitResponseData,
   GitCreateRefResponseData,
   GitCreateTreeResponseData,
+  GitGetCommitResponseData,
   OctokitResponse,
 } from '@octokit/types'
 
-import { client } from '@sr-services/Github/Client'
+import { client, readClient } from '@sr-services/Github/Client'
 import {
   Branch,
   createGitBlob,
   createGitBranch,
   createGitCommit,
   createGitTree,
+  getCommit,
   Repository,
   Sha,
   Tree,
@@ -137,6 +139,27 @@ describe('Git', () => {
         base_tree: 'my-sha',
       })
       expect(result.sha).toEqual('tree-sha')
+      spy.mockRestore()
+    })
+  })
+
+  describe('getCommit', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(readClient.git, 'getCommit')
+        .mockImplementation(
+          (_args?: { owner: string; repo: Repository; commit_sha: string }) =>
+            Promise.resolve(({
+              data: { message: 'Fix the widget' },
+            } as unknown) as OctokitResponse<GitGetCommitResponseData>)
+        )
+      const result = await getCommit(repo, 'my-sha')
+      expect(spy).toHaveBeenCalledWith({
+        owner: organizationName(),
+        repo,
+        commit_sha: 'my-sha',
+      })
+      expect(result.message).toEqual('Fix the widget')
       spy.mockRestore()
     })
   })

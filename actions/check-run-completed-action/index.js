@@ -60228,95 +60228,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5655:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkRunCompleted = void 0;
-const core_1 = __nccwpck_require__(2186);
-const isNil_1 = __importDefault(__nccwpck_require__(4977));
-const Constants_1 = __nccwpck_require__(7682);
-const Credentials_1 = __nccwpck_require__(3543);
-const Github_1 = __nccwpck_require__(4390);
-const Jira_1 = __nccwpck_require__(404);
-const Slack_1 = __nccwpck_require__(4745);
-/**
- * Runs whenever a check run completes.
- *
- * @param {WebhookPayloadCheckRun} payload The JSON payload from Github sent when the run completes.
- */
-const checkRunCompleted = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { check_run: checkRun, repository } = payload;
-    if (checkRun.pull_requests.length === 0) {
-        core_1.info('There are no pull requests associated with this check run - ignoring');
-        return;
-    }
-    // Used for log messages.
-    const prName = `${repository.name}#${checkRun.pull_requests[0].number}`;
-    if (checkRun.conclusion !== 'failure') {
-        core_1.info(`${prName} didn't fail - ignoring`);
-        return;
-    }
-    core_1.info(`Fetching the pull request ${prName}`);
-    const pullRequest = yield Github_1.getPullRequest(repository.name, checkRun.pull_requests[0].number);
-    if (isNil_1.default(pullRequest)) {
-        core_1.error(`Could not fetch the pull request ${prName}`);
-        return;
-    }
-    core_1.info(`Getting the Jira key from the pull request ${prName}...`);
-    const issueKey = Github_1.getIssueKey(pullRequest);
-    if (isNil_1.default(issueKey)) {
-        core_1.info(`Couldn't extract a Jira issue key from ${prName} - ignoring`);
-        return;
-    }
-    core_1.info(`Fetching the Jira issue ${issueKey}...`);
-    const issue = yield Jira_1.getIssue(issueKey);
-    if (isNil_1.default(issue)) {
-        core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
-        return;
-    }
-    core_1.info(`Adding the '${Constants_1.HasIssuesLabel}' label...`);
-    yield Github_1.addLabels(repository.name, pullRequest.number, [Constants_1.HasIssuesLabel]);
-    if (issue.fields.status.name === Jira_1.JiraStatusHasIssues) {
-        core_1.info(`Issue ${issueKey} is already in '${Jira_1.JiraStatusHasIssues}' - giving up`);
-        return;
-    }
-    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusHasIssues}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusHasIssues);
-    if (issue.fields.assignee) {
-        core_1.info('Sending a Slack message to the Jira assignee...');
-        const credentialLookup = issue.fields.assignee.emailAddress || issue.fields.assignee.displayName;
-        try {
-            const credentials = yield Credentials_1.fetchCredentials(credentialLookup);
-            if (credentials.github_username !== Constants_1.GithubWriteUser) {
-                const message = `A check has failed for _<${pullRequest.html_url}|${pullRequest.title}>_`;
-                yield Slack_1.sendUserMessage(credentials.slack_id, message);
-            }
-        }
-        catch (err) {
-            core_1.error(err);
-        }
-    }
-});
-exports.checkRunCompleted = checkRunCompleted;
-
-
-/***/ }),
-
 /***/ 7174:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -60335,17 +60246,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core_1 = __nccwpck_require__(2186);
 const github_1 = __nccwpck_require__(5438);
-const checkRunCompleted_1 = __nccwpck_require__(5655);
+const checkSuiteCompleted_1 = __nccwpck_require__(1887);
 /**
  * Runs whenever a check run completes.
  *
  * To trigger this event manually:
  *
- * $ act --job check_run_completed_action --eventpath src/actions/check-run-completed-action/__tests__/fixtures/check-run-failed-payload.json
+ * $ act --job check_run_completed_action --eventpath src/actions/check-run-completed-action/__tests__/fixtures/check-run-success-payload.json
  */
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload } = (yield github_1.context);
-    yield checkRunCompleted_1.checkRunCompleted(payload);
+    const { payload: { check_run: { check_suite: checkSuite }, }, } = (yield github_1.context);
+    yield checkSuiteCompleted_1.checkSuiteCompleted(checkSuite);
 });
 exports.run = run;
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -60354,6 +60265,136 @@ exports.run().catch(err => {
     core_1.error(err.stack);
     core_1.setFailed(err.message);
 });
+
+
+/***/ }),
+
+/***/ 1887:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkSuiteCompleted = void 0;
+const core_1 = __nccwpck_require__(2186);
+const isNil_1 = __importDefault(__nccwpck_require__(4977));
+const Constants_1 = __nccwpck_require__(7682);
+const Credentials_1 = __nccwpck_require__(3543);
+const Github_1 = __nccwpck_require__(4390);
+const Jira_1 = __nccwpck_require__(404);
+const Slack_1 = __nccwpck_require__(4745);
+/**
+ * Performs actions when a check suite fails.
+ *
+ * @param {string}               checkName   The name of the Github app running the check.
+ * @param {Issue}                issue       The Jira issue that the PR is linked to.
+ * @param {Repository}           repoName    The name of the Github repository.
+ * @param {PullsGetResponseData} pullRequest The pull request being checked.
+ *
+ * @returns {string | undefined} A message to be sent to the user in Slack.
+ */
+const handleFailure = (checkName, issue, repoName, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
+    core_1.info(`Adding the '${Constants_1.HasIssuesLabel}' label...`);
+    yield Github_1.addLabels(repoName, pullRequest.number, [Constants_1.HasIssuesLabel]);
+    if (issue.fields.status.name === Jira_1.JiraStatusHasIssues) {
+        core_1.info(`Issue ${issue.key} is already in '${Jira_1.JiraStatusHasIssues}' - giving up`);
+        return undefined;
+    }
+    core_1.info(`Moving Jira issue ${issue.key} to '${Jira_1.JiraStatusHasIssues}'...`);
+    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusHasIssues);
+    return `Check suite _*${checkName}*_ failed for _<${pullRequest.html_url}|${pullRequest.title}>_`;
+});
+/**
+ * Performs actions when a check suite succeeds.
+ *
+ * @param {string}               checkName   The name of the Github app running the check.
+ * @param {PullsGetResponseData} pullRequest The pull request being checked.
+ *
+ * @returns {string | undefined} A message to be sent to the user in Slack.
+ */
+const handleSuccess = (checkName, pullRequest) => {
+    return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${pullRequest.title}>_ ${Slack_1.positiveEmoji()}`;
+};
+/**
+ * Runs whenever a check suite completes.
+ *
+ * @param checkSuite The check suite payload from Github sent when the suite completes.
+ */
+const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, function* () {
+    const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$');
+    const repoName = checkSuite.url.replace(rgx, '$1');
+    core_1.info(`Fetching the commit ${checkSuite.after} for repository '${repoName}'...`);
+    const commit = yield Github_1.getCommit(repoName, checkSuite.after);
+    if (isNil_1.default(commit)) {
+        core_1.error(`Couldn't find commit ${checkSuite.after} - giving up`);
+        return;
+    }
+    core_1.info('Looking for an associated pull request number...');
+    let prNumber = Github_1.extractPullRequestNumber(commit.message);
+    if (isNil_1.default(prNumber) && checkSuite.pull_requests.length > 0) {
+        prNumber = checkSuite.pull_requests[0].number;
+    }
+    if (isNil_1.default(prNumber)) {
+        core_1.info('There are no pull requests associated with this check suite - ignoring');
+        return;
+    }
+    // Used for log messages.
+    const prName = `${repoName}#${prNumber}`;
+    core_1.info(`Fetching the pull request ${prName}`);
+    const pullRequest = yield Github_1.getPullRequest(repoName, prNumber);
+    if (isNil_1.default(pullRequest)) {
+        core_1.error(`Could not fetch the pull request ${prName}`);
+        return;
+    }
+    core_1.info(`Getting the Jira key from the pull request ${prName}...`);
+    const issueKey = Github_1.getIssueKey(pullRequest);
+    if (isNil_1.default(issueKey)) {
+        core_1.info(`Couldn't extract a Jira issue key from ${prName} - ignoring`);
+        return;
+    }
+    core_1.info(`Fetching the Jira issue ${issueKey}...`);
+    const issue = yield Jira_1.getIssue(issueKey);
+    if (isNil_1.default(issue)) {
+        core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
+        return;
+    }
+    let message;
+    const checkName = checkSuite.app.name;
+    if (checkSuite.conclusion === 'failure') {
+        core_1.info('The suite has failed');
+        message = yield handleFailure(checkName, issue, repoName, pullRequest);
+    }
+    else if (checkSuite.conclusion === 'success') {
+        core_1.info('The suite has passed');
+        message = handleSuccess(checkName, pullRequest);
+    }
+    if (issue.fields.assignee && !isNil_1.default(message)) {
+        core_1.info('Sending a Slack message to the Jira assignee...');
+        const credentialLookup = issue.fields.assignee.emailAddress || issue.fields.assignee.displayName;
+        try {
+            const credentials = yield Credentials_1.fetchCredentials(credentialLookup);
+            if (credentials.github_username !== Constants_1.GithubWriteUser) {
+                yield Slack_1.sendUserMessage(credentials.slack_id, message);
+            }
+        }
+        catch (err) {
+            core_1.error(err);
+        }
+    }
+});
+exports.checkSuiteCompleted = checkSuiteCompleted;
 
 
 /***/ }),
@@ -60698,7 +60739,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
+exports.getCommit = exports.createGitTree = exports.createGitBranch = exports.createGitCommit = exports.createGitBlob = exports.TreeTypes = exports.TreeModes = void 0;
 const Client_1 = __nccwpck_require__(2818);
 const Inputs_1 = __nccwpck_require__(5968);
 exports.TreeModes = {
@@ -60787,6 +60828,23 @@ const createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0
     return response.data;
 });
 exports.createGitTree = createGitTree;
+/**
+ * Returns the commit with the given sha.
+ *
+ * @param {Repository} repo The name of the repository whose commit we want to fetch.
+ * @param {Sha}        sha  The sha hash of the commit.
+ *
+ * @returns {GitGetCommitResponseData} The commit data.
+ */
+const getCommit = (repo, sha) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.readClient.git.getCommit({
+        owner: Inputs_1.organizationName(),
+        repo,
+        commit_sha: sha,
+    });
+    return response.data;
+});
+exports.getCommit = getCommit;
 
 
 /***/ }),
@@ -60909,7 +60967,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Client_1 = __nccwpck_require__(2818);
 const Inputs_1 = __nccwpck_require__(5968);
@@ -61033,6 +61091,15 @@ const assignReviewers = (repo, number, usernames) => __awaiter(void 0, void 0, v
 });
 exports.assignReviewers = assignReviewers;
 /**
+ * Extracts a pull request from a commit message, in the format "[#123] Do something".
+ *
+ * @param {string} message The commit message to extract the pull request number from.
+ *
+ * @returns {number | undefined} The number of the pull request, if one can be found.
+ */
+const extractPullRequestNumber = (message) => parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) || undefined;
+exports.extractPullRequestNumber = extractPullRequestNumber;
+/**
  * Lists the commits in the pull request with the given number.
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
@@ -61127,7 +61194,7 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
         commit.commit.message.startsWith('Bump '));
     const prNumbers = [
         ...new Set(commits
-            .map((commit) => parseInt(commit.commit.message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10))
+            .map((commit) => PullRequest_1.extractPullRequestNumber(commit.commit.message))
             .filter((prNumber) => prNumber)),
     ];
     const pulls = (yield Promise.all(prNumbers.map((prNumber) => __awaiter(void 0, void 0, void 0, function* () { return PullRequest_1.getPullRequest(repoName, prNumber); })))).filter((pull) => pull && !/^Bump .+ from .+ to .*$/.exec(pull.title));
@@ -62084,10 +62151,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.positiveEmoji = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Inputs_1 = __nccwpck_require__(5968);
 const Client_1 = __nccwpck_require__(7589);
+/**
+ * Returns a random 'positive' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+const positiveEmoji = () => {
+    const emoji = [
+        'thumbsup',
+        'clap',
+        'tada',
+        'dart',
+        'drunken_parrot',
+        'star-struck',
+        '100',
+        'boom',
+        'confetti_ball',
+        'fire',
+    ];
+    return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`;
+};
+exports.positiveEmoji = positiveEmoji;
 /**
  * Sends an error message to the default slack group.
  *
@@ -62102,6 +62190,8 @@ const sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function
     yield Client_1.client.chat.postMessage({
         channel: Inputs_1.slackErrorChannelId(),
         text: message,
+        unfurl_links: false,
+        unfurl_media: false,
     });
 });
 exports.sendErrorMessage = sendErrorMessage;
@@ -62119,7 +62209,12 @@ const sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, f
     }
     try {
         // See: https://api.slack.com/methods/chat.postMessage
-        yield Client_1.client.chat.postMessage({ channel: userId, text: message });
+        yield Client_1.client.chat.postMessage({
+            channel: userId,
+            text: message,
+            unfurl_links: false,
+            unfurl_media: false,
+        });
     }
     catch (err) {
         if (err.message.match(/channel_not_found/)) {
