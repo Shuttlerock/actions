@@ -1,0 +1,21 @@
+name: 'Check suite completed'
+on:
+  check_suite:
+    types: [completed]
+
+jobs:
+  check_suite_completed_action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Shuttlerock/actions/actions/check-suite-completed-action@master
+        with:
+          credentials-api-prefix: ${{ secrets.CREDENTIALS_API_PREFIX }}
+          credentials-api-secret: ${{ secrets.CREDENTIALS_API_SECRET }}
+          jira-email:             ${{ secrets.JIRA_EMAIL }}
+          jira-host:              ${{ secrets.JIRA_HOST }}
+          jira-token:             ${{ secrets.JIRA_TOKEN }}
+          organization-name:      ${{ secrets.ORGANIZATION_NAME }}
+          repo-token:             ${{ secrets.GITHUB_TOKEN }}
+          slack-token:            ${{ secrets.SLACK_TOKEN }}
+          write-token:            ${{ secrets.ACTIONS_WRITE_TOKEN }}
