@@ -60296,6 +60296,7 @@ const handleSuccess = (checkName, pullRequest) => {
  * @param checkSuite The check suite payload from Github sent when the suite completes.
  */
 const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$');
     const repoName = checkSuite.url.replace(rgx, '$1');
     if (isNil_1.default(checkSuite.after)) {
@@ -60310,7 +60311,7 @@ const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, fu
     }
     core_1.info('Looking for an associated pull request number...');
     let prNumber = Github_1.extractPullRequestNumber(commit.message);
-    if (isNil_1.default(prNumber) && checkSuite.pull_requests.length > 0) {
+    if (isNil_1.default(prNumber) && ((_a = checkSuite.pull_requests) === null || _a === void 0 ? void 0 : _a.length) > 0) {
         prNumber = checkSuite.pull_requests[0].number;
     }
     if (isNil_1.default(prNumber)) {
