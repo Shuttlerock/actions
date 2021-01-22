@@ -80,6 +80,12 @@ export const checkSuiteCompleted = async (
 ): Promise<void> => {
   const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$')
   const repoName = checkSuite.url.replace(rgx, '$1')
+
+  if (isNil(checkSuite.after)) {
+    error('No commit associated with this check - giving up')
+    return
+  }
+
   info(
     `Fetching the commit ${checkSuite.after} for repository '${repoName}'...`
   )
