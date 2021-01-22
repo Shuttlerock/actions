@@ -65,6 +65,11 @@ const handleSuccess = (
   checkName: string,
   pullRequest: PullsGetResponseData
 ): string | undefined => {
+  // We expect GitGuardian to pass every time - we only care if it fails.
+  if (checkName === 'GitGuardian') {
+    return undefined
+  }
+
   return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${
     pullRequest.title
   }>_ ${positiveEmoji()}`
