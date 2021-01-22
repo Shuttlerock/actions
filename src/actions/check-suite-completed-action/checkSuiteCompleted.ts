@@ -102,7 +102,7 @@ export const checkSuiteCompleted = async (
 
   info('Looking for an associated pull request number...')
   let prNumber = extractPullRequestNumber(commit.message)
-  if (isNil(prNumber) && checkSuite.pull_requests.length > 0) {
+  if (isNil(prNumber) && checkSuite.pull_requests?.length > 0) {
     prNumber = checkSuite.pull_requests[0].number
   }
 
