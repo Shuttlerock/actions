@@ -56,6 +56,8 @@ jest.mock('@sr-services/Github/Label', () => ({
 jest.mock('@sr-services/Github/PullRequest', () => ({
   assignOwners: jest.fn(),
   createPullRequest: jest.fn(),
+  extractPullRequestNumber: (message: string) =>
+    parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) || undefined,
   getPullRequest: jest.fn(),
   pullRequestUrl: jest.fn(),
   updatePullRequest: jest.fn(),

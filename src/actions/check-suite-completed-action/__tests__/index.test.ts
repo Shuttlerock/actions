@@ -4,14 +4,14 @@ import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/ch
 
 jest.mock('@sr-actions/check-suite-completed-action/checkSuiteCompleted')
 
-describe('check-run-completed-action', () => {
+describe('check-suite-completed-action', () => {
   afterAll(() => jest.restoreAllMocks())
 
   it('calls the method to handle the suite result', async () => {
     process.env.GITHUB_EVENT_PATH = join(
       __dirname,
       'fixtures',
-      'check-run-success-payload.json'
+      'check-suite-failed-payload.json'
     )
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { run } = require('../index')
