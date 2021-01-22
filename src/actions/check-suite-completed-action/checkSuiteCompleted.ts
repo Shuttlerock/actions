@@ -65,6 +65,11 @@ const handleSuccess = (
   checkName: string,
   pullRequest: PullsGetResponseData
 ): string | undefined => {
+  // We expect GitGuardian to pass every time - we only care if it fails.
+  if (checkName === 'GitGuardian') {
+    return undefined
+  }
+
   return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${
     pullRequest.title
   }>_ ${positiveEmoji()}`
@@ -80,6 +85,12 @@ export const checkSuiteCompleted = async (
 ): Promise<void> => {
   const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$')
   const repoName = checkSuite.url.replace(rgx, '$1')
+
+  if (isNil(checkSuite.after)) {
+    error('No commit associated with this check - giving up')
+    return
+  }
+
   info(
     `Fetching the commit ${checkSuite.after} for repository '${repoName}'...`
   )

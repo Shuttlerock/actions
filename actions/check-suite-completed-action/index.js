@@ -60284,6 +60284,10 @@ const handleFailure = (checkName, issue, repoName, pullRequest) => __awaiter(voi
  * @returns {string | undefined} A message to be sent to the user in Slack.
  */
 const handleSuccess = (checkName, pullRequest) => {
+    // We expect GitGuardian to pass every time - we only care if it fails.
+    if (checkName === 'GitGuardian') {
+        return undefined;
+    }
     return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${pullRequest.title}>_ ${Slack_1.positiveEmoji()}`;
 };
 /**
@@ -60294,6 +60298,10 @@ const handleSuccess = (checkName, pullRequest) => {
 const checkSuiteCompleted = (checkSuite) => __awaiter(void 0, void 0, void 0, function* () {
     const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$');
     const repoName = checkSuite.url.replace(rgx, '$1');
+    if (isNil_1.default(checkSuite.after)) {
+        core_1.error('No commit associated with this check - giving up');
+        return;
+    }
     core_1.info(`Fetching the commit ${checkSuite.after} for repository '${repoName}'...`);
     const commit = yield Github_1.getCommit(repoName, checkSuite.after);
     if (isNil_1.default(commit)) {
