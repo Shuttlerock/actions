@@ -16,6 +16,8 @@ describe('Message', () => {
       expect(spy).toHaveBeenCalledWith({
         channel: slackErrorChannelId(),
         text: 'my message',
+        unfurl_links: false,
+        unfurl_media: false,
       })
       spy.mockRestore()
     })
@@ -32,6 +34,8 @@ describe('Message', () => {
       expect(spy).toHaveBeenCalledWith({
         channel: 'U00001',
         text: 'my message',
+        unfurl_links: false,
+        unfurl_media: false,
       })
       spy.mockRestore()
     })

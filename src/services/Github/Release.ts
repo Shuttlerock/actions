@@ -29,6 +29,7 @@ import { setLabels } from '@sr-services/Github/Label'
 import {
   assignOwners,
   createPullRequest,
+  extractPullRequestNumber,
   getPullRequest,
   pullRequestUrl,
   updatePullRequest,
@@ -65,15 +66,15 @@ const getReleaseNotes = async (
     ...new Set(
       commits
         .map((commit: Commit) =>
-          parseInt(commit.commit.message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10)
+          extractPullRequestNumber(commit.commit.message)
         )
-        .filter((prNumber: number) => prNumber)
+        .filter((prNumber: number | undefined) => prNumber)
     ),
   ]
 
   const pulls = (
     await Promise.all(
-      prNumbers.map(async (prNumber: number) =>
+      (prNumbers as number[]).map(async (prNumber: number) =>
         getPullRequest(repoName, prNumber)
       )
     )

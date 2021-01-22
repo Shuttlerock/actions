@@ -1,14 +1,14 @@
-name: 'Check run completed'
+name: 'Check suite completed'
 on:
-  check_run:
+  check_suite:
     types: [completed]
 
 jobs:
-  check_run_completed_action:
+  check_suite_completed_action:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Shuttlerock/actions/actions/check-run-completed-action@master
+      - uses: Shuttlerock/actions/actions/check-suite-completed-action@master
         with:
           credentials-api-prefix: ${{ secrets.CREDENTIALS_API_PREFIX }}
           credentials-api-secret: ${{ secrets.CREDENTIALS_API_SECRET }}

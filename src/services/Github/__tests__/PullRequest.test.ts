@@ -14,6 +14,7 @@ import { Branch, Repository } from '@sr-services/Github/Git'
 import {
   assignOwners,
   assignReviewers,
+  extractPullRequestNumber,
   createPullRequest,
   getIssueKey,
   getPullRequest,
@@ -104,6 +105,22 @@ describe('PullRequest', () => {
       expect(result.id).toEqual(1234)
       getPullRequestSpy.mockRestore()
       requestReviewersSpy.mockRestore()
+    })
+  })
+
+  describe('extractPullRequestNumber', () => {
+    it('returns the number if one exists', () => {
+      const number = extractPullRequestNumber(
+        '[STUDIO-123] [#456] Fix the widget'
+      )
+      expect(number).toEqual(456)
+    })
+
+    it('returns undefined if no number can be found', () => {
+      const number = extractPullRequestNumber(
+        '[STUDIO-123] [456] Fix the widget'
+      )
+      expect(number).toEqual(undefined)
     })
   })
 

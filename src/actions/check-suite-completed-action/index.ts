@@ -9,19 +9,15 @@ import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/ch
  *
  * To trigger this event manually:
  *
- * $ act --job check_run_completed_action --eventpath src/actions/check-run-completed-action/__tests__/fixtures/check-run-success-payload.json
+ * $ act --job check_suite_completed_action --eventpath src/actions/check-suite-completed-action/__tests__/fixtures/check-suite-success-payload.json
  */
 export const run = async (): Promise<void> => {
   const {
-    payload: {
-      check_run: { check_suite: checkSuite },
-    },
+    payload: { check_suite: checkSuite },
   } = ((await context) as unknown) as {
-    payload: EventPayloads.WebhookPayloadCheckRun
+    payload: EventPayloads.WebhookPayloadCheckSuite
   }
-  await checkSuiteCompleted(
-    checkSuite as EventPayloads.WebhookPayloadCheckSuiteCheckSuite
-  )
+  await checkSuiteCompleted(checkSuite)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

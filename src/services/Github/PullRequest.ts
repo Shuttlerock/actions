@@ -168,6 +168,16 @@ export const assignReviewers = async (
 }
 
 /**
+ * Extracts a pull request from a commit message, in the format "[#123] Do something".
+ *
+ * @param {string} message The commit message to extract the pull request number from.
+ *
+ * @returns {number | undefined} The number of the pull request, if one can be found.
+ */
+export const extractPullRequestNumber = (message: string): number | undefined =>
+  parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) || undefined
+
+/**
  * Lists the commits in the pull request with the given number.
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
