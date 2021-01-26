@@ -60326,8 +60326,12 @@ const handleFailure = (checkName, issue, repoName, pullRequest) => __awaiter(voi
  * @returns {string | undefined} A message to be sent to the user in Slack.
  */
 const handleSuccess = (checkName, pullRequest) => {
-    // We expect GitGuardian to pass every time - we only care if it fails.
     if (checkName === 'GitGuardian') {
+        // We expect GitGuardian to pass every time - we only care if it fails.
+        return undefined;
+    }
+    if (checkName === 'Codecov') {
+        // Codecov is quite noisy, and we expect it to pass every time.
         return undefined;
     }
     return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${pullRequest.title}>_ ${Slack_1.positiveEmoji()}`;

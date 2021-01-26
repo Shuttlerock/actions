@@ -66,8 +66,12 @@ const handleSuccess = (
   checkName: string,
   pullRequest: PullsGetResponseData
 ): string | undefined => {
-  // We expect GitGuardian to pass every time - we only care if it fails.
   if (checkName === 'GitGuardian') {
+    // We expect GitGuardian to pass every time - we only care if it fails.
+    return undefined
+  }
+  if (checkName === 'Codecov') {
+    // Codecov is quite noisy, and we expect it to pass every time.
     return undefined
   }
 
