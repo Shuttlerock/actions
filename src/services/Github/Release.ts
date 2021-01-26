@@ -59,7 +59,7 @@ const getReleaseNotes = async (
   const dependencies = commits.filter(
     (commit: Commit) =>
       commit.author.login.startsWith('dependabot') &&
-      commit.commit.message.startsWith('Bump ')
+      commit.commit.message.includes('Bump ')
   )
 
   const prNumbers = [
@@ -80,7 +80,7 @@ const getReleaseNotes = async (
     )
   ).filter(
     (pull: PullsGetResponseData | undefined) =>
-      pull && !/^Bump .+ from .+ to .*$/.exec(pull.title)
+      pull && !/Bump .+ from .+ to .*$/.exec(pull.title)
   ) as PullsGetResponseData[]
 
   let description = `## Release Candidate ${releaseDate} (${releaseName})\n\n`
