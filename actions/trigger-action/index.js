@@ -62420,6 +62420,7 @@ const Label_1 = __nccwpck_require__(13146);
 const PullRequest_1 = __nccwpck_require__(88028);
 const Repository_1 = __nccwpck_require__(35015);
 const Inputs_1 = __nccwpck_require__(25968);
+const Jira_1 = __nccwpck_require__(80404);
 const Slack_1 = __nccwpck_require__(94745);
 const String_1 = __nccwpck_require__(55058);
 /**
@@ -62452,7 +62453,12 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
         description += '### Pull Requests\n\n';
         pulls.forEach((pull) => {
             const title = pull.title.replace(/(\[[^\]]+\])/g, '').trim();
-            description += `- #${pull.number} ${title}\n`;
+            const jiraKey = PullRequest_1.getIssueKey(pull);
+            description += `- #${pull.number} ${title}`;
+            if (!isNil_1.default(jiraKey)) {
+                description += ` ([${jiraKey}](${Jira_1.issueUrl(jiraKey)}))`;
+            }
+            description += '\n';
         });
         description += '\n';
     }

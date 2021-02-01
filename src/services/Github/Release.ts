@@ -30,12 +30,14 @@ import {
   assignOwners,
   createPullRequest,
   extractPullRequestNumber,
+  getIssueKey,
   getPullRequest,
   pullRequestUrl,
   updatePullRequest,
 } from '@sr-services/Github/PullRequest'
 import { compareCommits, repositoryUrl } from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
+import { issueUrl } from '@sr-services/Jira'
 import { sendUserMessage } from '@sr-services/Slack'
 import { generateReleaseName } from '@sr-services/String'
 
@@ -95,7 +97,12 @@ const getReleaseNotes = async (
     description += '### Pull Requests\n\n'
     pulls.forEach((pull: PullsGetResponseData) => {
       const title = pull.title.replace(/(\[[^\]]+\])/g, '').trim()
-      description += `- #${pull.number} ${title}\n`
+      const jiraKey = getIssueKey(pull)
+      description += `- #${pull.number} ${title}`
+      if (!isNil(jiraKey)) {
+        description += ` ([${jiraKey}](${issueUrl(jiraKey)}))`
+      }
+      description += '\n'
     })
     description += '\n'
   }
