@@ -11,8 +11,10 @@ import {
   Issue,
   JiraBoardColumn,
   JiraIssueTypeEpic,
+  JiraStatusHasIssues,
   JiraStatusInDevelopment,
   JiraStatusReadyForPlanning,
+  JiraStatusTechReview,
   JiraStatusValidated,
   moveIssueToBoard,
   setIssueStatus,
@@ -122,15 +124,19 @@ export const jiraIssueTransitioned = async (
   )
   if (isNil(leftmost)) {
     throw new Error(
-      `Couldn't find the leftomost issue status for children of ${parent.key}`
+      `Couldn't find the leftmost issue status for children of ${parent.key}`
     )
   }
 
-  // If any child of an epic is 'In development', then the epic is also 'In development'.
+  // If any child of an epic is in 'In development', 'Tech review' or 'Has issues', then the epic is 'In development'.
   if (parent.fields.issuetype.name === JiraIssueTypeEpic) {
     if (
-      children.find(
-        (child: Issue) => child.fields.status.name === JiraStatusInDevelopment
+      children.find((child: Issue) =>
+        [
+          JiraStatusHasIssues,
+          JiraStatusInDevelopment,
+          JiraStatusTechReview,
+        ].includes(child.fields.status.name)
       )
     ) {
       leftmost = JiraStatusInDevelopment
