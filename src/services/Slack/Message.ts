@@ -86,7 +86,7 @@ export const sendUserMessage = async (
     // See: https://api.slack.com/methods/chat.postMessage
     await client.chat.postMessage({
       channel: userId,
-      text: scrubMessage(message),
+      text: message,
       unfurl_links: false,
       unfurl_media: false,
     })

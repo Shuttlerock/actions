@@ -25,10 +25,11 @@ describe('Message', () => {
         .mockImplementation((_options?: ChatPostMessageArguments) =>
           Promise.resolve({ ok: true })
         )
+      await sendErrorMessage(`my email is ${jiraEmail()}`)
       await sendErrorMessage('my message')
       expect(spy).toHaveBeenCalledWith({
         channel: slackErrorChannelId(),
-        text: 'my message',
+        text: 'my email is ****************',
         unfurl_links: false,
         unfurl_media: false,
       })
@@ -43,10 +44,10 @@ describe('Message', () => {
         .mockImplementation((_options?: ChatPostMessageArguments) =>
           Promise.resolve({ ok: true })
         )
-      await sendUserMessage('U00001', `my email is ${jiraEmail()}`)
+      await sendUserMessage('U00001', 'my message')
       expect(spy).toHaveBeenCalledWith({
         channel: 'U00001',
-        text: 'my email is ****************',
+        text: 'my message',
         unfurl_links: false,
         unfurl_media: false,
       })
