@@ -64008,11 +64008,15 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     ];
     let leftmost = minBy_1.default(statuses, (status) => columnNames.indexOf(status));
     if (isNil_1.default(leftmost)) {
-        throw new Error(`Couldn't find the leftomost issue status for children of ${parent.key}`);
+        throw new Error(`Couldn't find the leftmost issue status for children of ${parent.key}`);
     }
-    // If any child of an epic is 'In development', then the epic is also 'In development'.
+    // If any child of an epic is in 'In development', 'Tech review' or 'Has issues', then the epic is 'In development'.
     if (parent.fields.issuetype.name === Jira_1.JiraIssueTypeEpic) {
-        if (children.find((child) => child.fields.status.name === Jira_1.JiraStatusInDevelopment)) {
+        if (children.find((child) => [
+            Jira_1.JiraStatusHasIssues,
+            Jira_1.JiraStatusInDevelopment,
+            Jira_1.JiraStatusTechReview,
+        ].includes(child.fields.status.name))) {
             leftmost = Jira_1.JiraStatusInDevelopment;
         }
     }
