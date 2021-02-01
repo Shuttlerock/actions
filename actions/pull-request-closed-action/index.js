@@ -34991,6 +34991,45 @@ module.exports = eq;
 
 /***/ }),
 
+/***/ 8415:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var toString = __nccwpck_require__(2931);
+
+/**
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+ */
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g,
+    reHasRegExpChar = RegExp(reRegExpChar.source);
+
+/**
+ * Escapes the `RegExp` special characters "^", "$", "\", ".", "*", "+",
+ * "?", "(", ")", "[", "]", "{", "}", and "|" in `string`.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to escape.
+ * @returns {string} Returns the escaped string.
+ * @example
+ *
+ * _.escapeRegExp('[lodash](https://lodash.com/)');
+ * // => '\[lodash\]\(https://lodash\.com/\)'
+ */
+function escapeRegExp(string) {
+  string = toString(string);
+  return (string && reHasRegExpChar.test(string))
+    ? string.replace(reRegExpChar, '\\$&')
+    : string;
+}
+
+module.exports = escapeRegExp;
+
+
+/***/ }),
+
 /***/ 8495:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -61129,6 +61168,7 @@ const Label_1 = __nccwpck_require__(3146);
 const PullRequest_1 = __nccwpck_require__(8028);
 const Repository_1 = __nccwpck_require__(5015);
 const Inputs_1 = __nccwpck_require__(5968);
+const Jira_1 = __nccwpck_require__(404);
 const Slack_1 = __nccwpck_require__(4745);
 const String_1 = __nccwpck_require__(5058);
 /**
@@ -61161,7 +61201,12 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
         description += '### Pull Requests\n\n';
         pulls.forEach((pull) => {
             const title = pull.title.replace(/(\[[^\]]+\])/g, '').trim();
-            description += `- #${pull.number} ${title}\n`;
+            const jiraKey = PullRequest_1.getIssueKey(pull);
+            description += `- #${pull.number} ${title}`;
+            if (!isNil_1.default(jiraKey)) {
+                description += ` ([${jiraKey}](${Jira_1.issueUrl(jiraKey)}))`;
+            }
+            description += '\n';
         });
         description += '\n';
     }
@@ -62091,6 +62136,25 @@ exports.client = new web_api_1.WebClient(Inputs_1.slackToken());
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -62104,9 +62168,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = exports.positiveEmoji = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = void 0;
+const escapeRegExp_1 = __importDefault(__nccwpck_require__(8415));
+const isFunction_1 = __importDefault(__nccwpck_require__(7799));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Inputs_1 = __nccwpck_require__(5968);
+const Inputs = __importStar(__nccwpck_require__(5968));
 const Client_1 = __nccwpck_require__(7589);
 /**
  * Returns a random 'positive' emoji.
@@ -62130,6 +62197,25 @@ const positiveEmoji = () => {
 };
 exports.positiveEmoji = positiveEmoji;
 /**
+ * Makes sure that secrets in the message are scrubbed out.
+ *
+ * @param {string} message The message to send.
+ *
+ * @returns {string} The scrubbed message
+ */
+const scrubMessage = (message) => {
+    let result = message;
+    Object.values(Inputs).forEach(func => {
+        if (isFunction_1.default(func)) {
+            const secret = func();
+            const regex = new RegExp(`(${escapeRegExp_1.default(secret)})`, 'g');
+            result = result.replace(regex, '*'.repeat(secret.length));
+        }
+    });
+    return result;
+};
+exports.scrubMessage = scrubMessage;
+/**
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
@@ -62142,7 +62228,7 @@ const sendErrorMessage = (message) => __awaiter(void 0, void 0, void 0, function
     }
     yield Client_1.client.chat.postMessage({
         channel: Inputs_1.slackErrorChannelId(),
-        text: message,
+        text: exports.scrubMessage(message),
         unfurl_links: false,
         unfurl_media: false,
     });
@@ -62164,7 +62250,7 @@ const sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, f
         // See: https://api.slack.com/methods/chat.postMessage
         yield Client_1.client.chat.postMessage({
             channel: userId,
-            text: message,
+            text: exports.scrubMessage(message),
             unfurl_links: false,
             unfurl_media: false,
         });
