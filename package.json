@@ -45,7 +45,7 @@
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
     "@slack/web-api": "^6.0.0",
-    "dateformat": "^4.5.0",
+    "dateformat": "^4.5.1",
     "jira-client": "^6.21.0",
     "lodash": "^4.17.20",
     "mustache": "^4.1.0",
