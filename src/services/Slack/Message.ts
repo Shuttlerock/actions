@@ -1,6 +1,9 @@
+import escapeRegExp from 'lodash/escapeRegExp'
+import isFunction from 'lodash/isFunction'
 import isNil from 'lodash/isNil'
 
 import { slackErrorChannelId } from '@sr-services/Inputs'
+import * as Inputs from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 
 /**
@@ -25,6 +28,25 @@ export const positiveEmoji = (): string => {
 }
 
 /**
+ * Makes sure that secrets in the message are scrubbed out.
+ *
+ * @param {string} message The message to send.
+ *
+ * @returns {string} The scrubbed message
+ */
+export const scrubMessage = (message: string): string => {
+  let result = message
+  Object.values(Inputs).forEach(func => {
+    if (isFunction(func)) {
+      const secret = func()
+      const regex = new RegExp(`(${escapeRegExp(secret)})`, 'g')
+      result = result.replace(regex, '*'.repeat(secret.length))
+    }
+  })
+  return result
+}
+
+/**
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
@@ -38,7 +60,7 @@ export const sendErrorMessage = async (message: string): Promise<void> => {
 
   await client.chat.postMessage({
     channel: slackErrorChannelId(),
-    text: message,
+    text: scrubMessage(message),
     unfurl_links: false,
     unfurl_media: false,
   })
@@ -64,7 +86,7 @@ export const sendUserMessage = async (
     // See: https://api.slack.com/methods/chat.postMessage
     await client.chat.postMessage({
       channel: userId,
-      text: message,
+      text: scrubMessage(message),
       unfurl_links: false,
       unfurl_media: false,
     })
