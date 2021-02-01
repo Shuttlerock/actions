@@ -3,6 +3,6 @@
   "inputs": {
     "email": "dave@shuttlerock.com",
     "event": "createRelease",
-    "param": "gatekeeper"
+    "param": "nolan"
   }
 }
