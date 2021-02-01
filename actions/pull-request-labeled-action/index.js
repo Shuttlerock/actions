@@ -62220,7 +62220,7 @@ const sendUserMessage = (userId, message) => __awaiter(void 0, void 0, void 0, f
         // See: https://api.slack.com/methods/chat.postMessage
         yield Client_1.client.chat.postMessage({
             channel: userId,
-            text: exports.scrubMessage(message),
+            text: message,
             unfurl_links: false,
             unfurl_media: false,
         });
