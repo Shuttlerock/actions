@@ -45,7 +45,7 @@
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
     "@slack/web-api": "^6.0.0",
-    "dateformat": "^4.5.0",
+    "dateformat": "^4.5.1",
     "jira-client": "^6.21.0",
     "lodash": "^4.17.20",
     "mustache": "^4.1.0",
@@ -53,7 +53,7 @@
     "unique-names-generator": "^4.3.1"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^7.21.0",
+    "@octokit/webhooks": "^7.24.2",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.20",
     "@types/jira-client": "^6.13.1",
@@ -63,7 +63,7 @@
     "@types/node-fetch": "^2.5.8",
     "@typescript-eslint/parser": "^4.14.1",
     "@vercel/ncc": "0.27.0",
-    "eslint": "^7.18.0",
+    "eslint": "^7.19.0",
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-import-resolver-alias": "^1.1.2",
