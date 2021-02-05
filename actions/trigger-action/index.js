@@ -61615,6 +61615,9 @@ const index_1 = __nccwpck_require__(64464);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     const { payload: { inputs: { email, event, param }, }, } = (yield github_1.context);
     switch (event) {
+        case 'approvePullRequest':
+            yield index_1.approvePullRequest(email, param);
+            break;
         case 'createPullRequestForJiraIssue':
             yield index_1.createPullRequestForJiraIssue(email, param);
             break;
@@ -62211,7 +62214,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.updatePullRequest = exports.reviewPullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const Client_1 = __nccwpck_require__(32818);
 const Inputs_1 = __nccwpck_require__(25968);
@@ -62370,6 +62373,27 @@ exports.listPullRequestCommits = listPullRequestCommits;
  */
 const pullRequestUrl = (repo, number) => `https://github.com/${Inputs_1.organizationName()}/${repo}/pull/${number}`;
 exports.pullRequestUrl = pullRequestUrl;
+/**
+ * Reviews the given PR using the system Github user.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
+ * @param {string}     body      The review body.
+ *
+ * @returns {PullsCreateReviewResponseData} The review data.
+ */
+const reviewPullRequest = (repo, number, event, body) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.createReview({
+        body,
+        event,
+        owner: Inputs_1.organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+exports.reviewPullRequest = reviewPullRequest;
 /**
  * Update the pull request with the given number, and assigns the given param hash.
  *
@@ -63420,13 +63444,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = exports.negativeEmoji = void 0;
 const escapeRegExp_1 = __importDefault(__nccwpck_require__(98415));
 const isFunction_1 = __importDefault(__nccwpck_require__(17799));
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const Inputs_1 = __nccwpck_require__(25968);
 const Inputs = __importStar(__nccwpck_require__(25968));
 const Client_1 = __nccwpck_require__(77589);
+/**
+ * Returns a random 'negative' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+const negativeEmoji = () => {
+    const emoji = [
+        'bomb',
+        'cry',
+        'crying_cat_face',
+        'disappointed',
+        'dizzy_face',
+        'man-facepalming',
+        'man-shrugging',
+        'sadpanda',
+        'scream_cat',
+        'thumbsdown',
+        'unamused',
+        'woman-facepalming',
+        'woman-shrugging',
+        'worried',
+    ];
+    return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`;
+};
+exports.negativeEmoji = negativeEmoji;
 /**
  * Returns a random 'positive' emoji.
  *
@@ -63672,6 +63721,76 @@ It requires new Environmental variables:
 
 /***/ }),
 
+/***/ 85520:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.approvePullRequest = void 0;
+const core_1 = __nccwpck_require__(42186);
+const isNil_1 = __importDefault(__nccwpck_require__(84977));
+const Credentials_1 = __nccwpck_require__(43543);
+const Github_1 = __nccwpck_require__(24390);
+const Slack_1 = __nccwpck_require__(94745);
+/**
+ * To trigger this event manually:
+ *
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/approvePullRequest.json
+ *
+ * or to trigger it via the Github API:
+ *
+ * $ curl --header "Accept: application/vnd.github.v3+json" \
+ * --header  "Authorization: token YOUR_TOKEN" \
+ * --request POST \
+ * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "approvePullRequest", "param": "actions#344" }}' \
+ * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
+ *
+ * @param {string} email     The email address of the user who requested the release be created.
+ * @param {string} repoAndPr The name of the repository and the pull request number together (eg. 'actions#344').
+ */
+const approvePullRequest = (email, repoAndPr) => __awaiter(void 0, void 0, void 0, function* () {
+    const [repoName, prStr] = repoAndPr.trim().split(/[\s#]+/);
+    const prNumber = parseInt(prStr, 10);
+    if (isNil_1.default(repoName) || isNil_1.default(prNumber)) {
+        core_1.error(`Repository name and pull request number could not be extracted from '${repoAndPr}' - giving up`);
+        return;
+    }
+    core_1.info(`User ${email} requested approval of ${repoName}#${prNumber}...`);
+    core_1.info(`Fetching credentials for '${email}'...`);
+    const credentials = yield Credentials_1.fetchCredentials(email);
+    core_1.info(`Fetching the repository '${repoName}'...`);
+    const repo = yield Credentials_1.fetchRepository(repoName);
+    if (!repo.allow_auto_review) {
+        const message = `The repository _*${repoName}*_ is not whitelisted for auto-approval`;
+        core_1.error(message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, `${message} ${Slack_1.negativeEmoji()}`);
+        return;
+    }
+    yield Github_1.reviewPullRequest(repoName, prNumber, 'APPROVE', ':thumbsup:');
+    core_1.info(`Approved ${repoName}#${prNumber}`);
+    core_1.info(`Sending ${email} a success message on Slack...`);
+    const message = `The pull request _*${repoName}#${prNumber}*_ has been approved`;
+    yield Slack_1.sendUserMessage(credentials.slack_id, `${message} ${Slack_1.positiveEmoji()}`);
+    core_1.info('Finished');
+});
+exports.approvePullRequest = approvePullRequest;
+
+
+/***/ }),
+
 /***/ 88749:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -63896,6 +64015,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(85520), exports);
 __exportStar(__nccwpck_require__(88749), exports);
 __exportStar(__nccwpck_require__(33982), exports);
 __exportStar(__nccwpck_require__(39973), exports);

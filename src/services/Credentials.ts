@@ -19,6 +19,7 @@ export interface Credentials extends User {
 }
 
 export interface Repository {
+  allow_auto_review: boolean
   jira_project_id?: number
   leads: User[]
   reviewers: User[]
