@@ -1,5 +1,6 @@
 import {
   IssuesAddAssigneesResponseData,
+  PullsCreateReviewResponseData,
   PullsGetResponseData,
   PullsListCommitsResponseData,
   PullsRequestReviewersResponseData,
@@ -208,6 +209,33 @@ export const listPullRequestCommits = async (
  */
 export const pullRequestUrl = (repo: Repository, number: number): string =>
   `https://github.com/${organizationName()}/${repo}/pull/${number}`
+
+/**
+ * Reviews the given PR using the system Github user.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
+ * @param {string}     body      The review body.
+ *
+ * @returns {PullsCreateReviewResponseData} The review data.
+ */
+export const reviewPullRequest = async (
+  repo: Repository,
+  number: number,
+  event: 'APPROVE' | 'COMMENT' | 'REQUEST_CHANGES',
+  body: string
+): Promise<PullsCreateReviewResponseData> => {
+  const response = await client.pulls.createReview({
+    body,
+    event,
+    owner: organizationName(),
+    pull_number: number,
+    repo,
+  })
+
+  return response.data
+}
 
 /**
  * Update the pull request with the given number, and assigns the given param hash.

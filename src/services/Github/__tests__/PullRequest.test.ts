@@ -2,6 +2,7 @@ import {
   IssuesAddAssigneesResponseData,
   OctokitResponse,
   PullsCreateResponseData,
+  PullsCreateReviewResponseData,
   PullsGetResponseData,
   PullsListCommitsResponseData,
   PullsRequestReviewersResponseData,
@@ -20,6 +21,7 @@ import {
   getPullRequest,
   listPullRequestCommits,
   pullRequestUrl,
+  reviewPullRequest,
   updatePullRequest,
 } from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
@@ -27,6 +29,7 @@ import {
   mockGitCommit,
   mockGithubPullRequest,
   mockGithubPullRequestCreateResponse,
+  mockGithubPullRequestReviewResponse,
   mockGithubPullRequestUpdateResponse,
   mockIssuesAddAssigneesResponseData,
   mockPullsRequestReviewersResponseData,
@@ -73,6 +76,7 @@ describe('PullRequest', () => {
       spy.mockRestore()
     })
   })
+
   describe('assignReviewers', () => {
     it('calls the Github API', async () => {
       const getPullRequestSpy = jest
@@ -248,6 +252,28 @@ describe('PullRequest', () => {
     it('returns the URL', () => {
       const expected = 'https://github.com/octokit/actions/pull/123'
       expect(pullRequestUrl('actions', 123)).toEqual(expected)
+    })
+  })
+
+  describe('reviewPullRequest', () => {
+    it('calls the Github API', async () => {
+      const spy = jest
+        .spyOn(Client.client.pulls, 'createReview')
+        .mockReturnValue(
+          Promise.resolve({
+            data: mockGithubPullRequestReviewResponse,
+          } as OctokitResponse<PullsCreateReviewResponseData>)
+        )
+      const result = await reviewPullRequest(repo, 23, 'APPROVE', ':thumbsup:')
+      expect(spy).toHaveBeenCalledWith({
+        body: ':thumbsup:',
+        event: 'APPROVE',
+        pull_number: 23,
+        owner: organizationName(),
+        repo,
+      })
+      expect(result.id).toEqual(1234)
+      spy.mockRestore()
     })
   })
 

@@ -1,3 +1,4 @@
+export * from './approvePullRequest'
 export * from './createPullRequestForJiraIssue'
 export * from './createRelease'
 export * from './jiraIssueTransitioned'

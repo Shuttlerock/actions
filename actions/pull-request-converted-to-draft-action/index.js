@@ -60935,7 +60935,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updatePullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
+exports.updatePullRequest = exports.reviewPullRequest = exports.pullRequestUrl = exports.listPullRequestCommits = exports.extractPullRequestNumber = exports.assignReviewers = exports.getPullRequest = exports.getIssueKey = exports.createPullRequest = exports.assignOwners = void 0;
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Client_1 = __nccwpck_require__(2818);
 const Inputs_1 = __nccwpck_require__(5968);
@@ -61094,6 +61094,27 @@ exports.listPullRequestCommits = listPullRequestCommits;
  */
 const pullRequestUrl = (repo, number) => `https://github.com/${Inputs_1.organizationName()}/${repo}/pull/${number}`;
 exports.pullRequestUrl = pullRequestUrl;
+/**
+ * Reviews the given PR using the system Github user.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
+ * @param {string}     body      The review body.
+ *
+ * @returns {PullsCreateReviewResponseData} The review data.
+ */
+const reviewPullRequest = (repo, number, event, body) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_1.client.pulls.createReview({
+        body,
+        event,
+        owner: Inputs_1.organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+exports.reviewPullRequest = reviewPullRequest;
 /**
  * Update the pull request with the given number, and assigns the given param hash.
  *

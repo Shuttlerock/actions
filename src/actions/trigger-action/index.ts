@@ -3,6 +3,7 @@ import { context } from '@actions/github'
 
 import { sendErrorMessage } from '@sr-services/Slack'
 import {
+  approvePullRequest,
   createPullRequestForJiraIssue,
   createRelease,
   jiraIssueTransitioned,
@@ -30,6 +31,9 @@ export const run = async (): Promise<void> => {
   } = ((await context) as unknown) as Context
 
   switch (event) {
+    case 'approvePullRequest':
+      await approvePullRequest(email, param)
+      break
     case 'createPullRequestForJiraIssue':
       await createPullRequestForJiraIssue(email, param)
       break
