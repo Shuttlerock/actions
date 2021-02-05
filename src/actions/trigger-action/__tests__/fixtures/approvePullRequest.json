@@ -1,0 +1,8 @@
+{
+  "ref": "develop",
+  "inputs": {
+    "email": "dave@shuttlerock.com",
+    "event": "approvePullRequest",
+    "param": "actions#344"
+  }
+}

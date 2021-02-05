@@ -3,6 +3,7 @@ import {
   IssuesAddLabelsResponseData,
   IssuesSetLabelsResponseData,
   PullsCreateResponseData,
+  PullsCreateReviewResponseData,
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
@@ -69,6 +70,11 @@ export const mockGithubPullRequestCreateResponse = ({
   number: 123,
   title: 'Add a Widget',
 } as unknown) as PullsCreateResponseData
+
+export const mockGithubPullRequestReviewResponse = ({
+  id: 1234,
+  body: ':thumbsup:',
+} as unknown) as PullsCreateReviewResponseData
 
 export const mockGithubPullRequestUpdateResponse = ({
   id: 1234,
