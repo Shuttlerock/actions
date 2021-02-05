@@ -7,6 +7,31 @@ import * as Inputs from '@sr-services/Inputs'
 import { client } from '@sr-services/Slack/Client'
 
 /**
+ * Returns a random 'negative' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+export const negativeEmoji = (): string => {
+  const emoji = [
+    'bomb',
+    'cry',
+    'crying_cat_face',
+    'disappointed',
+    'dizzy_face',
+    'man-facepalming',
+    'man-shrugging',
+    'sadpanda',
+    'scream_cat',
+    'thumbsdown',
+    'unamused',
+    'woman-facepalming',
+    'woman-shrugging',
+    'worried',
+  ]
+  return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`
+}
+
+/**
  * Returns a random 'positive' emoji.
  *
  * @returns {string} A slack emoji.

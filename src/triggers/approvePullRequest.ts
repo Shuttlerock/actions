@@ -1,7 +1,13 @@
 import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
 
+import { fetchCredentials, fetchRepository } from '@sr-services/Credentials'
 import { reviewPullRequest } from '@sr-services/Github'
+import {
+  negativeEmoji,
+  positiveEmoji,
+  sendUserMessage,
+} from '@sr-services/Slack'
 
 /**
  * To trigger this event manually:
@@ -23,16 +29,34 @@ export const approvePullRequest = async (
   email: string,
   repoAndPr: string
 ): Promise<void> => {
-  const [repositoryName, prStr] = repoAndPr.trim().split(/[\s#]+/)
+  const [repoName, prStr] = repoAndPr.trim().split(/[\s#]+/)
   const prNumber = parseInt(prStr, 10)
-  if (isNil(repositoryName) || isNil(prNumber)) {
+  if (isNil(repoName) || isNil(prNumber)) {
     error(
       `Repository name and pull request number could not be extracted from '${repoAndPr}' - giving up`
     )
     return
   }
 
-  info(`User ${email} requested approval of ${repositoryName}#${prNumber}...`)
-  await reviewPullRequest(repositoryName, prNumber, 'APPROVE', ':thumbsup:')
-  info(`Approved ${repositoryName}#${prNumber}`)
+  info(`User ${email} requested approval of ${repoName}#${prNumber}...`)
+  info(`Fetching credentials for '${email}'...`)
+  const credentials = await fetchCredentials(email)
+
+  info(`Fetching the repository '${repoName}'...`)
+  const repo = await fetchRepository(repoName)
+
+  if (!repo.allow_auto_review) {
+    const message = `The repository _*${repoName}*_ is not whitelisted for auto-approval`
+    error(message)
+    await sendUserMessage(credentials.slack_id, `${message} ${negativeEmoji()}`)
+    return
+  }
+
+  await reviewPullRequest(repoName, prNumber, 'APPROVE', ':thumbsup:')
+  info(`Approved ${repoName}#${prNumber}`)
+
+  info(`Sending ${email} a success message on Slack...`)
+  const message = `The pull request _*${repoName}#${prNumber}*_ has been approved`
+  await sendUserMessage(credentials.slack_id, `${message} ${positiveEmoji()}`)
+  info('Finished')
 }

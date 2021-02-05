@@ -62159,13 +62159,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = exports.negativeEmoji = void 0;
 const escapeRegExp_1 = __importDefault(__nccwpck_require__(8415));
 const isFunction_1 = __importDefault(__nccwpck_require__(7799));
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Inputs_1 = __nccwpck_require__(5968);
 const Inputs = __importStar(__nccwpck_require__(5968));
 const Client_1 = __nccwpck_require__(7589);
+/**
+ * Returns a random 'negative' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+const negativeEmoji = () => {
+    const emoji = [
+        'bomb',
+        'cry',
+        'crying_cat_face',
+        'disappointed',
+        'dizzy_face',
+        'man-facepalming',
+        'man-shrugging',
+        'sadpanda',
+        'scream_cat',
+        'thumbsdown',
+        'unamused',
+        'woman-facepalming',
+        'woman-shrugging',
+        'worried',
+    ];
+    return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`;
+};
+exports.negativeEmoji = negativeEmoji;
 /**
  * Returns a random 'positive' emoji.
  *

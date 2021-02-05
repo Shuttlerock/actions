@@ -63444,13 +63444,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = void 0;
+exports.sendUserMessage = exports.sendErrorMessage = exports.scrubMessage = exports.positiveEmoji = exports.negativeEmoji = void 0;
 const escapeRegExp_1 = __importDefault(__nccwpck_require__(98415));
 const isFunction_1 = __importDefault(__nccwpck_require__(17799));
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const Inputs_1 = __nccwpck_require__(25968);
 const Inputs = __importStar(__nccwpck_require__(25968));
 const Client_1 = __nccwpck_require__(77589);
+/**
+ * Returns a random 'negative' emoji.
+ *
+ * @returns {string} A slack emoji.
+ */
+const negativeEmoji = () => {
+    const emoji = [
+        'bomb',
+        'cry',
+        'crying_cat_face',
+        'disappointed',
+        'dizzy_face',
+        'man-facepalming',
+        'man-shrugging',
+        'sadpanda',
+        'scream_cat',
+        'thumbsdown',
+        'unamused',
+        'woman-facepalming',
+        'woman-shrugging',
+        'worried',
+    ];
+    return `:${emoji[Math.floor(Math.random() * emoji.length)]}:`;
+};
+exports.negativeEmoji = negativeEmoji;
 /**
  * Returns a random 'positive' emoji.
  *
@@ -63717,7 +63742,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.approvePullRequest = void 0;
 const core_1 = __nccwpck_require__(42186);
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
+const Credentials_1 = __nccwpck_require__(43543);
 const Github_1 = __nccwpck_require__(24390);
+const Slack_1 = __nccwpck_require__(94745);
 /**
  * To trigger this event manually:
  *
@@ -63735,15 +63762,29 @@ const Github_1 = __nccwpck_require__(24390);
  * @param {string} repoAndPr The name of the repository and the pull request number together (eg. 'actions#344').
  */
 const approvePullRequest = (email, repoAndPr) => __awaiter(void 0, void 0, void 0, function* () {
-    const [repositoryName, prStr] = repoAndPr.trim().split(/[\s#]+/);
+    const [repoName, prStr] = repoAndPr.trim().split(/[\s#]+/);
     const prNumber = parseInt(prStr, 10);
-    if (isNil_1.default(repositoryName) || isNil_1.default(prNumber)) {
+    if (isNil_1.default(repoName) || isNil_1.default(prNumber)) {
         core_1.error(`Repository name and pull request number could not be extracted from '${repoAndPr}' - giving up`);
         return;
     }
-    core_1.info(`User ${email} requested approval of ${repositoryName}#${prNumber}...`);
-    yield Github_1.reviewPullRequest(repositoryName, prNumber, 'APPROVE', ':thumbsup:');
-    core_1.info(`Approved ${repositoryName}#${prNumber}`);
+    core_1.info(`User ${email} requested approval of ${repoName}#${prNumber}...`);
+    core_1.info(`Fetching credentials for '${email}'...`);
+    const credentials = yield Credentials_1.fetchCredentials(email);
+    core_1.info(`Fetching the repository '${repoName}'...`);
+    const repo = yield Credentials_1.fetchRepository(repoName);
+    if (!repo.allow_auto_review) {
+        const message = `The repository _*${repoName}*_ is not whitelisted for auto-approval`;
+        core_1.error(message);
+        yield Slack_1.sendUserMessage(credentials.slack_id, `${message} ${Slack_1.negativeEmoji()}`);
+        return;
+    }
+    yield Github_1.reviewPullRequest(repoName, prNumber, 'APPROVE', ':thumbsup:');
+    core_1.info(`Approved ${repoName}#${prNumber}`);
+    core_1.info(`Sending ${email} a success message on Slack...`);
+    const message = `The pull request _*${repoName}#${prNumber}*_ has been approved`;
+    yield Slack_1.sendUserMessage(credentials.slack_id, `${message} ${Slack_1.positiveEmoji()}`);
+    core_1.info('Finished');
 });
 exports.approvePullRequest = approvePullRequest;
 
