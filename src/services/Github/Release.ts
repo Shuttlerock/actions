@@ -331,7 +331,10 @@ export const createReleasePullRequest = async (
 
   return reportInfo(
     credentials.slack_id,
-    `Here's your release PR: ${pullRequestUrl(repo.name, pullRequest.number)}`
+    `Here's your release PR: _<${pullRequestUrl(
+      repo.name,
+      pullRequest.number
+    )}|${repo.name}#${pullRequest.number}>_`
   )
 }
 
