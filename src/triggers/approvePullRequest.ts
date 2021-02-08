@@ -2,7 +2,7 @@ import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
 
 import { fetchCredentials, fetchRepository } from '@sr-services/Credentials'
-import { reviewPullRequest } from '@sr-services/Github'
+import { pullRequestUrl, reviewPullRequest } from '@sr-services/Github'
 import {
   negativeEmoji,
   positiveEmoji,
@@ -56,7 +56,10 @@ export const approvePullRequest = async (
   info(`Approved ${repoName}#${prNumber}`)
 
   info(`Sending ${email} a success message on Slack...`)
-  const message = `The pull request _*${repoName}#${prNumber}*_ has been approved`
-  await sendUserMessage(credentials.slack_id, `${message} ${positiveEmoji()}`)
+  const message = `The pull request _<${pullRequestUrl(
+    repoName,
+    prNumber
+  )}|${repoName}#${prNumber}>_ has been approved ${positiveEmoji()}`
+  await sendUserMessage(credentials.slack_id, message)
   info('Finished')
 }

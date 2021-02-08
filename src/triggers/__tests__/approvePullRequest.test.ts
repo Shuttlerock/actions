@@ -9,6 +9,8 @@ import {
 import { approvePullRequest } from '@sr-triggers/approvePullRequest'
 
 jest.mock('@sr-services/Github', () => ({
+  pullRequestUrl: (repo: string, number: number) =>
+    `https://github.com/octokit/${repo}/pull/${number}`,
   reviewPullRequest: jest.fn(),
 }))
 
@@ -70,11 +72,11 @@ describe('approvePullRequest', () => {
     )
   })
 
-  it('sends the user a message after the p@ull request has been approved', async () => {
+  it('sends the user a message after the pull request has been approved', async () => {
     await approvePullRequest(email, `${repoName}#${prNumber}`)
     expect(sendUserMessageSpy).toHaveBeenCalledWith(
       'my-slack-id',
-      'The pull request _*actions#123*_ has been approved :smile:'
+      'The pull request _<https://github.com/octokit/actions/pull/123|actions#123>_ has been approved :smile:'
     )
   })
 

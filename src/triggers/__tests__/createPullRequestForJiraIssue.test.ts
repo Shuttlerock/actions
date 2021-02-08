@@ -168,7 +168,7 @@ describe('createPullRequestForJiraIssue', () => {
     jiraPrsSpy.mockImplementation((_issueId: string) => Promise.resolve([123]))
     await createPullRequestForJiraIssue(email, issueKey)
     const message = expect.stringMatching(
-      /^Here's your pull request: https:\/\/github.com\/octokit\/webhooks\/pull\/123/
+      /^Here's your pull request: _<https:\/\/github.com\/octokit\/webhooks\/pull\/123/
     )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
     expect(githubCreatePullRequestSpy).toHaveBeenCalledTimes(0)
@@ -177,7 +177,7 @@ describe('createPullRequestForJiraIssue', () => {
   it('creates a new PR', async () => {
     await createPullRequestForJiraIssue(email, issueKey)
     const message = expect.stringMatching(
-      /^Here's your pull request: https:\/\/github.com\/octokit\/webhooks\/pull\/123/
+      /^Here's your pull request: _<https:\/\/github.com\/octokit\/webhooks\/pull\/123/
     )
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
     expect(githubCreatePullRequestSpy).toHaveBeenCalled()
