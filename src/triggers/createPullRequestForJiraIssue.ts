@@ -192,7 +192,8 @@ export const createPullRequestForJiraIssue = async (
 
   info(`Notifying Slack user ${credentials.slack_id}...`)
   const url = pullRequestUrl(repo.name, pullRequestNumber)
-  const message = `Here's your pull request: ${url}
+
+  const message = `Here's your pull request: _<${url}|${repo.name}#${pullRequestNumber}>_
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:
     \`git checkout --track origin/${newBranchName}\`
