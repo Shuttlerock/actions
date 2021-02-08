@@ -61450,7 +61450,7 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
             Constants_1.ReleaseLabel,
         ]);
     }
-    return reportInfo(credentials.slack_id, `Here's your release PR: ${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}`);
+    return reportInfo(credentials.slack_id, `Here's your release PR: _<${PullRequest_1.pullRequestUrl(repo.name, pullRequest.number)}|${repo.name}#${pullRequest.number}>_`);
 });
 exports.createReleasePullRequest = createReleasePullRequest;
 /**
