@@ -61,6 +61,8 @@ export const pullRequestClosed = async (
         releaseNotes.join('\n') // Release notes.
       )
       info(`Created the release ${releaseVersion}`)
+
+      return
     }
   }
 

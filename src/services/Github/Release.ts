@@ -255,9 +255,9 @@ export const createReleasePullRequest = async (
 
   await sendUserMessage(
     credentials.slack_id,
-    `Creating a release for <${repositoryUrl(
+    `Creating a release for *<${repositoryUrl(
       repo.name
-    )}|${organizationName()}/${repo.name}>...`
+    )}|${organizationName()}/${repo.name}>*...`
   )
 
   const develop = await getBranch(repo.name, DevelopBranchName)

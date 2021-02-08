@@ -118,7 +118,7 @@ export const createPullRequestForJiraIssue = async (
   } else {
     info('There is no open pull request for this issue')
     info("Notifying the user that we're making a pull request...")
-    const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`
+    const message = `Creating a pull request for *<${jiraUrl}|${issue.key}>*...`
     await sendUserMessage(credentials.slack_id, message)
 
     let baseBranchName = repo.default_branch
@@ -193,7 +193,7 @@ export const createPullRequestForJiraIssue = async (
   info(`Notifying Slack user ${credentials.slack_id}...`)
   const url = pullRequestUrl(repo.name, pullRequestNumber)
 
-  const message = `Here's your pull request: _<${url}|${repo.name}#${pullRequestNumber}>_
+  const message = `Here's your pull request: *<${url}|${repo.name}#${pullRequestNumber}>*
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:
     \`git checkout --track origin/${newBranchName}\`

@@ -60365,6 +60365,7 @@ const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, functio
             releaseNotes.join('\n') // Release notes.
             );
             core_1.info(`Created the release ${releaseVersion}`);
+            return;
         }
     }
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
@@ -61338,7 +61339,7 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     core_1.info(`Creating a release pull request for repository ${repo.name}`);
     core_1.info(`Fetching credentials for user '${email}'...`);
     const credentials = yield Credentials_1.fetchCredentials(email);
-    yield Slack_1.sendUserMessage(credentials.slack_id, `Creating a release for <${Repository_1.repositoryUrl(repo.name)}|${Inputs_1.organizationName()}/${repo.name}>...`);
+    yield Slack_1.sendUserMessage(credentials.slack_id, `Creating a release for *<${Repository_1.repositoryUrl(repo.name)}|${Inputs_1.organizationName()}/${repo.name}>*...`);
     const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
     if (isNil_1.default(develop)) {
         const message = `Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;

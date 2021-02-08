@@ -128,7 +128,7 @@ describe('check-suite-completed-action', () => {
         const succeeded = { ...checkSuite, conclusion: 'success' }
         await checkSuiteCompleted(succeeded)
         expect(addLabelsSpy).toHaveBeenCalledTimes(0)
-        const message = `Check suite _*CircleCI Checks*_ passed for _<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>_ :fire:`
+        const message = `Check suite _*CircleCI Checks*_ passed for *<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>* :fire:`
         expect(spy).toHaveBeenCalledWith('my-slack-id', message)
         spy.mockRestore()
       })
@@ -138,7 +138,7 @@ describe('check-suite-completed-action', () => {
       it('sends a slack message', async () => {
         const spy = jest.spyOn(Slack, 'sendUserMessage')
         await checkSuiteCompleted(checkSuite)
-        const message = `Check suite _*CircleCI Checks*_ failed for _<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>_`
+        const message = `Check suite _*CircleCI Checks*_ failed for *<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>*`
         expect(spy).toHaveBeenCalledWith('my-slack-id', message)
         spy.mockRestore()
       })

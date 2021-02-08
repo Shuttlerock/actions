@@ -76,7 +76,7 @@ describe('approvePullRequest', () => {
     await approvePullRequest(email, `${repoName}#${prNumber}`)
     expect(sendUserMessageSpy).toHaveBeenCalledWith(
       'my-slack-id',
-      'The pull request _<https://github.com/octokit/actions/pull/123|actions#123>_ has been approved :smile:'
+      'The pull request *<https://github.com/octokit/actions/pull/123|actions#123>* has been approved :smile:'
     )
   })
 
