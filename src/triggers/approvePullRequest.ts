@@ -56,10 +56,10 @@ export const approvePullRequest = async (
   info(`Approved ${repoName}#${prNumber}`)
 
   info(`Sending ${email} a success message on Slack...`)
-  const message = `The pull request _<${pullRequestUrl(
+  const message = `The pull request *<${pullRequestUrl(
     repoName,
     prNumber
-  )}|${repoName}#${prNumber}>_ has been approved ${positiveEmoji()}`
+  )}|${repoName}#${prNumber}>* has been approved ${positiveEmoji()}`
   await sendUserMessage(credentials.slack_id, message)
   info('Finished')
 }

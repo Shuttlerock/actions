@@ -51,7 +51,7 @@ const handleFailure = async (
   info(`Moving Jira issue ${issue.key} to '${JiraStatusHasIssues}'...`)
   await setIssueStatus(issue.id, JiraStatusHasIssues)
 
-  return `Check suite _*${checkName}*_ failed for _<${pullRequest.html_url}|${pullRequest.title}>_`
+  return `Check suite _*${checkName}*_ failed for *<${pullRequest.html_url}|${pullRequest.title}>*`
 }
 
 /**
@@ -75,9 +75,9 @@ const handleSuccess = (
     return undefined
   }
 
-  return `Check suite _*${checkName}*_ passed for _<${pullRequest.html_url}|${
+  return `Check suite _*${checkName}*_ passed for *<${pullRequest.html_url}|${
     pullRequest.title
-  }>_ ${positiveEmoji()}`
+  }>* ${positiveEmoji()}`
 }
 
 /**
