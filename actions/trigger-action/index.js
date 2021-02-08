@@ -62593,7 +62593,7 @@ const createReleasePullRequest = (email, repo) => __awaiter(void 0, void 0, void
     core_1.info(`Creating a release pull request for repository ${repo.name}`);
     core_1.info(`Fetching credentials for user '${email}'...`);
     const credentials = yield Credentials_1.fetchCredentials(email);
-    yield Slack_1.sendUserMessage(credentials.slack_id, `Creating a release for <${Repository_1.repositoryUrl(repo.name)}|${Inputs_1.organizationName()}/${repo.name}>...`);
+    yield Slack_1.sendUserMessage(credentials.slack_id, `Creating a release for *<${Repository_1.repositoryUrl(repo.name)}|${Inputs_1.organizationName()}/${repo.name}>*...`);
     const develop = yield Branch_1.getBranch(repo.name, Constants_1.DevelopBranchName);
     if (isNil_1.default(develop)) {
         const message = `Branch '${Constants_1.DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
@@ -63782,7 +63782,7 @@ const approvePullRequest = (email, repoAndPr) => __awaiter(void 0, void 0, void 
     yield Github_1.reviewPullRequest(repoName, prNumber, 'APPROVE', ':thumbsup:');
     core_1.info(`Approved ${repoName}#${prNumber}`);
     core_1.info(`Sending ${email} a success message on Slack...`);
-    const message = `The pull request _<${Github_1.pullRequestUrl(repoName, prNumber)}|${repoName}#${prNumber}>_ has been approved ${Slack_1.positiveEmoji()}`;
+    const message = `The pull request *<${Github_1.pullRequestUrl(repoName, prNumber)}|${repoName}#${prNumber}>* has been approved ${Slack_1.positiveEmoji()}`;
     yield Slack_1.sendUserMessage(credentials.slack_id, message);
     core_1.info('Finished');
 });
@@ -63897,7 +63897,7 @@ const createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, voi
     else {
         core_1.info('There is no open pull request for this issue');
         core_1.info("Notifying the user that we're making a pull request...");
-        const message = `Creating a pull request for <${jiraUrl}|${issue.key}>...`;
+        const message = `Creating a pull request for *<${jiraUrl}|${issue.key}>*...`;
         yield Slack_1.sendUserMessage(credentials.slack_id, message);
         let baseBranchName = repo.default_branch;
         const branch = yield Github_1.getBranch(repo.name, newBranchName);
@@ -63941,7 +63941,7 @@ const createPullRequestForJiraIssue = (email, issueKey) => __awaiter(void 0, voi
     ]);
     core_1.info(`Notifying Slack user ${credentials.slack_id}...`);
     const url = Github_1.pullRequestUrl(repo.name, pullRequestNumber);
-    const message = `Here's your pull request: _<${url}|${repo.name}#${pullRequestNumber}>_
+    const message = `Here's your pull request: *<${url}|${repo.name}#${pullRequestNumber}>*
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:
     \`git checkout --track origin/${newBranchName}\`
