@@ -60365,6 +60365,7 @@ const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, functio
             releaseNotes.join('\n') // Release notes.
             );
             core_1.info(`Created the release ${releaseVersion}`);
+            return;
         }
     }
     core_1.info(`Getting the Jira key from the pull request ${prName}...`);
