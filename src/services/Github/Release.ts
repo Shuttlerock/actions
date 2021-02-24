@@ -361,5 +361,5 @@ export const createReleaseTag = async (
     target_commitish: master.name,
   })
 
-  return response.data
+  return (response.data as unknown) as ReposCreateReleaseResponseData
 }

@@ -37,7 +37,7 @@ export const assignOwners = async (
     repo,
   })
 
-  return response.data
+  return (response.data as unknown) as IssuesAddAssigneesResponseData
 }
 
 /**
@@ -72,7 +72,7 @@ export const createPullRequest = async (
     title,
   })
 
-  return response.data as PullsGetResponseData
+  return (response.data as unknown) as PullsGetResponseData
 }
 
 /**
@@ -120,7 +120,7 @@ export const getPullRequest = async (
       repo,
     })
 
-    return response.data
+    return (response.data as unknown) as PullsGetResponseData
   } catch (err) {
     if ((err as Error).message === 'Pull request not found') {
       return undefined
@@ -164,7 +164,7 @@ export const assignReviewers = async (
     repo,
   })
 
-  return response.data
+  return (response.data as unknown) as PullsRequestReviewersResponseData
 }
 
 /**
@@ -195,7 +195,7 @@ export const listPullRequestCommits = async (
     repo,
   })
 
-  return response.data
+  return (response.data as unknown) as PullsListCommitsResponseData
 }
 
 /**
@@ -251,7 +251,7 @@ export const reviewPullRequest = async (
     repo,
   })
 
-  return response.data
+  return (response.data as unknown) as PullsCreateReviewResponseData
 }
 
 /**
@@ -274,5 +274,5 @@ export const updatePullRequest = async (
     repo,
   })
 
-  return response.data as PullsGetResponseData
+  return (response.data as unknown) as PullsGetResponseData
 }

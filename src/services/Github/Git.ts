@@ -145,7 +145,7 @@ export const createGitTree = async (
     base_tree: baseTree,
   })
 
-  return response.data
+  return (response.data as unknown) as GitCreateTreeResponseData
 }
 
 /**

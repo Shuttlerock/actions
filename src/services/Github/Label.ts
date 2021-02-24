@@ -49,7 +49,7 @@ export const setLabels = async (
     repo,
   })
 
-  return response.data
+  return (response.data as unknown) as IssuesSetLabelsResponseData
 }
 
 /**
