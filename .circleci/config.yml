@@ -61,7 +61,7 @@ jobs:
 
   jest:
     <<: *defaults
-    resource_class: large # Work around out-of-memory errors.
+    resource_class: xlarge # Work around out-of-memory errors.
     steps:
       - restore_cache:
           name: "Restore checkout cache"
