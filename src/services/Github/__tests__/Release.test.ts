@@ -174,7 +174,7 @@ describe('Release', () => {
 
     it('returns an existing pull request if one exists', async () => {
       updatePullRequestSpy.mockReturnValue(Promise.resolve(undefined))
-      listPullsSpy = jest.spyOn(readClient.pulls, 'list').mockReturnValue(
+      listPullsSpy.mockReturnValue(
         Promise.resolve(({
           data: [mockGithubPullRequest],
         } as unknown) as OctokitResponse<PullsListResponseData>)
@@ -193,7 +193,7 @@ describe('Release', () => {
     })
 
     it('creates a release pull request', async () => {
-      listPullsSpy = jest.spyOn(readClient.pulls, 'list').mockReturnValue(
+      listPullsSpy.mockReturnValue(
         Promise.resolve(({
           data: [],
         } as unknown) as OctokitResponse<PullsListResponseData>)
@@ -232,6 +232,22 @@ describe('Release', () => {
         mockGithubPullRequest.number,
         [InProgressLabel, ReleaseLabel]
       )
+    })
+
+    it('handles commit authors with no Github login', async () => {
+      listPullsSpy = jest.spyOn(readClient.pulls, 'list').mockReturnValue(
+        Promise.resolve(({
+          data: [],
+        } as unknown) as OctokitResponse<PullsListResponseData>)
+      )
+      compareCommitsSpy.mockReturnValue(
+        Promise.resolve(({
+          commits: [{ ...mockGitCommit, author: { login: null } }],
+          total_commits: 1,
+        } as unknown) as ReposCompareCommitsResponseData)
+      )
+      await createReleasePullRequest(email, mockGithubRepository)
+      expect(createPullRequestSpy).toHaveBeenCalled()
     })
   })
 
