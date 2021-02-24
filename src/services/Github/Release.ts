@@ -365,5 +365,5 @@ export const createReleaseTag = async (
     target_commitish: MasterBranchName,
   })
 
-  return response.data
+  return (response.data as unknown) as ReposCreateReleaseResponseData
 }

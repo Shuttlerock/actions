@@ -67,7 +67,7 @@ export const getBranch = async (
       repo,
       branch,
     })
-    return response.data
+    return (response.data as unknown) as ReposGetBranchResponseData
   } catch (err) {
     if (err.message === 'Branch not found') {
       return undefined
