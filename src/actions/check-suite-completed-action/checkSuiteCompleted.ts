@@ -1,6 +1,6 @@
 import { error, info } from '@actions/core'
 import { PullsGetResponseData } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
@@ -83,11 +83,12 @@ const handleSuccess = (
 /**
  * Runs whenever a check suite completes.
  *
- * @param checkSuite The check suite payload from Github sent when the suite completes.
+ * @param checkSuiteEvent The check suite payload from Github sent when the suite completes.
  */
 export const checkSuiteCompleted = async (
-  checkSuite: EventPayloads.WebhookPayloadCheckSuiteCheckSuite
+  checkSuiteEvent: Schema.CheckSuiteEvent
 ): Promise<void> => {
+  const { check_suite: checkSuite } = checkSuiteEvent
   const rgx = new RegExp('^.+/repos/[^/]+/([^/]+).*$')
   const repoName = checkSuite.url.replace(rgx, '$1')
   let prNumber: number | undefined

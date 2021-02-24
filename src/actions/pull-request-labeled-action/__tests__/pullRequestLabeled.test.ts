@@ -1,4 +1,4 @@
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import rawPayload from '@sr-actions/pull-request-labeled-action/__tests__/fixtures/pull-request-labeled.json'
 import { pullRequestLabeled } from '@sr-actions/pull-request-labeled-action/pullRequestLabeled'
@@ -24,7 +24,7 @@ describe('pull-request-labeled-action', () => {
   describe('pullRequestLabeled', () => {
     let addLabelsSpy: jest.SpyInstance
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
-    const payload = (rawPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
+    const payload = (rawPayload as unknown) as Schema.PullRequestLabeledEvent
 
     beforeEach(() => {
       addLabelsSpy = jest
@@ -52,7 +52,7 @@ describe('pull-request-labeled-action', () => {
         sender: {
           login: GithubWriteUser,
         },
-      } as unknown) as EventPayloads.WebhookPayloadPullRequest
+      } as unknown) as Schema.PullRequestLabeledEvent
       await pullRequestLabeled(automatedPayload)
       expect(addLabelsSpy).toHaveBeenCalledTimes(0)
     })
@@ -67,7 +67,7 @@ describe('pull-request-labeled-action', () => {
         label: {
           name: DependenciesLabel,
         },
-      } as unknown) as EventPayloads.WebhookPayloadPullRequest
+      } as unknown) as Schema.PullRequestLabeledEvent
       await pullRequestLabeled(dependabotPayload)
       expect(assignReviewersSpy).toHaveBeenCalledWith(
         payload.repository.name,

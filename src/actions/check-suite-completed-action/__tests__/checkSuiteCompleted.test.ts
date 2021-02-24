@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { GitGetCommitResponseData } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import rawPayload from '@sr-actions/check-suite-completed-action/__tests__/fixtures/check-suite-failure-payload.json'
 import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/checkSuiteCompleted'
@@ -47,9 +47,7 @@ describe('check-suite-completed-action', () => {
     let setIssueStatusSpy: jest.SpyInstance
 
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
-    const {
-      check_suite: checkSuite,
-    } = (rawPayload as unknown) as EventPayloads.WebhookPayloadCheckSuite
+    const checkSuitePayload = (rawPayload as unknown) as Schema.CheckSuiteEvent
 
     beforeEach(() => {
       addLabelsSpy = jest
@@ -114,7 +112,10 @@ describe('check-suite-completed-action', () => {
           message: 'No PR number!',
         } as GitGetCommitResponseData)
       )
-      const noPulls = { ...checkSuite, pull_requests: [] }
+      const noPulls = {
+        ...checkSuitePayload,
+        check_suite: { ...checkSuitePayload.check_suite, pull_requests: [] },
+      }
       await checkSuiteCompleted(noPulls)
       const message =
         'There are no pull requests associated with this check suite - ignoring'
@@ -125,7 +126,14 @@ describe('check-suite-completed-action', () => {
     describe('successful check', () => {
       it('sends a Slack message', async () => {
         const spy = jest.spyOn(Slack, 'sendUserMessage')
-        const succeeded = { ...checkSuite, conclusion: 'success' }
+        const succeeded = {
+          ...checkSuitePayload,
+          check_suite: {
+            ...checkSuitePayload.check_suite,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            conclusion: 'success' as any,
+          },
+        }
         await checkSuiteCompleted(succeeded)
         expect(addLabelsSpy).toHaveBeenCalledTimes(0)
         const message = `Check suite _*CircleCI Checks*_ passed for *<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>* :fire:`
@@ -137,7 +145,7 @@ describe('check-suite-completed-action', () => {
     describe('failed check', () => {
       it('sends a slack message', async () => {
         const spy = jest.spyOn(Slack, 'sendUserMessage')
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         const message = `Check suite _*CircleCI Checks*_ failed for *<${mockGithubPullRequest.html_url}|${mockGithubPullRequest.title}>*`
         expect(spy).toHaveBeenCalledWith('my-slack-id', message)
         spy.mockRestore()
@@ -148,7 +156,7 @@ describe('check-suite-completed-action', () => {
           (_repo: Github.Repository, _number: number) =>
             Promise.resolve(undefined)
         )
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         const message = 'Could not fetch the pull request actions#142'
         expect(errorSpy).toHaveBeenLastCalledWith(message)
         expect(addLabelsSpy).toHaveBeenCalledTimes(0)
@@ -158,7 +166,7 @@ describe('check-suite-completed-action', () => {
         getIssueKeySpy.mockImplementation(
           (_content: Github.PullRequestContent) => undefined
         )
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         const message =
           "Couldn't extract a Jira issue key from actions#142 - ignoring"
         expect(infoSpy).toHaveBeenLastCalledWith(message)
@@ -169,21 +177,21 @@ describe('check-suite-completed-action', () => {
         getIssueSpy.mockImplementation((_issueKey: string) =>
           Promise.resolve(undefined)
         )
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         const message = "Couldn't find a Jira issue for actions#142 - ignoring"
         expect(infoSpy).toHaveBeenLastCalledWith(message)
         expect(addLabelsSpy).toHaveBeenCalledTimes(0)
       })
 
       it('adds the has-issues label to the pull request', async () => {
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         expect(addLabelsSpy).toHaveBeenCalledWith('actions', 123, [
           HasIssuesLabel,
         ])
       })
 
       it('moves the Jira issue', async () => {
-        await checkSuiteCompleted(checkSuite)
+        await checkSuiteCompleted(checkSuitePayload)
         expect(setIssueStatusSpy).toHaveBeenCalledWith(
           '10000',
           Jira.JiraStatusHasIssues

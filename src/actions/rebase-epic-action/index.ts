@@ -1,6 +1,6 @@
 import { error, info, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { rebase } from '@sr-services/Github/Rebase'
 
@@ -13,7 +13,7 @@ export const run = async (): Promise<void> => {
   const {
     payload: { pull_request, repository },
   } = ((await context) as unknown) as {
-    payload: EventPayloads.WebhookPayloadPullRequest
+    payload: Schema.PullRequestEvent
   }
 
   if (!pull_request.title.startsWith('[Epic] ')) {

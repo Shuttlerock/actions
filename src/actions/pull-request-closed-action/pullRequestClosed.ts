@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 import isNil from 'lodash/isNil'
 
 import { ReleaseBranchName } from '@sr-services/Constants'
@@ -17,7 +17,7 @@ import {
  * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is closed.
  */
 export const pullRequestClosed = async (
-  payload: EventPayloads.WebhookPayloadPullRequest
+  payload: Schema.PullRequestEvent
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
 
