@@ -18,7 +18,6 @@ module.exports = {
     'plugin:jsdoc/recommended',
     'plugin:prettier/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
   ],
   rules: {
     camelcase: 'off',
