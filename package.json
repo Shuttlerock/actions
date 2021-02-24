@@ -82,6 +82,6 @@
     "prettier": "2.2.1",
     "ts-jest": "^26.5.2",
     "tscpaths": "^0.0.9",
-    "typescript": "^4.1.5"
+    "typescript": "^4.2.2"
   }
 }
