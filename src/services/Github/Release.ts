@@ -60,7 +60,7 @@ const getReleaseNotes = async (
   info(`Making release notes from ${commits.length} commits...`)
   const dependencies = commits.filter(
     (commit: Commit) =>
-      commit.author.login?.startsWith('dependabot') &&
+      commit.author?.login?.startsWith('dependabot') &&
       commit.commit.message.includes('Bump ')
   )
 
