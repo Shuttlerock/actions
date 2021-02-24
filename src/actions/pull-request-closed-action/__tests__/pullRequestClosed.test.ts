@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
 import { ReleaseBranchName } from '@sr-services/Constants'
@@ -75,7 +76,7 @@ describe('pull-request-closed-action', () => {
           },
           title: `Release Candidate ${releaseVersion} (${releaseName})`,
         },
-      }
+      } as Schema.PullRequestClosedEvent
 
       it('creates a Jira release', async () => {
         const createJiraReleaseSpy = jest.spyOn(Jira, 'createRelease')
