@@ -61175,8 +61175,8 @@ const String_1 = __nccwpck_require__(5058);
 const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.info(`Making release notes from ${commits.length} commits...`);
     const dependencies = commits.filter((commit) => {
-        var _a;
-        return ((_a = commit.author.login) === null || _a === void 0 ? void 0 : _a.startsWith('dependabot')) &&
+        var _a, _b;
+        return ((_b = (_a = commit.author) === null || _a === void 0 ? void 0 : _a.login) === null || _b === void 0 ? void 0 : _b.startsWith('dependabot')) &&
             commit.commit.message.includes('Bump ');
     });
     const prNumbers = [
