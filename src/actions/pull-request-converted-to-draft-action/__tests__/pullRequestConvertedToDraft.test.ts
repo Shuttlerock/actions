@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-to-draft-action/pullRequestConvertedToDraft'
 import { InProgressLabel } from '@sr-services/Constants'
@@ -25,7 +25,7 @@ describe('pull-request-converted-to-draft-action', () => {
     const payload = ({
       ...mockGithubPullRequestPayload,
       action: 'converted_to_draft',
-    } as unknown) as EventPayloads.WebhookPayloadPullRequest // 'converted_to_draft' is missing from types - see http://srck.me/38H79hV
+    } as unknown) as Schema.PullRequestConvertedToDraftEvent
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
     let getIssueSpy: jest.SpyInstance
@@ -85,8 +85,7 @@ describe('pull-request-converted-to-draft-action', () => {
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {
       getIssueKeySpy.mockImplementation(
-        (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
-          undefined
+        (_payload: Schema.PullRequest) => undefined
       )
       await pullRequestConvertedToDraft(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`

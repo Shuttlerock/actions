@@ -3,7 +3,7 @@ import {
   IssuesAddLabelsResponseData,
   IssuesSetLabelsResponseData,
 } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 import isEqual from 'lodash/isEqual'
 import isNil from 'lodash/isNil'
 
@@ -75,9 +75,7 @@ export const addLabels = async (
     )
   }
 
-  const existing = pullRequest.labels.map(
-    (lbl: EventPayloads.WebhookPayloadPullRequestLabel) => lbl.name
-  )
+  const existing = pullRequest.labels.map((lbl: Schema.Label) => lbl.name)
   info(`Existing labels are [${existing.join(', ')}]`)
   info(`The labels [${added.join(', ')}] were added`)
 

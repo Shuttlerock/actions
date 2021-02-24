@@ -1,6 +1,6 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-to-draft-action/pullRequestConvertedToDraft'
 
@@ -13,7 +13,7 @@ import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-
  */
 export const run = async (): Promise<void> => {
   const { payload } = ((await context) as unknown) as {
-    payload: EventPayloads.WebhookPayloadPullRequest
+    payload: Schema.PullRequestEvent
   }
   await pullRequestConvertedToDraft(payload)
 }

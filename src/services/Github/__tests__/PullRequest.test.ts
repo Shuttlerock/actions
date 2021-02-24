@@ -8,7 +8,7 @@ import {
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
 } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
@@ -178,7 +178,7 @@ describe('PullRequest', () => {
         body:
           '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
         title: '[ISSUE-456] My Issue',
-      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      } as unknown) as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toEqual('ISSUE-456')
     })
 
@@ -187,7 +187,7 @@ describe('PullRequest', () => {
         body:
           '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
         title: 'My Issue',
-      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      } as unknown) as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toEqual('ISSUE-789')
     })
 
@@ -195,7 +195,7 @@ describe('PullRequest', () => {
       const pullRequest = ({
         body: 'My body',
         title: 'My Issue',
-      } as unknown) as EventPayloads.WebhookPayloadPullRequestPullRequest
+      } as unknown) as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toBeUndefined()
     })
   })

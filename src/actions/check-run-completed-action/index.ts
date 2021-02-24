@@ -1,6 +1,6 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/checkSuiteCompleted'
 
@@ -17,11 +17,11 @@ export const run = async (): Promise<void> => {
       check_run: { check_suite: checkSuite },
     },
   } = ((await context) as unknown) as {
-    payload: EventPayloads.WebhookPayloadCheckRun
+    payload: Schema.CheckRunEvent
   }
-  await checkSuiteCompleted(
-    checkSuite as EventPayloads.WebhookPayloadCheckSuiteCheckSuite
-  )
+  await checkSuiteCompleted({
+    check_suite: checkSuite,
+  } as Schema.CheckSuiteEvent)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

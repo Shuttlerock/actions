@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 import isNil from 'lodash/isNil'
 
 import { InProgressLabel } from '@sr-services/Constants'
@@ -16,7 +16,7 @@ import {
  * @param {} payload The JSON payload from Github sent when a pull request is updated.
  */
 export const pullRequestConvertedToDraft = async (
-  payload: EventPayloads.WebhookPayloadPullRequest
+  payload: Schema.PullRequestEvent
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
 

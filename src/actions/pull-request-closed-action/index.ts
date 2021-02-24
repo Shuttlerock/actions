@@ -1,6 +1,6 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
 
@@ -13,7 +13,7 @@ import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRe
  */
 export const run = async (): Promise<void> => {
   const { payload } = ((await context) as unknown) as {
-    payload: EventPayloads.WebhookPayloadPullRequest
+    payload: Schema.PullRequestEvent
   }
   await pullRequestClosed(payload)
 }
