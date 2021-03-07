@@ -23,6 +23,8 @@ export interface Repository {
   jira_project_id?: number
   leads: User[]
   reviewers: User[]
+  senior_reviewers: User[]
+  minimum_senior_reviewers: number
   status: 'forbidden' | 'not_found' | 'ok'
 }
 

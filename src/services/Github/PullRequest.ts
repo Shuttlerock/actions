@@ -4,6 +4,7 @@ import {
   PullsGetResponseData,
   PullsListCommitsResponseData,
   PullsRequestReviewersResponseData,
+  PullsListReviewsResponseData,
 } from '@octokit/types'
 import isNil from 'lodash/isNil'
 
@@ -259,4 +260,32 @@ export const updatePullRequest = async (
   })
 
   return response.data as PullsGetResponseData
+}
+
+/**
+ * Return the list of reviews returns in chronological order.
+ *
+ * @param {Repository} repo      The name of the repository that the PR belongs to.
+ * @param {number}     number    The PR number.
+ *
+ * @returns {PullsListReviewsResponseData} The pull request data.
+ */
+export const getPullRequestListReview = async (
+  repo: Repository,
+  number: number
+): Promise<PullsListReviewsResponseData> => {
+  const pullRequest = await getPullRequest(repo, number)
+  if (isNil(pullRequest)) {
+    throw new Error(
+      `Could not find the pull request to assign reviewers to (${repo}#${number})`
+    )
+  }
+
+  const response = await client.pulls.listReviews({
+    owner: organizationName(),
+    pull_number: number,
+    repo,
+  })
+
+  return response.data
 }
