@@ -7,6 +7,7 @@ jest.spyOn(Core, 'info').mockImplementation((_message: unknown) => undefined)
 
 jest.mock('@sr-services/Inputs', () => ({
   __esModule: true,
+  circleCIToken: () => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
   credentialsApiPrefix: () => 'https://users.example.com/api/private/',
   credentialsApiSecret: () => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
   githubReadToken: () => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
