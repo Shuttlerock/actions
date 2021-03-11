@@ -1,7 +1,12 @@
+import { info } from '@actions/core'
 import isNil from 'lodash/isNil'
 import fetch from 'node-fetch'
 
 import { apiPrefix, client } from '@sr-services/Jira/Client'
+import {
+  JiraStatusInDevelopment,
+  JiraStatusInProgress,
+} from '@sr-services/Jira/Issue'
 
 export interface JiraBoard {
   id: number
@@ -78,6 +83,36 @@ export const getColumns = async (
   const data = (await response.json()) as JiraBoardConfiguration
 
   return data.columnConfig.columns
+}
+
+/**
+ * Some boards use 'In progress' rather than 'In development' to mark issues as in-progress.
+ * This fetches the column names for the project and decides which one is appropriate.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as in-progress.
+ */
+export const getInProgressColumn = async (
+  projectId: string
+): Promise<string> => {
+  info(`Finding the 'In progress' column names for the project ${projectId}...`)
+  const columns = await getColumns(projectId)
+  if (isNil(columns) || columns.length === 0) {
+    throw new Error(`No columns found for project ${projectId}`)
+  }
+
+  const inProgressColumn = columns.find((col: JiraBoardColumn) =>
+    [JiraStatusInDevelopment, JiraStatusInProgress].includes(col.name)
+  )?.name
+
+  if (isNil(inProgressColumn)) {
+    throw new Error(
+      `Couldn't find an in-progress column for project ${projectId} - giving up`
+    )
+  }
+
+  return inProgressColumn
 }
 
 /**

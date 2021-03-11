@@ -33362,6 +33362,32 @@ module.exports = baseToString;
 
 /***/ }),
 
+/***/ 69528:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var trimmedEndIndex = __nccwpck_require__(57010);
+
+/** Used to match leading whitespace. */
+var reTrimStart = /^\s+/;
+
+/**
+ * The base implementation of `_.trim`.
+ *
+ * @private
+ * @param {string} string The string to trim.
+ * @returns {string} Returns the trimmed string.
+ */
+function baseTrim(string) {
+  return string
+    ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
+    : string;
+}
+
+module.exports = baseTrim;
+
+
+/***/ }),
+
 /***/ 59258:
 /***/ ((module) => {
 
@@ -35457,6 +35483,32 @@ module.exports = toSource;
 
 /***/ }),
 
+/***/ 57010:
+/***/ ((module) => {
+
+/** Used to match a single whitespace character. */
+var reWhitespace = /\s/;
+
+/**
+ * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
+ * character of `string`.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {number} Returns the index of the last non-whitespace character.
+ */
+function trimmedEndIndex(string) {
+  var index = string.length;
+
+  while (index-- && reWhitespace.test(string.charAt(index))) {}
+  return index;
+}
+
+module.exports = trimmedEndIndex;
+
+
+/***/ }),
+
 /***/ 88580:
 /***/ ((module) => {
 
@@ -36950,14 +37002,12 @@ module.exports = toInteger;
 /***/ 91235:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var isObject = __nccwpck_require__(33334),
+var baseTrim = __nccwpck_require__(69528),
+    isObject = __nccwpck_require__(33334),
     isSymbol = __nccwpck_require__(66403);
 
 /** Used as references for various `Number` constants. */
 var NAN = 0 / 0;
-
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
 
 /** Used to detect bad signed hexadecimal string values. */
 var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
@@ -37008,7 +37058,7 @@ function toNumber(value) {
   if (typeof value != 'string') {
     return value === 0 ? value : +value;
   }
-  value = value.replace(reTrim, '');
+  value = baseTrim(value);
   var isBinary = reIsBinary.test(value);
   return (isBinary || reIsOctal.test(value))
     ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
@@ -62875,7 +62925,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
+exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInProgress = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
 const core_1 = __nccwpck_require__(42186);
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
@@ -62885,6 +62935,7 @@ const Client_1 = __nccwpck_require__(13861);
 exports.JiraStatusDone = 'Done';
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
+exports.JiraStatusInProgress = 'In progress'; // Alternative to 'In development' in some boards.
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
 exports.JiraStatusTechnicalPlanning = 'Technical Planning';
 exports.JiraStatusTechReview = 'Tech review';
@@ -63153,10 +63204,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProject = exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
+const core_1 = __nccwpck_require__(42186);
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
 const Client_1 = __nccwpck_require__(13861);
+const Issue_1 = __nccwpck_require__(8273);
 /**
  * Fetches the board definition for the given project ID.
  *
@@ -63194,6 +63247,28 @@ const getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* ()
     return data.columnConfig.columns;
 });
 exports.getColumns = getColumns;
+/**
+ * Some boards use 'In progress' rather than 'In development' to mark issues as in-progress.
+ * This fetches the column names for the project and decides which one is appropriate.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as in-progress.
+ */
+const getInProgressColumn = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    core_1.info(`Finding the 'In progress' column names for the project ${projectId}...`);
+    const columns = yield exports.getColumns(projectId);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${projectId}`);
+    }
+    const inProgressColumn = (_a = columns.find((col) => [Issue_1.JiraStatusInDevelopment, Issue_1.JiraStatusInProgress].includes(col.name))) === null || _a === void 0 ? void 0 : _a.name;
+    if (isNil_1.default(inProgressColumn)) {
+        throw new Error(`Couldn't find an in-progress column for project ${projectId} - giving up`);
+    }
+    return inProgressColumn;
+});
+exports.getInProgressColumn = getInProgressColumn;
 /**
  * Fetches the project with the given ID.
  *
@@ -64125,6 +64200,8 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
         throw new Error(`No columns found for project ${parent.fields.project.key}`);
     }
     const columnNames = columns.map((col) => col.name);
+    // Some boards use 'In progress' rather than 'In development'.
+    const inProgressColumn = yield Jira_1.getInProgressColumn(parent.fields.project.id);
     core_1.info('Finding the left-most status for child issues...');
     const statuses = [
         ...new Set(children.map((child) => child.fields.status.name)),
@@ -64135,12 +64212,8 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
     }
     // If any child of an epic is in 'In development', 'Tech review' or 'Has issues', then the epic is 'In development'.
     if (parent.fields.issuetype.name === Jira_1.JiraIssueTypeEpic) {
-        if (children.find((child) => [
-            Jira_1.JiraStatusHasIssues,
-            Jira_1.JiraStatusInDevelopment,
-            Jira_1.JiraStatusTechReview,
-        ].includes(child.fields.status.name))) {
-            leftmost = Jira_1.JiraStatusInDevelopment;
+        if (children.find((child) => [Jira_1.JiraStatusHasIssues, inProgressColumn, Jira_1.JiraStatusTechReview].includes(child.fields.status.name))) {
+            leftmost = inProgressColumn;
         }
     }
     if (parent.fields.status.name === leftmost) {

@@ -8,6 +8,7 @@ jest.mock('@sr-services/Jira', () => ({
   getBoard: jest.fn(),
   getChildIssues: jest.fn(),
   getColumns: jest.fn(),
+  getInProgressColumn: jest.fn(),
   getIssue: jest.fn(),
   isIssueOnBoard: jest.fn(),
   JiraIssueTypeEpic: 'Epic',
@@ -33,6 +34,7 @@ describe('jiraIssueTransitioned', () => {
   let getBoardSpy: jest.SpyInstance
   let getChildIssuesSpy: jest.SpyInstance
   let getColumnsSpy: jest.SpyInstance
+  let getInProgressColumnSpy: jest.SpyInstance
   let getIssueSpy: jest.SpyInstance
   let infoSpy: jest.SpyInstance
   let isIssueOnBoardSpy: jest.SpyInstance
@@ -45,6 +47,9 @@ describe('jiraIssueTransitioned', () => {
       .mockImplementation((_projectId: string) =>
         Promise.resolve(mockJiraBoard)
       )
+    getInProgressColumnSpy = jest
+      .spyOn(Jira, 'getInProgressColumn')
+      .mockReturnValue(Promise.resolve(Jira.JiraStatusInDevelopment))
     getChildIssuesSpy = jest
       .spyOn(Jira, 'getChildIssues')
       .mockImplementation((_key: string) => Promise.resolve([childIssue]))
@@ -78,6 +83,7 @@ describe('jiraIssueTransitioned', () => {
     getBoardSpy.mockRestore()
     getChildIssuesSpy.mockRestore()
     getColumnsSpy.mockRestore()
+    getInProgressColumnSpy.mockRestore()
     getIssueSpy.mockRestore()
     infoSpy.mockRestore()
     isIssueOnBoardSpy.mockRestore()
