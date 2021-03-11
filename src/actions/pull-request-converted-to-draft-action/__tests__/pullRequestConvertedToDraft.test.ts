@@ -12,7 +12,9 @@ import {
 } from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
+  getInProgressColumn: jest.fn(),
   getIssue: jest.fn(),
+  JiraStatusInDevelopment: 'In development',
   setIssueStatus: jest.fn(),
 }))
 jest.mock('@sr-services/Github', () => ({
@@ -28,6 +30,7 @@ describe('pull-request-converted-to-draft-action', () => {
     } as unknown) as Schema.PullRequestConvertedToDraftEvent
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
+    let getInProgressColumnSpy: jest.SpyInstance
     let getIssueSpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
@@ -40,10 +43,19 @@ describe('pull-request-converted-to-draft-action', () => {
           (_repo: Github.Repository, _number: number, _labels: string[]) =>
             Promise.resolve(mockIssuesAddLabelsResponseData)
         )
+      getInProgressColumnSpy = jest
+        .spyOn(Jira, 'getInProgressColumn')
+        .mockReturnValue(Promise.resolve(Jira.JiraStatusInDevelopment))
       getIssueSpy = jest
         .spyOn(Jira, 'getIssue')
         .mockImplementation((_issueKey: string) =>
-          Promise.resolve(mockJiraIssue)
+          Promise.resolve({
+            ...mockJiraIssue,
+            fields: {
+              ...mockJiraIssue.fields,
+              status: { name: 'Ready for development' },
+            },
+          })
         )
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
@@ -60,6 +72,7 @@ describe('pull-request-converted-to-draft-action', () => {
 
     afterEach(() => {
       addLabelsSpy.mockRestore()
+      getInProgressColumnSpy.mockRestore()
       getIssueSpy.mockRestore()
       getIssueKeySpy.mockRestore()
       infoSpy.mockRestore()

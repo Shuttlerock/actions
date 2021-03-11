@@ -61621,7 +61621,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
+exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInProgress = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
@@ -61631,6 +61631,7 @@ const Client_1 = __nccwpck_require__(3861);
 exports.JiraStatusDone = 'Done';
 exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
+exports.JiraStatusInProgress = 'In progress'; // Alternative to 'In development' in some boards.
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
 exports.JiraStatusTechnicalPlanning = 'Technical Planning';
 exports.JiraStatusTechReview = 'Tech review';
@@ -61899,10 +61900,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProject = exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
+const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 const Client_1 = __nccwpck_require__(3861);
+const Issue_1 = __nccwpck_require__(8273);
 /**
  * Fetches the board definition for the given project ID.
  *
@@ -61940,6 +61943,28 @@ const getColumns = (projectId) => __awaiter(void 0, void 0, void 0, function* ()
     return data.columnConfig.columns;
 });
 exports.getColumns = getColumns;
+/**
+ * Some boards use 'In progress' rather than 'In development' to mark issues as in-progress.
+ * This fetches the column names for the project and decides which one is appropriate.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as in-progress.
+ */
+const getInProgressColumn = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    core_1.info(`Finding the 'In progress' column names for the project ${projectId}...`);
+    const columns = yield exports.getColumns(projectId);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${projectId}`);
+    }
+    const inProgressColumn = (_a = columns.find((col) => [Issue_1.JiraStatusInDevelopment, Issue_1.JiraStatusInProgress].includes(col.name))) === null || _a === void 0 ? void 0 : _a.name;
+    if (isNil_1.default(inProgressColumn)) {
+        throw new Error(`Couldn't find an in-progress column for project ${projectId} - giving up`);
+    }
+    return inProgressColumn;
+});
+exports.getInProgressColumn = getInProgressColumn;
 /**
  * Fetches the project with the given ID.
  *

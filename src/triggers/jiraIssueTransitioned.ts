@@ -6,13 +6,13 @@ import {
   getBoard,
   getChildIssues,
   getColumns,
+  getInProgressColumn,
   getIssue,
   isIssueOnBoard,
   Issue,
   JiraBoardColumn,
   JiraIssueTypeEpic,
   JiraStatusHasIssues,
-  JiraStatusInDevelopment,
   JiraStatusReadyForPlanning,
   JiraStatusTechReview,
   JiraStatusValidated,
@@ -115,6 +115,9 @@ export const jiraIssueTransitioned = async (
   }
   const columnNames = columns.map((col: JiraBoardColumn) => col.name)
 
+  // Some boards use 'In progress' rather than 'In development'.
+  const inProgressColumn = await getInProgressColumn(parent.fields.project.id)
+
   info('Finding the left-most status for child issues...')
   const statuses = [
     ...new Set(children.map((child: Issue) => child.fields.status.name)),
@@ -132,14 +135,12 @@ export const jiraIssueTransitioned = async (
   if (parent.fields.issuetype.name === JiraIssueTypeEpic) {
     if (
       children.find((child: Issue) =>
-        [
-          JiraStatusHasIssues,
-          JiraStatusInDevelopment,
-          JiraStatusTechReview,
-        ].includes(child.fields.status.name)
+        [JiraStatusHasIssues, inProgressColumn, JiraStatusTechReview].includes(
+          child.fields.status.name
+        )
       )
     ) {
-      leftmost = JiraStatusInDevelopment
+      leftmost = inProgressColumn
     }
   }
 
