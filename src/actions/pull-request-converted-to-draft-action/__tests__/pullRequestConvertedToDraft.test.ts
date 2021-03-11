@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-to-draft-action/pullRequestConvertedToDraft'
 import { InProgressLabel } from '@sr-services/Constants'
@@ -12,7 +12,9 @@ import {
 } from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
+  getInProgressColumn: jest.fn(),
   getIssue: jest.fn(),
+  JiraStatusInDevelopment: 'In development',
   setIssueStatus: jest.fn(),
 }))
 jest.mock('@sr-services/Github', () => ({
@@ -25,9 +27,10 @@ describe('pull-request-converted-to-draft-action', () => {
     const payload = ({
       ...mockGithubPullRequestPayload,
       action: 'converted_to_draft',
-    } as unknown) as EventPayloads.WebhookPayloadPullRequest // 'converted_to_draft' is missing from types - see http://srck.me/38H79hV
+    } as unknown) as Schema.PullRequestConvertedToDraftEvent
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
+    let getInProgressColumnSpy: jest.SpyInstance
     let getIssueSpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
@@ -40,10 +43,19 @@ describe('pull-request-converted-to-draft-action', () => {
           (_repo: Github.Repository, _number: number, _labels: string[]) =>
             Promise.resolve(mockIssuesAddLabelsResponseData)
         )
+      getInProgressColumnSpy = jest
+        .spyOn(Jira, 'getInProgressColumn')
+        .mockReturnValue(Promise.resolve(Jira.JiraStatusInDevelopment))
       getIssueSpy = jest
         .spyOn(Jira, 'getIssue')
         .mockImplementation((_issueKey: string) =>
-          Promise.resolve(mockJiraIssue)
+          Promise.resolve({
+            ...mockJiraIssue,
+            fields: {
+              ...mockJiraIssue.fields,
+              status: { name: 'Ready for development' },
+            },
+          })
         )
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
@@ -60,6 +72,7 @@ describe('pull-request-converted-to-draft-action', () => {
 
     afterEach(() => {
       addLabelsSpy.mockRestore()
+      getInProgressColumnSpy.mockRestore()
       getIssueSpy.mockRestore()
       getIssueKeySpy.mockRestore()
       infoSpy.mockRestore()
@@ -85,8 +98,7 @@ describe('pull-request-converted-to-draft-action', () => {
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {
       getIssueKeySpy.mockImplementation(
-        (_payload: EventPayloads.WebhookPayloadPullRequestPullRequest) =>
-          undefined
+        (_payload: Schema.PullRequest) => undefined
       )
       await pullRequestConvertedToDraft(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`

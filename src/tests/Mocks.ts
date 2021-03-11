@@ -11,7 +11,7 @@ import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 import { TransitionObject } from 'jira-client'
 
 import { Credentials, Repository } from '@sr-services/Credentials'
@@ -82,7 +82,7 @@ export const mockGithubPullRequestUpdateResponse = ({
   title: 'Add a Widget',
 } as unknown) as PullsUpdateResponseData
 
-export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as EventPayloads.WebhookPayloadPullRequest
+export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as Schema.PullRequestEvent
 
 export const mockGithubPullRequest = (mockGithubPullRequestPayload.pull_request as unknown) as PullsGetResponseData
 

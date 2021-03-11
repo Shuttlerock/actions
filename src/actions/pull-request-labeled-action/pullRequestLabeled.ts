@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import { EventPayloads } from '@octokit/webhooks'
+import Schema from '@octokit/webhooks-definitions/schema'
 
 import {
   DependenciesLabel,
@@ -15,7 +15,7 @@ import { addLabels, assignReviewers } from '@sr-services/Github'
  * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
  */
 export const pullRequestLabeled = async (
-  payload: EventPayloads.WebhookPayloadPullRequest
+  payload: Schema.PullRequestLabeledEvent
 ): Promise<void> => {
   const { label, pull_request: pullRequest, repository, sender } = payload
 
