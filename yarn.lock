@@ -665,10 +665,10 @@
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.62.5.tgz#3b2443ee07bb00e6333ce6bef8ccf5eadfb08430"
   integrity sha512-1SWpIFhDLgus9aJ++GOnV/YYcT53glj/YDNzt45S47BfK2/tzYLHWHYFpmEO0frsSEKMFDewDy4c4cWuCpNH/g==
 
-"@octokit/webhooks@^8.5.3":
-  version "8.5.3"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.5.3.tgz#1d4348b9d6fb9709e8c8f5fe943a7af183e58cf5"
-  integrity sha512-hAHYHDC06KClFX2oKGxAZkolX9n9zU6PJ4UVJte87ZhH+Buui+hLPNKnSHYgsV7rn83kNItHTRfnfyRBD9CjkA==
+"@octokit/webhooks@^8.5.4":
+  version "8.5.4"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.5.4.tgz#35f67dfe121ae85dc3881fad2042d8386939a7dc"
+  integrity sha512-7fwSpn3X0WQu5UMdE3NWId6pUfdWWDgShXhZiKfnZcQHxDajpjuS5SiR13OFCwfrm3OgDjkpiey6xO5u9uqXBg==
   dependencies:
     "@octokit/request-error" "^2.0.2"
     "@octokit/webhooks-definitions" "3.62.5"
@@ -701,10 +701,10 @@
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-1.9.0.tgz#aa8f90b2f66ac54a77e42606644366f93cff4871"
   integrity sha512-RmwgMWqOtzd2JPXdiaD/tyrDD0vtjjRDFdxN1I3tAxwBbg4aryzDUVqFc8na16A+3Xik/UN8X1hvVTw8J4EB9w==
 
-"@slack/web-api@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.0.0.tgz#14c65ed73c66a187e5f20e12c3898dfd8d5cbf7c"
-  integrity sha512-YD1wqWuzrYPf4RQyD7OnYS5lImUmNWn+G5V6Qt0N97fPYxqhT72YJtRdSnsTc3VkH5R5imKOhYxb+wqI9hiHnA==
+"@slack/web-api@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.1.0.tgz#27a17f61eb72100d6722ff17f581349c41d19b5f"
+  integrity sha512-9MVHw+rDBaFvkvzm8lDNH/nlkvJCDKRIjFGMdpbyZlVLsm4rcht4qyiL71bqdyLATHXJnWknb/sl0FQGLLobIA==
   dependencies:
     "@slack/logger" ">=1.0.0 <3.0.0"
     "@slack/types" "^1.7.0"
@@ -855,10 +855,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@>= 8", "@types/node@>=12.0.0", "@types/node@>=8.9.0", "@types/node@^14.14.32":
-  version "14.14.32"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.32.tgz#90c5c4a8d72bbbfe53033f122341343249183448"
-  integrity sha512-/Ctrftx/zp4m8JOujM5ZhwzlWLx22nbQJiVqz8/zE15gOeEW+uly3FSX4fGFpcfEvFzXcMCJwq9lGVWgyARXhg==
+"@types/node@*", "@types/node@>= 8", "@types/node@>=12.0.0", "@types/node@>=8.9.0", "@types/node@^14.14.34":
+  version "14.14.34"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.34.tgz#07935194fc049069a1c56c0c274265abeddf88da"
+  integrity sha512-dBPaxocOK6UVyvhbnpFIj2W+S+1cBTkHQbFQfeeJhoKFbzYcVUGHvddeWPSucKATb3F0+pgDq0i6ghEaZjsugA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
