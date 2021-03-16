@@ -5,11 +5,7 @@ import isNil from 'lodash/isNil'
 import { PleaseReviewLabel } from '@sr-services/Constants'
 import { fetchRepository, User } from '@sr-services/Credentials'
 import { addLabels, assignReviewers, getIssueKey } from '@sr-services/Github'
-import {
-  getIssue,
-  JiraStatusTechReview,
-  setIssueStatus,
-} from '@sr-services/Jira'
+import { getReviewColumn, getIssue, setIssueStatus } from '@sr-services/Jira'
 
 /**
  * Runs whenever a pull request is marked as 'ready for review'.
@@ -49,14 +45,19 @@ export const pullRequestReadyForReview = async (
     info(`Couldn't find a Jira issue for ${prName} - ignoring`)
     return
   }
-
-  if (issue.fields.status.name === JiraStatusTechReview) {
-    info(
-      `Jira issue ${issueKey} is already in '${JiraStatusTechReview}' - ignoring`
-    )
+  if (isNil(issue.fields.project)) {
+    info(`Couldn't find a project for Jira issue ${issueKey} - ignoring`)
     return
   }
 
-  info(`Moving Jira issue ${issueKey} to '${JiraStatusTechReview}'...`)
-  await setIssueStatus(issue.id, JiraStatusTechReview)
+  // Some boards use 'Review' rather than 'Tech review'.
+  const reviewColumn = await getReviewColumn(issue.fields.project.id)
+
+  if (issue.fields.status.name === reviewColumn) {
+    info(`Jira issue ${issueKey} is already in '${reviewColumn}' - ignoring`)
+    return
+  }
+
+  info(`Moving Jira issue ${issueKey} to '${reviewColumn}'...`)
+  await setIssueStatus(issue.id, reviewColumn)
 }

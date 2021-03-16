@@ -61590,7 +61590,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReadyForPlanning = exports.JiraStatusInProgress = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
+exports.updateCustomField = exports.setVersion = exports.setIssueStatus = exports.moveIssueToBoard = exports.issueUrl = exports.isIssueOnBoard = exports.getIssuePullRequestNumbers = exports.recursiveGetEpic = exports.getEpic = exports.getIssue = exports.getChildIssues = exports.JiraFieldStoryPointEstimate = exports.JiraFieldRepository = exports.JiraLabelSkipPR = exports.JiraIssueTypeEpic = exports.JiraStatusValidated = exports.JiraStatusTechReview = exports.JiraStatusTechnicalPlanning = exports.JiraStatusReview = exports.JiraStatusReadyForPlanning = exports.JiraStatusInProgress = exports.JiraStatusInDevelopment = exports.JiraStatusHasIssues = exports.JiraStatusDone = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
@@ -61602,6 +61602,7 @@ exports.JiraStatusHasIssues = 'Has issues';
 exports.JiraStatusInDevelopment = 'In development';
 exports.JiraStatusInProgress = 'In progress'; // Alternative to 'In development' in some boards.
 exports.JiraStatusReadyForPlanning = 'Ready for planning';
+exports.JiraStatusReview = 'Review'; // Alternative to 'Tech review' in some boards.
 exports.JiraStatusTechnicalPlanning = 'Technical Planning';
 exports.JiraStatusTechReview = 'Tech review';
 exports.JiraStatusValidated = 'Validated';
@@ -61869,7 +61870,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProject = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getReviewColumn = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
@@ -61934,6 +61935,28 @@ const getInProgressColumn = (projectId) => __awaiter(void 0, void 0, void 0, fun
     return inProgressColumn;
 });
 exports.getInProgressColumn = getInProgressColumn;
+/**
+ * Some boards use 'Review' rather than 'Tech review' to mark issues as ready-for-review.
+ * This fetches the column names for the project and decides which one is appropriate.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as ready-for-review.
+ */
+const getReviewColumn = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    core_1.info(`Finding the 'Review' column names for the project ${projectId}...`);
+    const columns = yield exports.getColumns(projectId);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${projectId}`);
+    }
+    const reviewColumn = (_b = columns.find((col) => [Issue_1.JiraStatusReview, Issue_1.JiraStatusTechReview].includes(col.name))) === null || _b === void 0 ? void 0 : _b.name;
+    if (isNil_1.default(reviewColumn)) {
+        throw new Error(`Couldn't find a review column for project ${projectId} - giving up`);
+    }
+    return reviewColumn;
+});
+exports.getReviewColumn = getReviewColumn;
 /**
  * Fetches the project with the given ID.
  *
