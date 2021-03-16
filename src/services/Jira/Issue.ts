@@ -71,6 +71,7 @@ export const JiraStatusHasIssues = 'Has issues'
 export const JiraStatusInDevelopment = 'In development'
 export const JiraStatusInProgress = 'In progress' // Alternative to 'In development' in some boards.
 export const JiraStatusReadyForPlanning = 'Ready for planning'
+export const JiraStatusReview = 'Review' // Alternative to 'Tech review' in some boards.
 export const JiraStatusTechnicalPlanning = 'Technical Planning'
 export const JiraStatusTechReview = 'Tech review'
 export const JiraStatusValidated = 'Validated'
