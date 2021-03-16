@@ -53,7 +53,7 @@
     "unique-names-generator": "^4.4.0"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^8.5.3",
+    "@octokit/webhooks": "^8.5.4",
     "@octokit/webhooks-definitions": "^3.62.5",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.20",
@@ -62,7 +62,7 @@
     "@types/mustache": "^4.1.1",
     "@types/node": "^14.14.34",
     "@types/node-fetch": "^2.5.8",
-    "@typescript-eslint/parser": "^4.17.0",
+    "@typescript-eslint/parser": "^4.18.0",
     "@vercel/ncc": "0.27.0",
     "eslint": "^7.22.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
@@ -71,7 +71,7 @@
     "eslint-plugin-github": "^4.1.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.3.1",
-    "eslint-plugin-jsdoc": "^32.2.0",
+    "eslint-plugin-jsdoc": "^32.3.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-unused-imports": "^1.1.0",
@@ -81,7 +81,7 @@
     "js-yaml": "^4.0.0",
     "lint-staged": "^10.5.4",
     "prettier": "2.2.1",
-    "ts-jest": "^26.5.2",
+    "ts-jest": "^26.5.3",
     "tscpaths": "^0.0.9",
     "typescript": "^4.2.3"
   }
