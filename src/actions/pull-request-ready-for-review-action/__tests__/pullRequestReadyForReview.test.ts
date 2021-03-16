@@ -15,7 +15,9 @@ import {
 } from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
+  getReviewColumn: jest.fn(),
   getIssue: jest.fn(),
+  JiraStatusTechReview: 'Tech review',
   setIssueStatus: jest.fn(),
 }))
 jest.mock('@sr-services/Github', () => ({
@@ -34,8 +36,9 @@ describe('pull-request-ready-for-review-action', () => {
     let addLabelsSpy: jest.SpyInstance
     let assignReviewersSpy: jest.SpyInstance
     let fetchRepositorySpy: jest.SpyInstance
-    let getIssueSpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
+    let getIssueSpy: jest.SpyInstance
+    let getReviewColumnSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let setIssueStatusSpy: jest.SpyInstance
 
@@ -63,6 +66,9 @@ describe('pull-request-ready-for-review-action', () => {
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
         .mockImplementation((_pr: Github.PullRequestContent) => 'ISSUE-236')
+      getReviewColumnSpy = jest
+        .spyOn(Jira, 'getReviewColumn')
+        .mockReturnValue(Promise.resolve(Jira.JiraStatusTechReview))
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string) => undefined)
@@ -79,6 +85,7 @@ describe('pull-request-ready-for-review-action', () => {
       fetchRepositorySpy.mockRestore()
       getIssueSpy.mockRestore()
       getIssueKeySpy.mockRestore()
+      getReviewColumnSpy.mockRestore()
       infoSpy.mockRestore()
       setIssueStatusSpy.mockRestore()
     })

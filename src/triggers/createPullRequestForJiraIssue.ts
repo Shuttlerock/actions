@@ -50,7 +50,7 @@ export const createPullRequestForJiraIssue = async (
   const issue = await getIssue(issueKey)
   if (isNil(issue)) {
     const credentials = await fetchCredentials(email)
-    const message = `Issue ${issueKey}> could not be found, so no pull request was created`
+    const message = `Issue ${issueKey} could not be found, so no pull request was created`
     await sendUserMessage(credentials.slack_id, message)
     error(message)
     return
