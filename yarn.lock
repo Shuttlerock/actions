@@ -660,10 +660,15 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks-definitions@3.62.5", "@octokit/webhooks-definitions@^3.62.5":
+"@octokit/webhooks-definitions@3.62.5":
   version "3.62.5"
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.62.5.tgz#3b2443ee07bb00e6333ce6bef8ccf5eadfb08430"
   integrity sha512-1SWpIFhDLgus9aJ++GOnV/YYcT53glj/YDNzt45S47BfK2/tzYLHWHYFpmEO0frsSEKMFDewDy4c4cWuCpNH/g==
+
+"@octokit/webhooks-definitions@^3.63.1":
+  version "3.63.1"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.63.1.tgz#8a1f48a57d6a39b6dc0adfea9d47ad9227160613"
+  integrity sha512-lVjCTaa8fMiwxRh1WVDugEPkZnOqGnrSy5IXVUecpK9IXO23v6ZbvsMEW5LQYBJ07PZuusn7V9j1K13Cq5jPQA==
 
 "@octokit/webhooks@^8.5.4":
   version "8.5.4"
