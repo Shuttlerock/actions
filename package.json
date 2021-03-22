@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@octokit/webhooks": "^8.5.4",
-    "@octokit/webhooks-definitions": "^3.62.5",
+    "@octokit/webhooks-definitions": "^3.65.0",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.20",
     "@types/jira-client": "^6.13.1",
