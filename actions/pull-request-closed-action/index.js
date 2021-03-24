@@ -60398,7 +60398,7 @@ exports.pullRequestClosed = pullRequestClosed;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.SecurityLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
 exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
@@ -60409,6 +60409,7 @@ exports.InProgressLabel = 'in-progress';
 exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
 exports.ReleaseLabel = 'release';
+exports.SecurityLabel = 'security';
 exports.UnderDiscussionLabel = 'under-discussion';
 // The Github user our actions use.
 exports.GithubWriteUser = 'sr-devops';

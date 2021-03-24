@@ -8,6 +8,7 @@ import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
 import {
   mockGithubPullRequestPayload,
+  mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
   mockJiraIssue,
   mockPullsRequestReviewersResponseData,
@@ -23,6 +24,7 @@ jest.mock('@sr-services/Jira', () => ({
 jest.mock('@sr-services/Github', () => ({
   addLabels: jest.fn(),
   getIssueKey: jest.fn(),
+  assignOwners: jest.fn(),
   assignReviewers: jest.fn(),
 }))
 
@@ -34,6 +36,7 @@ describe('pull-request-ready-for-review-action', () => {
     } as Schema.PullRequestEvent
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
+    let assignOwnersSpy: jest.SpyInstance
     let assignReviewersSpy: jest.SpyInstance
     let fetchRepositorySpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
@@ -45,42 +48,34 @@ describe('pull-request-ready-for-review-action', () => {
     beforeEach(() => {
       addLabelsSpy = jest
         .spyOn(Github, 'addLabels')
-        .mockImplementation(
-          (_repo: Github.Repository, _number: number, _labels: string[]) =>
-            Promise.resolve(mockIssuesAddLabelsResponseData)
-        )
+        .mockReturnValue(Promise.resolve(mockIssuesAddLabelsResponseData))
+      assignOwnersSpy = jest
+        .spyOn(Github, 'assignOwners')
+        .mockReturnValue(Promise.resolve(mockIssuesAddAssigneesResponseData))
       assignReviewersSpy = jest
         .spyOn(Github, 'assignReviewers')
-        .mockImplementation(
-          (_repo: Github.Repository, _number: number, _usernames: string[]) =>
-            Promise.resolve(mockPullsRequestReviewersResponseData)
-        )
+        .mockReturnValue(Promise.resolve(mockPullsRequestReviewersResponseData))
       fetchRepositorySpy = jest
         .spyOn(Credentials, 'fetchRepository')
-        .mockImplementation((_name?: string) => Promise.resolve(mockRepository))
+        .mockReturnValue(Promise.resolve(mockRepository))
       getIssueSpy = jest
         .spyOn(Jira, 'getIssue')
-        .mockImplementation((_issueKey: string) =>
-          Promise.resolve(mockJiraIssue)
-        )
+        .mockReturnValue(Promise.resolve(mockJiraIssue))
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
-        .mockImplementation((_pr: Github.PullRequestContent) => 'ISSUE-236')
+        .mockReturnValue('ISSUE-236')
       getReviewColumnSpy = jest
         .spyOn(Jira, 'getReviewColumn')
         .mockReturnValue(Promise.resolve(Jira.JiraStatusTechReview))
-      infoSpy = jest
-        .spyOn(core, 'info')
-        .mockImplementation((_message: string) => undefined)
+      infoSpy = jest.spyOn(core, 'info').mockReturnValue(undefined)
       setIssueStatusSpy = jest
         .spyOn(Jira, 'setIssueStatus')
-        .mockImplementation((_issueId: string, _newStatus: string) =>
-          Promise.resolve(undefined)
-        )
+        .mockReturnValue(Promise.resolve(undefined))
     })
 
     afterEach(() => {
       addLabelsSpy.mockRestore()
+      assignOwnersSpy.mockRestore()
       assignReviewersSpy.mockRestore()
       fetchRepositorySpy.mockRestore()
       getIssueSpy.mockRestore()
@@ -107,6 +102,15 @@ describe('pull-request-ready-for-review-action', () => {
       )
     })
 
+    it('assigns owners', async () => {
+      await pullRequestReadyForReview(payload)
+      expect(assignOwnersSpy).toHaveBeenCalledWith(
+        payload.repository.name,
+        payload.pull_request.number,
+        ['dhh']
+      )
+    })
+
     it('assigns reviewers', async () => {
       await pullRequestReadyForReview(payload)
       expect(assignReviewersSpy).toHaveBeenCalledWith(
@@ -117,9 +121,7 @@ describe('pull-request-ready-for-review-action', () => {
     })
 
     it("does nothing if the pull request doesn't contain a Jira issue key", async () => {
-      getIssueKeySpy.mockImplementation(
-        (_pr: Github.PullRequestContent) => undefined
-      )
+      getIssueKeySpy.mockReturnValue(undefined)
       await pullRequestReadyForReview(payload)
       const message = `Couldn't extract a Jira issue key from ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
@@ -127,7 +129,7 @@ describe('pull-request-ready-for-review-action', () => {
     })
 
     it('does nothing if the Jira issue cannot be found', async () => {
-      getIssueSpy.mockImplementation((_issueKey: string) => undefined)
+      getIssueSpy.mockReturnValue(undefined)
       await pullRequestReadyForReview(payload)
       const message = `Couldn't find a Jira issue for ${prName} - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)
@@ -145,9 +147,7 @@ describe('pull-request-ready-for-review-action', () => {
           },
         },
       }
-      getIssueSpy.mockImplementation((_issueKey: string) =>
-        Promise.resolve(validatedIssue)
-      )
+      getIssueSpy.mockReturnValue(Promise.resolve(validatedIssue))
       await pullRequestReadyForReview(payload)
       const message = `Jira issue ${mockJiraIssue.key} is already in '${Jira.JiraStatusTechReview}' - ignoring`
       expect(infoSpy).toHaveBeenLastCalledWith(message)

@@ -5,9 +5,10 @@ import {
   DependenciesLabel,
   GithubWriteUser,
   PleaseReviewLabel,
+  SecurityLabel,
 } from '@sr-services/Constants'
 import { fetchRepository, User } from '@sr-services/Credentials'
-import { addLabels, assignReviewers } from '@sr-services/Github'
+import { addLabels, assignOwners, assignReviewers } from '@sr-services/Github'
 
 /**
  * Runs whenever a pull request is labeled.
@@ -24,13 +25,27 @@ export const pullRequestLabeled = async (
     return
   }
 
-  let added = [label?.name as string] // We know we have a label for this event.
+  const added = label?.name as string // We know we have a label for this event.
+
+  if (![DependenciesLabel, SecurityLabel].includes(added)) {
+    info(`No action needed for the label '${added}'`)
+    return
+  }
+
+  const repo = await fetchRepository(repository.name)
+
+  // If this is a security PR or a dependency update, we want to make sure there is an owner.
+  const owners = repo.leads.map((user: User) => user.github_username)
+  if (owners.length > 0) {
+    info(`Assigning owners (${owners.join(', ')})...`)
+    await assignOwners(repository.name, pullRequest.number, owners)
+  } else {
+    info('No owners to assign')
+  }
 
   // If this is a dependabot PR, we want to start review straight away.
-  if (added[0] === DependenciesLabel) {
+  if (added === DependenciesLabel) {
     info('This looks like a dependency update - adding reviewers...')
-    added = [...added, PleaseReviewLabel]
-    const repo = await fetchRepository(repository.name)
     const reviewers = repo.reviewers.map((user: User) => user.github_username)
     if (reviewers.length > 0) {
       info(`Assigning reviewers (${reviewers.join(', ')})...`)
@@ -38,7 +53,10 @@ export const pullRequestLabeled = async (
     } else {
       info('No reviewers to assign')
     }
-  }
 
-  await addLabels(repository.name, pullRequest.number, added)
+    await addLabels(repository.name, pullRequest.number, [
+      added,
+      PleaseReviewLabel,
+    ])
+  }
 }
