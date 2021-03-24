@@ -6,6 +6,7 @@ import {
   DependenciesLabel,
   GithubWriteUser,
   PleaseReviewLabel,
+  SecurityLabel,
 } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
@@ -17,33 +18,36 @@ jest.mock('@sr-services/Jira', () => ({
 }))
 jest.mock('@sr-services/Github', () => ({
   addLabels: jest.fn(),
+  assignOwners: jest.fn(),
   assignReviewers: jest.fn(),
+  fetchRepositorySpy: jest.fn(),
 }))
 
 describe('pull-request-labeled-action', () => {
   describe('pullRequestLabeled', () => {
     let addLabelsSpy: jest.SpyInstance
+    let fetchRepositorySpy: jest.SpyInstance
+
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
     const payload = (rawPayload as unknown) as Schema.PullRequestLabeledEvent
 
     beforeEach(() => {
       addLabelsSpy = jest
         .spyOn(Github, 'addLabels')
-        .mockImplementation(
-          (_repo: Github.Repository, _num: number, _added: string[]) =>
-            Promise.resolve([])
-        )
+        .mockReturnValue(Promise.resolve([]))
+      fetchRepositorySpy = jest
+        .spyOn(Credentials, 'fetchRepository')
+        .mockReturnValue(Promise.resolve(mockRepository))
     })
 
     afterEach(() => {
       addLabelsSpy.mockRestore()
+      fetchRepositorySpy.mockRestore()
     })
 
-    it('adds the specified labels', async () => {
+    it('does nothing if the label is not relevant', async () => {
       await pullRequestLabeled(payload)
-      expect(addLabelsSpy).toHaveBeenCalledWith(payload.repository.name, 136, [
-        PleaseReviewLabel,
-      ])
+      expect(addLabelsSpy).toHaveBeenCalledTimes(0)
     })
 
     it('does nothing if the event was triggered by another Github action', async () => {
@@ -57,10 +61,7 @@ describe('pull-request-labeled-action', () => {
       expect(addLabelsSpy).toHaveBeenCalledTimes(0)
     })
 
-    it('assigns reviewers to dependabot PRs', async () => {
-      const fetchRepositorySpy = jest
-        .spyOn(Credentials, 'fetchRepository')
-        .mockReturnValue(Promise.resolve(mockRepository))
+    it('assigns owners', async () => {
       const assignReviewersSpy = jest.spyOn(Github, 'assignReviewers')
       const dependabotPayload = ({
         ...payload,
@@ -78,8 +79,24 @@ describe('pull-request-labeled-action', () => {
         DependenciesLabel,
         PleaseReviewLabel,
       ])
-      fetchRepositorySpy.mockRestore()
       assignReviewersSpy.mockRestore()
+    })
+
+    it('assigns reviewers to dependabot PRs', async () => {
+      const assignOwnersSpy = jest.spyOn(Github, 'assignOwners')
+      const dependabotPayload = ({
+        ...payload,
+        label: {
+          name: SecurityLabel,
+        },
+      } as unknown) as Schema.PullRequestLabeledEvent
+      await pullRequestLabeled(dependabotPayload)
+      expect(assignOwnersSpy).toHaveBeenCalledWith(
+        payload.repository.name,
+        136,
+        ['dhh']
+      )
+      assignOwnersSpy.mockRestore()
     })
   })
 })

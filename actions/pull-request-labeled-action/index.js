@@ -60339,12 +60339,24 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
         core_1.info(`This label was added by @${Constants_1.GithubWriteUser} - nothing to do`);
         return;
     }
-    let added = [label === null || label === void 0 ? void 0 : label.name]; // We know we have a label for this event.
+    const added = label === null || label === void 0 ? void 0 : label.name; // We know we have a label for this event.
+    if (![Constants_1.DependenciesLabel, Constants_1.SecurityLabel].includes(added)) {
+        core_1.info(`No action needed for the label '${added}'`);
+        return;
+    }
+    const repo = yield Credentials_1.fetchRepository(repository.name);
+    // If this is a security PR or a dependency update, we want to make sure there is an owner.
+    const owners = repo.leads.map((user) => user.github_username);
+    if (owners.length > 0) {
+        core_1.info(`Assigning owners (${owners.join(', ')})...`);
+        yield Github_1.assignOwners(repository.name, pullRequest.number, owners);
+    }
+    else {
+        core_1.info('No owners to assign');
+    }
     // If this is a dependabot PR, we want to start review straight away.
-    if (added[0] === Constants_1.DependenciesLabel) {
+    if (added === Constants_1.DependenciesLabel) {
         core_1.info('This looks like a dependency update - adding reviewers...');
-        added = [...added, Constants_1.PleaseReviewLabel];
-        const repo = yield Credentials_1.fetchRepository(repository.name);
         const reviewers = repo.reviewers.map((user) => user.github_username);
         if (reviewers.length > 0) {
             core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
@@ -60353,8 +60365,11 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
         else {
             core_1.info('No reviewers to assign');
         }
+        yield Github_1.addLabels(repository.name, pullRequest.number, [
+            added,
+            Constants_1.PleaseReviewLabel,
+        ]);
     }
-    yield Github_1.addLabels(repository.name, pullRequest.number, added);
 });
 exports.pullRequestLabeled = pullRequestLabeled;
 
@@ -60367,7 +60382,7 @@ exports.pullRequestLabeled = pullRequestLabeled;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.SecurityLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
 exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
@@ -60378,6 +60393,7 @@ exports.InProgressLabel = 'in-progress';
 exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
 exports.ReleaseLabel = 'release';
+exports.SecurityLabel = 'security';
 exports.UnderDiscussionLabel = 'under-discussion';
 // The Github user our actions use.
 exports.GithubWriteUser = 'sr-devops';
