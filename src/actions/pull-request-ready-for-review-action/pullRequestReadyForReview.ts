@@ -4,7 +4,12 @@ import isNil from 'lodash/isNil'
 
 import { PleaseReviewLabel } from '@sr-services/Constants'
 import { fetchRepository, User } from '@sr-services/Credentials'
-import { addLabels, assignReviewers, getIssueKey } from '@sr-services/Github'
+import {
+  addLabels,
+  assignOwners,
+  assignReviewers,
+  getIssueKey,
+} from '@sr-services/Github'
 import { getReviewColumn, getIssue, setIssueStatus } from '@sr-services/Jira'
 
 /**
@@ -19,11 +24,17 @@ export const pullRequestReadyForReview = async (
 
   info('Fetching repository details...')
   const repo = await fetchRepository(repository.name)
-  const reviewers = repo.reviewers.map((user: User) => user.github_username)
 
-  info(`Assigning reviewers (${reviewers.join(', ')})...`)
+  const reviewers = repo.reviewers.map((user: User) => user.github_username)
   if (reviewers.length > 0) {
+    info(`Assigning reviewers (${reviewers.join(', ')})...`)
     await assignReviewers(repository.name, pullRequest.number, reviewers)
+  }
+
+  const owners = repo.leads.map((user: User) => user.github_username)
+  if (owners.length > 0) {
+    info(`Assigning owners (${owners.join(', ')})...`)
+    await assignOwners(repository.name, pullRequest.number, owners)
   }
 
   info(`Adding the '${PleaseReviewLabel}' label...`)

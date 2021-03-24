@@ -60343,9 +60343,14 @@ const pullRequestReadyForReview = (payload) => __awaiter(void 0, void 0, void 0,
     core_1.info('Fetching repository details...');
     const repo = yield Credentials_1.fetchRepository(repository.name);
     const reviewers = repo.reviewers.map((user) => user.github_username);
-    core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
     if (reviewers.length > 0) {
+        core_1.info(`Assigning reviewers (${reviewers.join(', ')})...`);
         yield Github_1.assignReviewers(repository.name, pullRequest.number, reviewers);
+    }
+    const owners = repo.leads.map((user) => user.github_username);
+    if (owners.length > 0) {
+        core_1.info(`Assigning owners (${owners.join(', ')})...`);
+        yield Github_1.assignOwners(repository.name, pullRequest.number, owners);
     }
     core_1.info(`Adding the '${Constants_1.PleaseReviewLabel}' label...`);
     yield Github_1.addLabels(repository.name, pullRequest.number, [Constants_1.PleaseReviewLabel]);
@@ -60387,7 +60392,7 @@ exports.pullRequestReadyForReview = pullRequestReadyForReview;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.SecurityLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
 exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
@@ -60398,6 +60403,7 @@ exports.InProgressLabel = 'in-progress';
 exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
 exports.ReleaseLabel = 'release';
+exports.SecurityLabel = 'security';
 exports.UnderDiscussionLabel = 'under-discussion';
 // The Github user our actions use.
 exports.GithubWriteUser = 'sr-devops';
