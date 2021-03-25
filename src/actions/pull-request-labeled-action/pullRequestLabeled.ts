@@ -1,5 +1,6 @@
 import { info } from '@actions/core'
 import Schema from '@octokit/webhooks-definitions/schema'
+import isNil from 'lodash/isNil'
 
 import {
   DependenciesLabel,
@@ -25,7 +26,11 @@ export const pullRequestLabeled = async (
     return
   }
 
-  const added = label?.name as string // We know we have a label for this event.
+  const added = label?.name
+  if (isNil(added)) {
+    info('The label is empty - giving up')
+    return
+  }
 
   if (![DependenciesLabel, SecurityLabel].includes(added)) {
     info(`No action needed for the label '${added}'`)

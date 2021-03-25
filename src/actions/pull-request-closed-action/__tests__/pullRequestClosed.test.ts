@@ -14,6 +14,8 @@ import {
 jest.mock('@sr-services/Jira', () => ({
   createRelease: jest.fn(),
   getIssue: jest.fn(),
+  getValidatedColumn: jest.fn(),
+  JiraStatusValidated: 'Validated',
   setIssueStatus: jest.fn(),
 }))
 jest.mock('@sr-services/Github', () => ({
@@ -26,6 +28,7 @@ describe('pull-request-closed-action', () => {
     const prName = `${mockGithubPullRequestPayload.repository.name}#${mockGithubPullRequestPayload.pull_request.number}`
     let getIssueSpy: jest.SpyInstance
     let getIssueKeySpy: jest.SpyInstance
+    let getValidatedColumnSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let setIssueStatusSpy: jest.SpyInstance
 
@@ -38,6 +41,9 @@ describe('pull-request-closed-action', () => {
       getIssueKeySpy = jest
         .spyOn(Github, 'getIssueKey')
         .mockImplementation((_pr: Github.PullRequestContent) => 'ISSUE-236')
+      getValidatedColumnSpy = jest
+        .spyOn(Jira, 'getValidatedColumn')
+        .mockReturnValue(Promise.resolve(Jira.JiraStatusValidated))
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string) => undefined)
@@ -51,6 +57,7 @@ describe('pull-request-closed-action', () => {
     afterEach(() => {
       getIssueSpy.mockRestore()
       getIssueKeySpy.mockRestore()
+      getValidatedColumnSpy.mockRestore()
       infoSpy.mockRestore()
       setIssueStatusSpy.mockRestore()
     })

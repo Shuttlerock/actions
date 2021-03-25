@@ -6,7 +6,7 @@ module.exports =
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"@slack/web-api\",\"version\":\"6.0.0\",\"description\":\"Official library for using the Slack Platform's Web API\",\"author\":\"Slack Technologies, Inc.\",\"license\":\"MIT\",\"keywords\":[\"slack\",\"web-api\",\"bot\",\"client\",\"http\",\"api\",\"proxy\",\"rate-limiting\",\"pagination\"],\"main\":\"dist/index.js\",\"types\":\"./dist/index.d.ts\",\"files\":[\"dist/**/*\"],\"engines\":{\"node\":\">= 12.13.0\",\"npm\":\">= 6.12.0\"},\"repository\":\"slackapi/node-slack-sdk\",\"homepage\":\"https://slack.dev/node-slack-sdk/web-api\",\"publishConfig\":{\"access\":\"public\"},\"bugs\":{\"url\":\"https://github.com/slackapi/node-slack-sdk/issues\"},\"scripts\":{\"prepare\":\"npm run build\",\"build\":\"npm run build:clean && tsc\",\"build:clean\":\"shx rm -rf ./dist ./coverage ./.nyc_output\",\"lint\":\"tslint --project .\",\"test\":\"npm run build && npm run test:mocha && npm run test:types\",\"test:mocha\":\"nyc mocha --config .mocharc.json src/*.spec.js\",\"test:types\":\"tsd\",\"coverage\":\"codecov -F webapi --root=$PWD\",\"ref-docs:model\":\"api-extractor run\",\"watch\":\"npx nodemon --watch 'src' --ext 'ts' --exec npm run build\"},\"dependencies\":{\"@slack/logger\":\">=1.0.0 <3.0.0\",\"@slack/types\":\"^1.7.0\",\"@types/is-stream\":\"^1.1.0\",\"@types/node\":\">=12.0.0\",\"axios\":\"^0.21.1\",\"eventemitter3\":\"^3.1.0\",\"form-data\":\"^2.5.0\",\"is-stream\":\"^1.1.0\",\"p-queue\":\"^6.6.1\",\"p-retry\":\"^4.0.0\"},\"devDependencies\":{\"@aoberoi/capture-console\":\"^1.1.0\",\"@microsoft/api-extractor\":\"^7.3.4\",\"@types/chai\":\"^4.1.7\",\"@types/mocha\":\"^5.2.6\",\"busboy\":\"^0.3.0\",\"chai\":\"^4.2.0\",\"codecov\":\"^3.2.0\",\"mocha\":\"^6.0.2\",\"nock\":\"^10.0.6\",\"nyc\":\"^14.1.1\",\"shelljs\":\"^0.8.3\",\"shx\":\"^0.3.2\",\"sinon\":\"^7.2.7\",\"source-map-support\":\"^0.5.10\",\"ts-node\":\"^9.0.0\",\"tsd\":\"^0.13.1\",\"tslint\":\"^5.13.1\",\"tslint-config-airbnb\":\"^5.11.1\",\"typescript\":\"^4.1\"},\"tsd\":{\"directory\":\"test/types\"}}");
+module.exports = JSON.parse("{\"name\":\"@slack/web-api\",\"version\":\"6.1.0\",\"description\":\"Official library for using the Slack Platform's Web API\",\"author\":\"Slack Technologies, Inc.\",\"license\":\"MIT\",\"keywords\":[\"slack\",\"web-api\",\"bot\",\"client\",\"http\",\"api\",\"proxy\",\"rate-limiting\",\"pagination\"],\"main\":\"dist/index.js\",\"types\":\"./dist/index.d.ts\",\"files\":[\"dist/**/*\"],\"engines\":{\"node\":\">= 12.13.0\",\"npm\":\">= 6.12.0\"},\"repository\":\"slackapi/node-slack-sdk\",\"homepage\":\"https://slack.dev/node-slack-sdk/web-api\",\"publishConfig\":{\"access\":\"public\"},\"bugs\":{\"url\":\"https://github.com/slackapi/node-slack-sdk/issues\"},\"scripts\":{\"prepare\":\"npm run build\",\"build\":\"npm run build:clean && tsc\",\"build:clean\":\"shx rm -rf ./dist ./coverage ./.nyc_output\",\"lint\":\"tslint --project .\",\"test\":\"npm run build && npm run test:mocha && npm run test:types\",\"test:mocha\":\"nyc mocha --config .mocharc.json src/*.spec.js\",\"test:types\":\"tsd\",\"coverage\":\"codecov -F webapi --root=$PWD\",\"ref-docs:model\":\"api-extractor run\",\"watch\":\"npx nodemon --watch 'src' --ext 'ts' --exec npm run build\"},\"dependencies\":{\"@slack/logger\":\">=1.0.0 <3.0.0\",\"@slack/types\":\"^1.7.0\",\"@types/is-stream\":\"^1.1.0\",\"@types/node\":\">=12.0.0\",\"axios\":\"^0.21.1\",\"eventemitter3\":\"^3.1.0\",\"form-data\":\"^2.5.0\",\"is-stream\":\"^1.1.0\",\"p-queue\":\"^6.6.1\",\"p-retry\":\"^4.0.0\"},\"devDependencies\":{\"@aoberoi/capture-console\":\"^1.1.0\",\"@microsoft/api-extractor\":\"^7.3.4\",\"@types/chai\":\"^4.1.7\",\"@types/mocha\":\"^5.2.6\",\"busboy\":\"^0.3.0\",\"chai\":\"^4.2.0\",\"codecov\":\"^3.2.0\",\"mocha\":\"^6.0.2\",\"nock\":\"^10.0.6\",\"nyc\":\"^14.1.1\",\"shelljs\":\"^0.8.3\",\"shx\":\"^0.3.2\",\"sinon\":\"^7.2.7\",\"source-map-support\":\"^0.5.10\",\"ts-node\":\"^9.0.0\",\"tsd\":\"^0.13.1\",\"tslint\":\"^5.13.1\",\"tslint-config-airbnb\":\"^5.11.1\",\"typescript\":\"^4.1\"},\"tsd\":{\"directory\":\"test/types\"}}");
 
 /***/ }),
 
@@ -63206,7 +63206,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProject = exports.getReviewColumn = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getValidatedColumn = exports.getReviewColumn = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
 const core_1 = __nccwpck_require__(42186);
 const isNil_1 = __importDefault(__nccwpck_require__(84977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(80467));
@@ -63264,7 +63264,10 @@ const getInProgressColumn = (projectId) => __awaiter(void 0, void 0, void 0, fun
     if (isNil_1.default(columns) || columns.length === 0) {
         throw new Error(`No columns found for project ${projectId}`);
     }
-    const inProgressColumn = (_a = columns.find((col) => [Issue_1.JiraStatusInDevelopment, Issue_1.JiraStatusInProgress].includes(col.name))) === null || _a === void 0 ? void 0 : _a.name;
+    const inProgressColumn = (_a = columns.find((col) => [
+        Issue_1.JiraStatusInDevelopment.toLowerCase(),
+        Issue_1.JiraStatusInProgress.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _a === void 0 ? void 0 : _a.name;
     if (isNil_1.default(inProgressColumn)) {
         throw new Error(`Couldn't find an in-progress column for project ${projectId} - giving up`);
     }
@@ -63286,13 +63289,41 @@ const getReviewColumn = (projectId) => __awaiter(void 0, void 0, void 0, functio
     if (isNil_1.default(columns) || columns.length === 0) {
         throw new Error(`No columns found for project ${projectId}`);
     }
-    const reviewColumn = (_b = columns.find((col) => [Issue_1.JiraStatusReview, Issue_1.JiraStatusTechReview].includes(col.name))) === null || _b === void 0 ? void 0 : _b.name;
+    const reviewColumn = (_b = columns.find((col) => [
+        Issue_1.JiraStatusReview.toLowerCase(),
+        Issue_1.JiraStatusTechReview.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _b === void 0 ? void 0 : _b.name;
     if (isNil_1.default(reviewColumn)) {
         throw new Error(`Couldn't find a review column for project ${projectId} - giving up`);
     }
     return reviewColumn;
 });
 exports.getReviewColumn = getReviewColumn;
+/**
+ * Some boards don't have a 'Validated' column. In that case we will just put them in
+ * 'Review', if it exists.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as validated.
+ */
+const getValidatedColumn = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    core_1.info(`Finding the 'Validated' column names for the project ${projectId}...`);
+    const columns = yield exports.getColumns(projectId);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${projectId}`);
+    }
+    const validatedColumn = (_c = columns.find((col) => [
+        Issue_1.JiraStatusValidated.toLowerCase(),
+        Issue_1.JiraStatusReview.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _c === void 0 ? void 0 : _c.name;
+    if (isNil_1.default(validatedColumn)) {
+        throw new Error(`Couldn't find a validated column for project ${projectId} - giving up`);
+    }
+    return validatedColumn;
+});
+exports.getValidatedColumn = getValidatedColumn;
 /**
  * Fetches the project with the given ID.
  *
