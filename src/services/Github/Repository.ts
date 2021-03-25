@@ -28,7 +28,7 @@ export const compareCommits = async (
     head,
   })
 
-  return response.data
+  return (response.data as unknown) as ReposCompareCommitsResponseData
 }
 
 /**
@@ -72,7 +72,7 @@ export const getRepository = async (
     owner: organizationName(),
     repo,
   })
-  return response.data
+  return (response.data as unknown) as ReposGetResponseData
 }
 
 /**
