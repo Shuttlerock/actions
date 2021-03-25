@@ -1,7 +1,11 @@
 import fetch from 'node-fetch'
 
 import { client } from '@sr-services/Jira/Client'
-import { JiraStatusInProgress, JiraStatusReview } from '@sr-services/Jira/Issue'
+import {
+  JiraStatusInProgress,
+  JiraStatusReview,
+  JiraStatusValidated,
+} from '@sr-services/Jira/Issue'
 import * as Project from '@sr-services/Jira/Project'
 import {
   mockJiraBoard,
@@ -63,6 +67,19 @@ describe('Project', () => {
         )
       const columnName = await Project.getReviewColumn('10003')
       expect(columnName).toEqual(JiraStatusReview)
+      spy.mockRestore()
+    })
+  })
+
+  describe('getValidatedColumn', () => {
+    it('returns the correct column name', async () => {
+      const spy = jest
+        .spyOn(Project, 'getColumns')
+        .mockReturnValue(
+          Promise.resolve([mockJiraBoardColumn, { name: JiraStatusValidated }])
+        )
+      const columnName = await Project.getValidatedColumn('10003')
+      expect(columnName).toEqual(JiraStatusValidated)
       spy.mockRestore()
     })
   })

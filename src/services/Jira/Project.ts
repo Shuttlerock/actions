@@ -8,6 +8,7 @@ import {
   JiraStatusInProgress,
   JiraStatusReview,
   JiraStatusTechReview,
+  JiraStatusValidated,
 } from '@sr-services/Jira/Issue'
 
 export interface JiraBoard {
@@ -105,7 +106,10 @@ export const getInProgressColumn = async (
   }
 
   const inProgressColumn = columns.find((col: JiraBoardColumn) =>
-    [JiraStatusInDevelopment, JiraStatusInProgress].includes(col.name)
+    [
+      JiraStatusInDevelopment.toLowerCase(),
+      JiraStatusInProgress.toLowerCase(),
+    ].includes(col.name.toLowerCase())
   )?.name
 
   if (isNil(inProgressColumn)) {
@@ -133,7 +137,10 @@ export const getReviewColumn = async (projectId: string): Promise<string> => {
   }
 
   const reviewColumn = columns.find((col: JiraBoardColumn) =>
-    [JiraStatusReview, JiraStatusTechReview].includes(col.name)
+    [
+      JiraStatusReview.toLowerCase(),
+      JiraStatusTechReview.toLowerCase(),
+    ].includes(col.name.toLowerCase())
   )?.name
 
   if (isNil(reviewColumn)) {
@@ -143,6 +150,39 @@ export const getReviewColumn = async (projectId: string): Promise<string> => {
   }
 
   return reviewColumn
+}
+
+/**
+ * Some boards don't have a 'Validated' column. In that case we will just put them in
+ * 'Review', if it exists.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as validated.
+ */
+export const getValidatedColumn = async (
+  projectId: string
+): Promise<string> => {
+  info(`Finding the 'Validated' column names for the project ${projectId}...`)
+  const columns = await getColumns(projectId)
+  if (isNil(columns) || columns.length === 0) {
+    throw new Error(`No columns found for project ${projectId}`)
+  }
+
+  const validatedColumn = columns.find((col: JiraBoardColumn) =>
+    [
+      JiraStatusValidated.toLowerCase(),
+      JiraStatusReview.toLowerCase(),
+    ].includes(col.name.toLowerCase())
+  )?.name
+
+  if (isNil(validatedColumn)) {
+    throw new Error(
+      `Couldn't find a validated column for project ${projectId} - giving up`
+    )
+  }
+
+  return validatedColumn
 }
 
 /**
