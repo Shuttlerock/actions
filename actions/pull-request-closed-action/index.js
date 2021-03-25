@@ -60380,12 +60380,18 @@ const pullRequestClosed = (payload) => __awaiter(void 0, void 0, void 0, functio
         core_1.info(`Couldn't find a Jira issue for ${prName} - ignoring`);
         return;
     }
-    if (issue.fields.status.name === Jira_1.JiraStatusValidated) {
-        core_1.info(`Jira issue ${issueKey} is already in '${Jira_1.JiraStatusValidated}' - ignoring`);
+    if (isNil_1.default(issue.fields.project)) {
+        core_1.info(`Couldn't find a project for Jira issue ${issueKey} - ignoring`);
         return;
     }
-    core_1.info(`Moving Jira issue ${issueKey} to '${Jira_1.JiraStatusValidated}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusValidated);
+    // Some boards use 'Review' rather than 'Tech review'.
+    const validatedColumn = yield Jira_1.getValidatedColumn(issue.fields.project.id);
+    if (issue.fields.status.name === validatedColumn) {
+        core_1.info(`Jira issue ${issueKey} is already in '${validatedColumn}' - ignoring`);
+        return;
+    }
+    core_1.info(`Moving Jira issue ${issueKey} to '${validatedColumn}'...`);
+    yield Jira_1.setIssueStatus(issue.id, validatedColumn);
 });
 exports.pullRequestClosed = pullRequestClosed;
 
@@ -61902,7 +61908,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getProject = exports.getReviewColumn = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
+exports.getProject = exports.getValidatedColumn = exports.getReviewColumn = exports.getInProgressColumn = exports.getColumns = exports.getBoard = void 0;
 const core_1 = __nccwpck_require__(2186);
 const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
@@ -61960,7 +61966,10 @@ const getInProgressColumn = (projectId) => __awaiter(void 0, void 0, void 0, fun
     if (isNil_1.default(columns) || columns.length === 0) {
         throw new Error(`No columns found for project ${projectId}`);
     }
-    const inProgressColumn = (_a = columns.find((col) => [Issue_1.JiraStatusInDevelopment, Issue_1.JiraStatusInProgress].includes(col.name))) === null || _a === void 0 ? void 0 : _a.name;
+    const inProgressColumn = (_a = columns.find((col) => [
+        Issue_1.JiraStatusInDevelopment.toLowerCase(),
+        Issue_1.JiraStatusInProgress.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _a === void 0 ? void 0 : _a.name;
     if (isNil_1.default(inProgressColumn)) {
         throw new Error(`Couldn't find an in-progress column for project ${projectId} - giving up`);
     }
@@ -61982,13 +61991,41 @@ const getReviewColumn = (projectId) => __awaiter(void 0, void 0, void 0, functio
     if (isNil_1.default(columns) || columns.length === 0) {
         throw new Error(`No columns found for project ${projectId}`);
     }
-    const reviewColumn = (_b = columns.find((col) => [Issue_1.JiraStatusReview, Issue_1.JiraStatusTechReview].includes(col.name))) === null || _b === void 0 ? void 0 : _b.name;
+    const reviewColumn = (_b = columns.find((col) => [
+        Issue_1.JiraStatusReview.toLowerCase(),
+        Issue_1.JiraStatusTechReview.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _b === void 0 ? void 0 : _b.name;
     if (isNil_1.default(reviewColumn)) {
         throw new Error(`Couldn't find a review column for project ${projectId} - giving up`);
     }
     return reviewColumn;
 });
 exports.getReviewColumn = getReviewColumn;
+/**
+ * Some boards don't have a 'Validated' column. In that case we will just put them in
+ * 'Review', if it exists.
+ *
+ * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
+ *
+ * @returns {string} The name of the column used to mark issues as validated.
+ */
+const getValidatedColumn = (projectId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    core_1.info(`Finding the 'Validated' column names for the project ${projectId}...`);
+    const columns = yield exports.getColumns(projectId);
+    if (isNil_1.default(columns) || columns.length === 0) {
+        throw new Error(`No columns found for project ${projectId}`);
+    }
+    const validatedColumn = (_c = columns.find((col) => [
+        Issue_1.JiraStatusValidated.toLowerCase(),
+        Issue_1.JiraStatusReview.toLowerCase(),
+    ].includes(col.name.toLowerCase()))) === null || _c === void 0 ? void 0 : _c.name;
+    if (isNil_1.default(validatedColumn)) {
+        throw new Error(`Couldn't find a validated column for project ${projectId} - giving up`);
+    }
+    return validatedColumn;
+});
+exports.getValidatedColumn = getValidatedColumn;
 /**
  * Fetches the project with the given ID.
  *

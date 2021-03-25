@@ -7,7 +7,7 @@ import { createReleaseTag, getIssueKey } from '@sr-services/Github'
 import {
   createRelease as createJiraRelease,
   getIssue,
-  JiraStatusValidated,
+  getValidatedColumn,
   setIssueStatus,
 } from '@sr-services/Jira'
 
@@ -79,14 +79,19 @@ export const pullRequestClosed = async (
     info(`Couldn't find a Jira issue for ${prName} - ignoring`)
     return
   }
-
-  if (issue.fields.status.name === JiraStatusValidated) {
-    info(
-      `Jira issue ${issueKey} is already in '${JiraStatusValidated}' - ignoring`
-    )
+  if (isNil(issue.fields.project)) {
+    info(`Couldn't find a project for Jira issue ${issueKey} - ignoring`)
     return
   }
 
-  info(`Moving Jira issue ${issueKey} to '${JiraStatusValidated}'...`)
-  await setIssueStatus(issue.id, JiraStatusValidated)
+  // Some boards use 'Review' rather than 'Tech review'.
+  const validatedColumn = await getValidatedColumn(issue.fields.project.id)
+
+  if (issue.fields.status.name === validatedColumn) {
+    info(`Jira issue ${issueKey} is already in '${validatedColumn}' - ignoring`)
+    return
+  }
+
+  info(`Moving Jira issue ${issueKey} to '${validatedColumn}'...`)
+  await setIssueStatus(issue.id, validatedColumn)
 }
