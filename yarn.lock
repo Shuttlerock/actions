@@ -660,18 +660,18 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks-definitions@3.65.2", "@octokit/webhooks-definitions@^3.65.2":
-  version "3.65.2"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.65.2.tgz#ca644b8d0439870b6221b46b47e412005f50c1a1"
-  integrity sha512-xOPH/kGbnsHQrPLRTk75F3lkxkpY+1vPWqq74mBCUwfjYVnVv3q9l7yi+ZvyUrZ2O/kqjhuJWbG923G/icd0ag==
+"@octokit/webhooks-definitions@3.65.4", "@octokit/webhooks-definitions@^3.65.2":
+  version "3.65.4"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.65.4.tgz#1e2c1e7b38a3fbd7d4d0d51d3cac4d35bad736df"
+  integrity sha512-nXYWY9eTtCMjLtWQwxVFuvIqUJk8j7W+g2SQebgMbMKGVUoqUCJbHVVr7sC4rEIGYK1lofWoU9da9sn+w14k4Q==
 
-"@octokit/webhooks@^8.8.0":
-  version "8.8.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.8.0.tgz#bd4560217cfdd9c528739a374d2bea3a7a1e3c91"
-  integrity sha512-IuZNROGyMLegD/67+1YVv6kNIoxCQKhLLGvmNuitmk6okeMvqCuQGXNM6eyBF9LQ5uxQyr+2vVPaXvQU/p7QQQ==
+"@octokit/webhooks@^8.8.2":
+  version "8.8.2"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.8.2.tgz#727f045003ea609ddfac6cf20f08df27156d73c6"
+  integrity sha512-4aSf3Px0YbLr9eVc8+I/628et79o1Uh3DfiRXy9870+NzUf/F+6PaK73VI4f0db/+z+zOyRZRLydBPImyn8+GA==
   dependencies:
     "@octokit/request-error" "^2.0.2"
-    "@octokit/webhooks-definitions" "3.65.2"
+    "@octokit/webhooks-definitions" "3.65.4"
     aggregate-error "^3.1.0"
     debug "^4.0.0"
 
@@ -2044,10 +2044,10 @@ eslint-plugin-import@>=2.20.1, eslint-plugin-import@^2.22.1:
     resolve "^1.17.0"
     tsconfig-paths "^3.9.0"
 
-eslint-plugin-jest@^24.3.1:
-  version "24.3.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-24.3.1.tgz#c8df037847b83397940bef7fbc2cc168ab466bcc"
-  integrity sha512-RQt59rfMSHyvedImT72iaf8JcvCcR4P7Uq499dALtjY8mrCjbwWrFi1UceG4sid2wVIeDi+0tjxXZ8CZEVO7Zw==
+eslint-plugin-jest@^24.3.2:
+  version "24.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-24.3.2.tgz#30a8b2dea6278d0da1d6fb9d6cd530aaf58050a1"
+  integrity sha512-cicWDr+RvTAOKS3Q/k03+Z3odt3VCiWamNUHWd6QWbVQWcYJyYgUTu8x0mx9GfeDEimawU5kQC+nQ3MFxIM6bw==
   dependencies:
     "@typescript-eslint/experimental-utils" "^4.0.1"
 
