@@ -660,23 +660,18 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks-definitions@3.62.5":
-  version "3.62.5"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.62.5.tgz#3b2443ee07bb00e6333ce6bef8ccf5eadfb08430"
-  integrity sha512-1SWpIFhDLgus9aJ++GOnV/YYcT53glj/YDNzt45S47BfK2/tzYLHWHYFpmEO0frsSEKMFDewDy4c4cWuCpNH/g==
-
-"@octokit/webhooks-definitions@^3.65.2":
+"@octokit/webhooks-definitions@3.65.2", "@octokit/webhooks-definitions@^3.65.2":
   version "3.65.2"
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.65.2.tgz#ca644b8d0439870b6221b46b47e412005f50c1a1"
   integrity sha512-xOPH/kGbnsHQrPLRTk75F3lkxkpY+1vPWqq74mBCUwfjYVnVv3q9l7yi+ZvyUrZ2O/kqjhuJWbG923G/icd0ag==
 
-"@octokit/webhooks@^8.5.4":
-  version "8.5.4"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.5.4.tgz#35f67dfe121ae85dc3881fad2042d8386939a7dc"
-  integrity sha512-7fwSpn3X0WQu5UMdE3NWId6pUfdWWDgShXhZiKfnZcQHxDajpjuS5SiR13OFCwfrm3OgDjkpiey6xO5u9uqXBg==
+"@octokit/webhooks@^8.8.0":
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-8.8.0.tgz#bd4560217cfdd9c528739a374d2bea3a7a1e3c91"
+  integrity sha512-IuZNROGyMLegD/67+1YVv6kNIoxCQKhLLGvmNuitmk6okeMvqCuQGXNM6eyBF9LQ5uxQyr+2vVPaXvQU/p7QQQ==
   dependencies:
     "@octokit/request-error" "^2.0.2"
-    "@octokit/webhooks-definitions" "3.62.5"
+    "@octokit/webhooks-definitions" "3.65.2"
     aggregate-error "^3.1.0"
     debug "^4.0.0"
 
@@ -811,10 +806,10 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@^26.0.20":
-  version "26.0.20"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.20.tgz#cd2f2702ecf69e86b586e1f5223a60e454056307"
-  integrity sha512-9zi2Y+5USJRxd0FsahERhBwlcvFh6D2GLQnY2FH2BzK8J9s9omvNHIbvABwIluXa0fD8XVKMLTO0aOEuUfACAA==
+"@types/jest@^26.0.22":
+  version "26.0.22"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.22.tgz#8308a1debdf1b807aa47be2838acdcd91e88fbe6"
+  integrity sha512-eeWwWjlqxvBxc4oQdkueW5OF/gtfSceKk4OnOAGlUSwS/liBRtZppbJuz1YkgbrbfGOoeBHun9fOvXnjNwrSOw==
   dependencies:
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"
@@ -2049,10 +2044,10 @@ eslint-plugin-import@>=2.20.1, eslint-plugin-import@^2.22.1:
     resolve "^1.17.0"
     tsconfig-paths "^3.9.0"
 
-eslint-plugin-jest@^24.3.1:
-  version "24.3.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-24.3.1.tgz#c8df037847b83397940bef7fbc2cc168ab466bcc"
-  integrity sha512-RQt59rfMSHyvedImT72iaf8JcvCcR4P7Uq499dALtjY8mrCjbwWrFi1UceG4sid2wVIeDi+0tjxXZ8CZEVO7Zw==
+eslint-plugin-jest@^24.3.2:
+  version "24.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-24.3.2.tgz#30a8b2dea6278d0da1d6fb9d6cd530aaf58050a1"
+  integrity sha512-cicWDr+RvTAOKS3Q/k03+Z3odt3VCiWamNUHWd6QWbVQWcYJyYgUTu8x0mx9GfeDEimawU5kQC+nQ3MFxIM6bw==
   dependencies:
     "@typescript-eslint/experimental-utils" "^4.0.1"
 

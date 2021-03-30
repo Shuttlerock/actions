@@ -60348,19 +60348,18 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
         core_1.info('The label is empty - giving up');
         return;
     }
-    if (![Constants_1.DependenciesLabel, Constants_1.SecurityLabel].includes(added)) {
-        core_1.info(`No action needed for the label '${added}'`);
-        return;
-    }
+    let labels = [added];
     const repo = yield Credentials_1.fetchRepository(repository.name);
     // If this is a security PR or a dependency update, we want to make sure there is an owner.
-    const owners = repo.leads.map((user) => user.github_username);
-    if (owners.length > 0) {
-        core_1.info(`Assigning owners (${owners.join(', ')})...`);
-        yield Github_1.assignOwners(repository.name, pullRequest.number, owners);
-    }
-    else {
-        core_1.info('No owners to assign');
+    if ([Constants_1.DependenciesLabel, Constants_1.SecurityLabel].includes(added)) {
+        const owners = repo.leads.map((user) => user.github_username);
+        if (owners.length > 0) {
+            core_1.info(`Assigning owners (${owners.join(', ')})...`);
+            yield Github_1.assignOwners(repository.name, pullRequest.number, owners);
+        }
+        else {
+            core_1.info('No owners to assign');
+        }
     }
     // If this is a dependabot PR, we want to start review straight away.
     if (added === Constants_1.DependenciesLabel) {
@@ -60373,11 +60372,9 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
         else {
             core_1.info('No reviewers to assign');
         }
-        yield Github_1.addLabels(repository.name, pullRequest.number, [
-            added,
-            Constants_1.PleaseReviewLabel,
-        ]);
+        labels = [...labels, Constants_1.PleaseReviewLabel];
     }
+    yield Github_1.addLabels(repository.name, pullRequest.number, labels);
 });
 exports.pullRequestLabeled = pullRequestLabeled;
 

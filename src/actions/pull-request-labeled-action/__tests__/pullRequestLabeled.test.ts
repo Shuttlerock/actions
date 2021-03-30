@@ -45,9 +45,11 @@ describe('pull-request-labeled-action', () => {
       fetchRepositorySpy.mockRestore()
     })
 
-    it('does nothing if the label is not relevant', async () => {
+    it('adds labels', async () => {
       await pullRequestLabeled(payload)
-      expect(addLabelsSpy).toHaveBeenCalledTimes(0)
+      expect(addLabelsSpy).toHaveBeenCalledWith('actions', 136, [
+        PleaseReviewLabel,
+      ])
     })
 
     it('does nothing if the event was triggered by another Github action', async () => {

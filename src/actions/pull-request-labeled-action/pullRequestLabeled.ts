@@ -31,21 +31,19 @@ export const pullRequestLabeled = async (
     info('The label is empty - giving up')
     return
   }
-
-  if (![DependenciesLabel, SecurityLabel].includes(added)) {
-    info(`No action needed for the label '${added}'`)
-    return
-  }
+  let labels = [added]
 
   const repo = await fetchRepository(repository.name)
 
   // If this is a security PR or a dependency update, we want to make sure there is an owner.
-  const owners = repo.leads.map((user: User) => user.github_username)
-  if (owners.length > 0) {
-    info(`Assigning owners (${owners.join(', ')})...`)
-    await assignOwners(repository.name, pullRequest.number, owners)
-  } else {
-    info('No owners to assign')
+  if ([DependenciesLabel, SecurityLabel].includes(added)) {
+    const owners = repo.leads.map((user: User) => user.github_username)
+    if (owners.length > 0) {
+      info(`Assigning owners (${owners.join(', ')})...`)
+      await assignOwners(repository.name, pullRequest.number, owners)
+    } else {
+      info('No owners to assign')
+    }
   }
 
   // If this is a dependabot PR, we want to start review straight away.
@@ -59,9 +57,8 @@ export const pullRequestLabeled = async (
       info('No reviewers to assign')
     }
 
-    await addLabels(repository.name, pullRequest.number, [
-      added,
-      PleaseReviewLabel,
-    ])
+    labels = [...labels, PleaseReviewLabel]
   }
+
+  await addLabels(repository.name, pullRequest.number, labels)
 }
