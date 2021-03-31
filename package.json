@@ -48,7 +48,7 @@
     "dateformat": "^4.5.1",
     "jira-client": "^6.21.0",
     "lodash": "^4.17.21",
-    "mustache": "^4.1.0",
+    "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
     "unique-names-generator": "^4.4.0"
   },
