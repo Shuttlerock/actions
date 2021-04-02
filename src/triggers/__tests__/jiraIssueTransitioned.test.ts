@@ -44,39 +44,29 @@ describe('jiraIssueTransitioned', () => {
   beforeEach(() => {
     getBoardSpy = jest
       .spyOn(Jira, 'getBoard')
-      .mockImplementation((_projectId: string) =>
-        Promise.resolve(mockJiraBoard)
-      )
+      .mockReturnValue(Promise.resolve(mockJiraBoard))
     getInProgressColumnSpy = jest
       .spyOn(Jira, 'getInProgressColumn')
       .mockReturnValue(Promise.resolve(Jira.JiraStatusInDevelopment))
     getChildIssuesSpy = jest
       .spyOn(Jira, 'getChildIssues')
-      .mockImplementation((_key: string) => Promise.resolve([childIssue]))
+      .mockReturnValue(Promise.resolve([childIssue]))
     getColumnsSpy = jest
       .spyOn(Jira, 'getColumns')
-      .mockImplementation((_projectId: string) => Promise.resolve(columns))
+      .mockReturnValue(Promise.resolve(columns))
     getIssueSpy = jest
       .spyOn(Jira, 'getIssue')
-      .mockImplementation((_key: string) => Promise.resolve(parentIssue))
-    infoSpy = jest
-      .spyOn(core, 'info')
-      .mockImplementation((_message: string) => undefined)
+      .mockReturnValue(Promise.resolve(parentIssue))
+    infoSpy = jest.spyOn(core, 'info').mockReturnValue(undefined)
     isIssueOnBoardSpy = jest
       .spyOn(Jira, 'isIssueOnBoard')
-      .mockImplementation((_boardId: number, _issueId: string) =>
-        Promise.resolve(true)
-      )
+      .mockReturnValue(Promise.resolve(true))
     moveIssueToBoardSpy = jest
       .spyOn(Jira, 'moveIssueToBoard')
-      .mockImplementation((_boardId: number, _issueId: string) =>
-        Promise.resolve(204)
-      )
+      .mockReturnValue(Promise.resolve(204))
     setIssueStatusSpy = jest
       .spyOn(Jira, 'setIssueStatus')
-      .mockImplementation((_issueId: string, _newStatus: string) =>
-        Promise.resolve(undefined)
-      )
+      .mockReturnValue(Promise.resolve(undefined))
   })
 
   afterEach(() => {
@@ -92,9 +82,7 @@ describe('jiraIssueTransitioned', () => {
   })
 
   it('moves the issue to the board if necessary', async () => {
-    isIssueOnBoardSpy.mockImplementation((_boardId: number, _issueId: string) =>
-      Promise.resolve(false)
-    )
+    isIssueOnBoardSpy.mockReturnValue(Promise.resolve(false))
     await jiraIssueTransitioned(email, issueKey)
     expect(moveIssueToBoardSpy).toHaveBeenCalledWith(
       mockJiraBoard.id,
@@ -110,9 +98,7 @@ describe('jiraIssueTransitioned', () => {
         status: { name: Jira.JiraStatusValidated },
       },
     }
-    getChildIssuesSpy.mockImplementation((_key: string) =>
-      Promise.resolve([validatedChild])
-    )
+    getChildIssuesSpy.mockReturnValue(Promise.resolve([validatedChild]))
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledWith(
       parentIssue.id,
@@ -122,10 +108,24 @@ describe('jiraIssueTransitioned', () => {
     expect(infoSpy).toHaveBeenLastCalledWith(message)
   })
 
-  it("doesn't move the parent if is not necessary", async () => {
-    getChildIssuesSpy.mockImplementation((_key: string) =>
-      Promise.resolve([childIssue])
+  it('handles inconsistencies in capitalization from Jira', async () => {
+    const validatedChild = {
+      ...childIssue,
+      fields: {
+        ...childIssue.fields,
+        status: { name: 'vAlIdAtEd' },
+      },
+    }
+    getChildIssuesSpy.mockReturnValue(Promise.resolve([validatedChild]))
+    await jiraIssueTransitioned(email, issueKey)
+    expect(setIssueStatusSpy).toHaveBeenCalledWith(
+      parentIssue.id,
+      Jira.JiraStatusValidated
     )
+  })
+
+  it("doesn't move the parent if is not necessary", async () => {
+    getChildIssuesSpy.mockReturnValue(Promise.resolve([childIssue]))
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     const message = `The parent issue ${parentIssue.key} is already in 'In development' - nothing to do`
@@ -143,7 +143,7 @@ describe('jiraIssueTransitioned', () => {
         },
       },
     }
-    getIssueSpy.mockImplementation((_key: string) => Promise.resolve(epic))
+    getIssueSpy.mockReturnValue(Promise.resolve(epic))
     const validatedChild = {
       ...childIssue,
       fields: {
@@ -151,9 +151,7 @@ describe('jiraIssueTransitioned', () => {
         status: { name: Jira.JiraStatusValidated },
       },
     }
-    getChildIssuesSpy.mockImplementation((_key: string) =>
-      Promise.resolve([validatedChild])
-    )
+    getChildIssuesSpy.mockReturnValue(Promise.resolve([validatedChild]))
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     const message = `The parent issue ${parentIssue.key} is an epic, so it can't be moved to '${Jira.JiraStatusValidated}' automatically - nothing to do`
@@ -172,7 +170,7 @@ describe('jiraIssueTransitioned', () => {
         status: { name: Jira.JiraStatusValidated },
       },
     }
-    getIssueSpy.mockImplementation((_key: string) => Promise.resolve(epic))
+    getIssueSpy.mockReturnValue(Promise.resolve(epic))
     const inDevelopmentChild = {
       ...childIssue,
       fields: {
@@ -187,7 +185,7 @@ describe('jiraIssueTransitioned', () => {
         status: { name: Jira.JiraStatusTechnicalPlanning },
       },
     }
-    getChildIssuesSpy.mockImplementation((_key: string) =>
+    getChildIssuesSpy.mockReturnValue(
       Promise.resolve([inDevelopmentChild, planningChild])
     )
     await jiraIssueTransitioned(email, issueKey)
@@ -202,7 +200,7 @@ describe('jiraIssueTransitioned', () => {
       ...childIssue,
       fields: { ...childIssue.fields, parent: undefined },
     }
-    getIssueSpy.mockImplementation((_key: string) => Promise.resolve(noParent))
+    getIssueSpy.mockReturnValue(Promise.resolve(noParent))
     await jiraIssueTransitioned(email, issueKey)
     expect(setIssueStatusSpy).toHaveBeenCalledTimes(0)
     const message = `Issue ${noParent.key} has no parent issue - nothing to do`
