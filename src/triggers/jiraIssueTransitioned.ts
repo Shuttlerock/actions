@@ -1,4 +1,4 @@
-import { info } from '@actions/core'
+import { error, info } from '@actions/core'
 import isNil from 'lodash/isNil'
 import minBy from 'lodash/minBy'
 
@@ -144,6 +144,13 @@ export const jiraIssueTransitioned = async (
     }
   }
 
+  // Jira seems to add capitalization in child status names that don't necessarily match the board.
+  if (!isNil(leftmost)) {
+    leftmost = columnNames.find(
+      status => status.toLowerCase() === (leftmost as string).toLowerCase()
+    )
+  }
+
   if (parent.fields.status.name === leftmost) {
     info(
       `The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`
@@ -155,8 +162,11 @@ export const jiraIssueTransitioned = async (
     info(
       `The parent issue ${parent.key} is an epic, so it can't be moved to '${leftmost}' automatically - nothing to do`
     )
-  } else {
+  } else if (!isNil(leftmost)) {
     info(`Moved the parent issue ${parent.key} to '${leftmost}'`)
     await setIssueStatus(parent.id, leftmost)
+  } else {
+    // This should never happen, but Jira can be a bit inconsistent.
+    error('The leftmost status is empty - giving up')
   }
 }

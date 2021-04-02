@@ -64271,6 +64271,10 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
             leftmost = inProgressColumn;
         }
     }
+    // Jira seems to add capitalization in child status names that don't necessarily match the board.
+    if (!isNil_1.default(leftmost)) {
+        leftmost = columnNames.find(status => status.toLowerCase() === leftmost.toLowerCase());
+    }
     if (parent.fields.status.name === leftmost) {
         core_1.info(`The parent issue ${parent.key} is already in '${leftmost}' - nothing to do`);
     }
@@ -64278,9 +64282,13 @@ const jiraIssueTransitioned = (_email, issueKey) => __awaiter(void 0, void 0, vo
         leftmost === Jira_1.JiraStatusValidated) {
         core_1.info(`The parent issue ${parent.key} is an epic, so it can't be moved to '${leftmost}' automatically - nothing to do`);
     }
-    else {
+    else if (!isNil_1.default(leftmost)) {
         core_1.info(`Moved the parent issue ${parent.key} to '${leftmost}'`);
         yield Jira_1.setIssueStatus(parent.id, leftmost);
+    }
+    else {
+        // This should never happen, but Jira can be a bit inconsistent.
+        core_1.error('The leftmost status is empty - giving up');
     }
 });
 exports.jiraIssueTransitioned = jiraIssueTransitioned;
