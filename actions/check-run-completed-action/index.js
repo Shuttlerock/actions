@@ -36308,7 +36308,6 @@ function plural(ms, msAbs, n, name) {
 /***/ 8272:
 /***/ (function(module) {
 
-// This file has been generated from mustache.mjs
 (function (global, factory) {
    true ? module.exports = factory() :
   0;
@@ -37010,7 +37009,7 @@ function plural(ms, msAbs, n, name) {
 
   var mustache = {
     name: 'mustache.js',
-    version: '4.1.0',
+    version: '4.2.0',
     tags: [ '{{', '}}' ],
     clearCache: undefined,
     escape: undefined,
@@ -61283,7 +61282,16 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => __await
             .map((commit) => PullRequest_1.extractPullRequestNumber(commit.commit.message))
             .filter((prNumber) => prNumber)),
     ];
-    const pulls = (yield Promise.all(prNumbers.map((prNumber) => __awaiter(void 0, void 0, void 0, function* () { return PullRequest_1.getPullRequest(repoName, prNumber); })))).filter((pull) => pull && !/Bump .+ from .+ to .*$/.exec(pull.title));
+    const pulls = (yield Promise.all(prNumbers.map((prNumber) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            return PullRequest_1.getPullRequest(repoName, prNumber);
+        }
+        catch (err) {
+            core_1.error(`Couldn't find the pull request ${repoName}#${prNumber} for release notes. Here's the commit list:`);
+            commits.map((commit) => core_1.error(`  ${commit.commit.message}`));
+            return undefined;
+        }
+    })))).filter((pull) => pull && !/Bump .+ from .+ to .*$/.exec(pull.title));
     let description = `## Release Candidate ${releaseDate} (${releaseName})\n\n`;
     // Github only gives us 250 commits. This is usually enough, but add a note if we hit the limit.
     if (commits.length === 250) {
