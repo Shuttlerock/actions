@@ -53,7 +53,7 @@
     "unique-names-generator": "^4.4.0"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^8.11.2",
+    "@octokit/webhooks": "^8.12.2",
     "@octokit/webhooks-definitions": "^3.67.2",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.22",
