@@ -44,7 +44,6 @@ describe('check-suite-completed-action', () => {
     let getIssueSpy: jest.SpyInstance
     let getPullRequestSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
-    let setIssueStatusSpy: jest.SpyInstance
 
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
     const checkSuitePayload = (rawPayload as unknown) as Schema.CheckSuiteEvent
@@ -87,11 +86,6 @@ describe('check-suite-completed-action', () => {
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string) => undefined)
-      setIssueStatusSpy = jest
-        .spyOn(Jira, 'setIssueStatus')
-        .mockImplementation((_issueId: string, _newStatus: string) =>
-          Promise.resolve(undefined)
-        )
     })
 
     afterEach(() => {
@@ -103,7 +97,6 @@ describe('check-suite-completed-action', () => {
       getIssueSpy.mockRestore()
       getPullRequestSpy.mockRestore()
       infoSpy.mockRestore()
-      setIssueStatusSpy.mockRestore()
     })
 
     it('does nothing if there are no pull requests associated with the check suite', async () => {
@@ -188,14 +181,6 @@ describe('check-suite-completed-action', () => {
         expect(addLabelsSpy).toHaveBeenCalledWith('actions', 123, [
           HasIssuesLabel,
         ])
-      })
-
-      it('moves the Jira issue', async () => {
-        await checkSuiteCompleted(checkSuitePayload)
-        expect(setIssueStatusSpy).toHaveBeenCalledWith(
-          '10000',
-          Jira.JiraStatusHasIssues
-        )
       })
     })
   })

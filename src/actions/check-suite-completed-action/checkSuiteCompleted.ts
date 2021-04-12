@@ -14,12 +14,7 @@ import {
   getPullRequest,
   Repository,
 } from '@sr-services/Github'
-import {
-  getIssue,
-  Issue,
-  JiraStatusHasIssues,
-  setIssueStatus,
-} from '@sr-services/Jira'
+import { getIssue, Issue } from '@sr-services/Jira'
 import { positiveEmoji, sendUserMessage } from '@sr-services/Slack'
 
 /**
@@ -40,16 +35,7 @@ const handleFailure = async (
 ): Promise<string | undefined> => {
   info(`Adding the '${HasIssuesLabel}' label...`)
   await addLabels(repoName, pullRequest.number, [HasIssuesLabel])
-
-  if (issue.fields.status.name === JiraStatusHasIssues) {
-    info(
-      `Issue ${issue.key} is already in '${JiraStatusHasIssues}' - giving up`
-    )
-    return undefined
-  }
-
-  info(`Moving Jira issue ${issue.key} to '${JiraStatusHasIssues}'...`)
-  await setIssueStatus(issue.id, JiraStatusHasIssues)
+  info(`Issue ${issue.key} is in status '${issue.fields.status.name}'`)
 
   return `Check suite _*${checkName}*_ failed for *<${pullRequest.html_url}|${pullRequest.title}>*`
 }

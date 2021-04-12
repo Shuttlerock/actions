@@ -37680,7 +37680,6 @@ function plural(ms, msAbs, n, name) {
 /***/ 98272:
 /***/ (function(module) {
 
-// This file has been generated from mustache.mjs
 (function (global, factory) {
    true ? module.exports = factory() :
   0;
@@ -38382,7 +38381,7 @@ function plural(ms, msAbs, n, name) {
 
   var mustache = {
     name: 'mustache.js',
-    version: '4.1.0',
+    version: '4.2.0',
     tags: [ '{{', '}}' ],
     clearCache: undefined,
     escape: undefined,
