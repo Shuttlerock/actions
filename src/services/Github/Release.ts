@@ -76,9 +76,17 @@ const getReleaseNotes = async (
 
   const pulls = (
     await Promise.all(
-      (prNumbers as number[]).map(async (prNumber: number) =>
-        getPullRequest(repoName, prNumber)
-      )
+      (prNumbers as number[]).map(async (prNumber: number) => {
+        try {
+          return getPullRequest(repoName, prNumber)
+        } catch (err) {
+          error(
+            `Couldn't find the pull request ${repoName}#${prNumber} for release notes. Here's the commit list:`
+          )
+          commits.map((commit: Commit) => error(`  ${commit.commit.message}`))
+          return undefined
+        }
+      })
     )
   ).filter(
     (pull: PullsGetResponseData | undefined) =>

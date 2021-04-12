@@ -76,7 +76,7 @@ In order to integrate with other services such as Jira and Slack, we need to pro
 
 1. `${credentialsApiPrefix}/credentials/${id}`
     This endpoint allows us to fetch information about a specific user, and link a github account to Slack and Jira accounts. The `id` is the base64-encoded email address or Jira user name.
-    ```json
+    ```
     {
       "email":           "someone@gmail.com",
       "github_token":    "xxx",
@@ -89,7 +89,7 @@ In order to integrate with other services such as Jira and Slack, we need to pro
     ```
 2. `${credentialsApiPrefix}/repositories/${id}`
     This endpoint allows us to fetch information about a specific repository. The `id` is the base64-encoded repository name.
-    ```json
+    ```
     {
       "allow_auto_review": false, // Allow the bot to approve PRs.
       "jira_project_id":   "EXAMPLE",
