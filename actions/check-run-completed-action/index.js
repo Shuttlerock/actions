@@ -60349,12 +60349,7 @@ const Slack_1 = __nccwpck_require__(4745);
 const handleFailure = (checkName, issue, repoName, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
     core_1.info(`Adding the '${Constants_1.HasIssuesLabel}' label...`);
     yield Github_1.addLabels(repoName, pullRequest.number, [Constants_1.HasIssuesLabel]);
-    if (issue.fields.status.name === Jira_1.JiraStatusHasIssues) {
-        core_1.info(`Issue ${issue.key} is already in '${Jira_1.JiraStatusHasIssues}' - giving up`);
-        return undefined;
-    }
-    core_1.info(`Moving Jira issue ${issue.key} to '${Jira_1.JiraStatusHasIssues}'...`);
-    yield Jira_1.setIssueStatus(issue.id, Jira_1.JiraStatusHasIssues);
+    core_1.info(`Issue ${issue.key} is in status '${issue.fields.status.name}'`);
     return `Check suite _*${checkName}*_ failed for *<${pullRequest.html_url}|${pullRequest.title}>*`;
 });
 /**
