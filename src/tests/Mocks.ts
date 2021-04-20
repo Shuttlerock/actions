@@ -149,7 +149,7 @@ export const mockJiraRelease = {
 
 export const mockRepository = {
   allow_auto_review: true,
-  leads: [{ github_username: 'dhh' }],
-  reviewers: [{ github_username: 'wycats' }],
+  leads: [{ github_username: 'dhh', slack_id: 'slack-dhh' }],
+  reviewers: [{ github_username: 'wycats', slack_id: 'slack-wycats' }],
   status: 'ok',
 } as Repository
