@@ -6,10 +6,19 @@ import {
   DependenciesLabel,
   GithubWriteUser,
   PleaseReviewLabel,
+  PriorityHighLabel,
+  PriorityLowLabel,
+  PriorityMediumLabel,
   SecurityLabel,
 } from '@sr-services/Constants'
 import { fetchRepository, User } from '@sr-services/Credentials'
-import { addLabels, assignOwners, assignReviewers } from '@sr-services/Github'
+import {
+  addLabels,
+  assignOwners,
+  assignReviewers,
+  pullRequestUrl,
+} from '@sr-services/Github'
+import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack'
 
 /**
  * Runs whenever a pull request is labeled.
@@ -43,6 +52,40 @@ export const pullRequestLabeled = async (
       await assignOwners(repository.name, pullRequest.number, owners)
     } else {
       info('No owners to assign')
+    }
+  }
+
+  // If this is a security-related PR, assign a priority, and message the owners
+  // asking them to confirm the priority.
+  const isPrioritized =
+    pullRequest.labels.filter(lbl =>
+      [PriorityHighLabel, PriorityMediumLabel, PriorityLowLabel].includes(
+        lbl.name
+      )
+    ).length > 0
+  if (added === SecurityLabel && !isPrioritized) {
+    labels = [...labels, PriorityHighLabel]
+    info('Prioritizing the PR...')
+    const url = pullRequestUrl(repository.name, pullRequest.number)
+    const link = `*<${url}|${repository.name}#${pullRequest.number} (${pullRequest.title})>*`
+    const message =
+      `:warning: Please review the security issue ${link} and assign a priority of either ` +
+      `\`${PriorityHighLabel}\` (high), \`${PriorityMediumLabel}\` (medium) or \`${PriorityLowLabel}\` (low). ` +
+      'SLAs apply to this pull request, and we need to resolve it in a timely manner.'
+
+    await Promise.all(
+      repo.leads.map(async (user: User) => {
+        await sendUserMessage(user.slack_id, message)
+        info(
+          `Sent a message to ${user.email} requesting that the priority be checked`
+        )
+      })
+    )
+
+    if (repo.leads.length === 0) {
+      await sendErrorMessage(
+        `Repository ${repository.name} has no technical lead assigned to prioritize security issues.`
+      )
     }
   }
 

@@ -6,7 +6,8 @@
     }, {
       "name": "under-discussion"
     }],
-    "number": 136
+    "number": 493,
+    "title": "Fix the widget"
   },
   "label": {
     "name": "please-review"
@@ -15,6 +16,6 @@
     "name": "actions"
   },
   "sender": {
-    "login": "recurser"
+    "login": "dperrett"
   }
 }

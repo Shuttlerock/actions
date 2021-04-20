@@ -60331,6 +60331,7 @@ const isNil_1 = __importDefault(__nccwpck_require__(4977));
 const Constants_1 = __nccwpck_require__(7682);
 const Credentials_1 = __nccwpck_require__(3543);
 const Github_1 = __nccwpck_require__(4390);
+const Slack_1 = __nccwpck_require__(4745);
 /**
  * Runs whenever a pull request is labeled.
  *
@@ -60360,6 +60361,25 @@ const pullRequestLabeled = (payload) => __awaiter(void 0, void 0, void 0, functi
             core_1.info('No owners to assign');
         }
     }
+    // If this is a security-related PR, assign a priority, and message the owners
+    // asking them to confirm the priority.
+    const isPrioritized = pullRequest.labels.filter(lbl => [Constants_1.PriorityHighLabel, Constants_1.PriorityMediumLabel, Constants_1.PriorityLowLabel].includes(lbl.name)).length > 0;
+    if (added === Constants_1.SecurityLabel && !isPrioritized) {
+        labels = [...labels, Constants_1.PriorityHighLabel];
+        core_1.info('Prioritizing the PR...');
+        const url = Github_1.pullRequestUrl(repository.name, pullRequest.number);
+        const link = `*<${url}|${repository.name}#${pullRequest.number} (${pullRequest.title})>*`;
+        const message = `:warning: Please review the security issue ${link} and assign a priority of either ` +
+            `\`${Constants_1.PriorityHighLabel}\` (high), \`${Constants_1.PriorityMediumLabel}\` (medium) or \`${Constants_1.PriorityLowLabel}\` (low). ` +
+            'SLAs apply to this pull request, and we need to resolve it in a timely manner.';
+        yield Promise.all(repo.leads.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+            yield Slack_1.sendUserMessage(user.slack_id, message);
+            core_1.info(`Sent a message to ${user.email} requesting that the priority be checked`);
+        })));
+        if (repo.leads.length === 0) {
+            yield Slack_1.sendErrorMessage(`Repository ${repository.name} has no technical lead assigned to prioritize security issues.`);
+        }
+    }
     // If this is a dependabot PR, we want to start review straight away.
     if (added === Constants_1.DependenciesLabel) {
         core_1.info('This looks like a dependency update - adding reviewers...');
@@ -60386,7 +60406,7 @@ exports.pullRequestLabeled = pullRequestLabeled;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.SecurityLabel = exports.ReleaseLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
+exports.ReleaseBranchName = exports.MasterBranchName = exports.DevelopBranchName = exports.GithubWriteUser = exports.UnderDiscussionLabel = exports.SecurityLabel = exports.ReleaseLabel = exports.PriorityMediumLabel = exports.PriorityLowLabel = exports.PriorityHighLabel = exports.PleaseReviewLabel = exports.PassedReviewLabel = exports.InProgressLabel = exports.HasIssuesLabel = exports.HasFailuresLabel = exports.HasConflictsLabel = exports.EpicLabel = exports.DependenciesLabel = void 0;
 // Labels.
 exports.DependenciesLabel = 'dependencies';
 exports.EpicLabel = 'epic';
@@ -60396,6 +60416,9 @@ exports.HasIssuesLabel = 'has-issues';
 exports.InProgressLabel = 'in-progress';
 exports.PassedReviewLabel = 'passed-review';
 exports.PleaseReviewLabel = 'please-review';
+exports.PriorityHighLabel = 'p1';
+exports.PriorityLowLabel = 'p3';
+exports.PriorityMediumLabel = 'p2';
 exports.ReleaseLabel = 'release';
 exports.SecurityLabel = 'security';
 exports.UnderDiscussionLabel = 'under-discussion';
