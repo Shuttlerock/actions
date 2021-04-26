@@ -660,7 +660,7 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks-definitions@3.67.3", "@octokit/webhooks-definitions@^3.67.2":
+"@octokit/webhooks-definitions@^3.67.2":
   version "3.67.3"
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.67.3.tgz#d2a905a90b04af8111982d0c13658a49fc4eecb9"
   integrity sha512-do4Z1r2OVhuI0ihJhQ8Hg+yPWnBYEBNuFNCrvtPKoYT1w81jD7pBXgGe86lYuuNirkDHb0Nxt+zt4O5GiFJfgA==
@@ -670,14 +670,19 @@
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-1.0.0.tgz#274799138725c89a3466e3af2026afe755f28c4b"
   integrity sha512-pVceMQcj9SZ5p2RkemL0TuuPdGULNQj9F3Pq1cNM1xH+Kst1VNt0dj3PEGZRZV473njrDnYdi/OG4wWY9TLbbA==
 
-"@octokit/webhooks@^9.0.1":
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.0.1.tgz#f2e726eec5705ccd0961cf3db9185587b669219e"
-  integrity sha512-t7dRsS97fRN5V9kqh2UpRPheRWTgbgzUOJju0fttVKrEjkdbKyTNV3U/AoK9FyKz2wABr3uBIUM9sFfNxCcw/Q==
+"@octokit/webhooks-types@3.69.3":
+  version "3.69.3"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-3.69.3.tgz#d33046e68308c204b6521e3339c8504208b2ee64"
+  integrity sha512-notMfKvZbPydwloJHr0Es8zSe0M2Nvye7hDIAoYsnWsWlzNQo53D+CZZ7IpYR5uP9hqsvLcZI1Sbt/H/qZhF8A==
+
+"@octokit/webhooks@^9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.1.1.tgz#c5f83e4ce543d12721e7f1027b4f6d0c0e353fed"
+  integrity sha512-kc1QWgFrPFhy/umDUeMErnje+l6+kwnHvvGsLddhVwjbA/iZWpX8hqrhvZBH9AhB3wcSPnYUPPE2kFqm6/GHIA==
   dependencies:
     "@octokit/request-error" "^2.0.2"
-    "@octokit/webhooks-definitions" "3.67.3"
     "@octokit/webhooks-methods" "^1.0.0"
+    "@octokit/webhooks-types" "3.69.3"
     aggregate-error "^3.1.0"
 
 "@sinonjs/commons@^1.7.0":
@@ -2028,10 +2033,10 @@ eslint-config-airbnb@^18.2.0:
     object.assign "^4.1.2"
     object.entries "^1.1.2"
 
-eslint-config-prettier@>=8.0.0, eslint-config-prettier@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.2.0.tgz#78de77d63bca8e9e59dae75a614b5299925bb7b3"
-  integrity sha512-dWV9EVeSo2qodOPi1iBYU/x6F6diHv8uujxbxr77xExs3zTAlNXvVZKiyLsQGNz7yPV2K49JY5WjPzNIuDc2Bw==
+eslint-config-prettier@>=8.0.0, eslint-config-prettier@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
+  integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
 
 eslint-import-resolver-alias@^1.1.2:
   version "1.1.2"
