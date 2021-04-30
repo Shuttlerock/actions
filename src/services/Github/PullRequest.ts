@@ -176,7 +176,9 @@ export const assignReviewers = async (
  * @returns {number | undefined} The number of the pull request, if one can be found.
  */
 export const extractPullRequestNumber = (message: string): number | undefined =>
-  parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) || undefined
+  parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) ||
+  parseInt(message.replace(/^Merge pull request #(\d+).*$/, '$1'), 10) ||
+  undefined
 
 /**
  * Lists the commits in the pull request with the given number.

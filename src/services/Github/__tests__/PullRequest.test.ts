@@ -113,9 +113,16 @@ describe('PullRequest', () => {
   })
 
   describe('extractPullRequestNumber', () => {
-    it('returns the number if one exists', () => {
+    it('returns the number added by automation', () => {
       const number = extractPullRequestNumber(
         '[STUDIO-123] [#456] Fix the widget'
+      )
+      expect(number).toEqual(456)
+    })
+
+    it('returns the number from a merge commit', () => {
+      const number = extractPullRequestNumber(
+        'Merge pull request #456 Fix the widget'
       )
       expect(number).toEqual(456)
     })
