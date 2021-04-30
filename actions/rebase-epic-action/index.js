@@ -1,4 +1,3 @@
-module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -198,6 +197,7 @@ exports.getInput = getInput;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
+    process.stdout.write(os.EOL);
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
@@ -5820,68 +5820,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 82:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
-const core_1 = __nccwpck_require__(186);
-const github_1 = __nccwpck_require__(438);
-const Rebase_1 = __nccwpck_require__(275);
-/**
- * Runs whenever a commit is added to a pull request.
- *
- * Checks if the Pull request title starts with [Epic]. If so, it rebases the PR.
- */
-const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { payload: { pull_request, repository }, } = (yield github_1.context);
-    if (!pull_request.title.startsWith('[Epic] ')) {
-        core_1.info(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
-        return;
-    }
-    yield Rebase_1.rebase(repository.owner.login, repository.name, pull_request.head.ref, pull_request.base.ref);
-});
-exports.run = run;
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-exports.run().catch(err => {
-    core_1.error(err);
-    core_1.error(err.stack);
-    core_1.setFailed(err.message);
-});
-
-
-/***/ }),
-
-/***/ 275:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// https://github.com/steveukx/git-js#readme
-// See https://github.com/actions/toolkit/tree/main/packages/github
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.rebase = void 0;
-const core_1 = __nccwpck_require__(186);
-const rebase = (owner, repo, head, base) => {
-    // This is much harder than expected to get right - leaving a placeholder method for now.
-    core_1.info(`Todo: rebasing ${owner}/${repo} ${base} → ${head}...`);
-};
-exports.rebase = rebase;
-
-
-/***/ }),
-
 /***/ 877:
 /***/ ((module) => {
 
@@ -6002,8 +5940,9 @@ module.exports = require("zlib");;
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -6026,12 +5965,97 @@ module.exports = require("zlib");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(82);
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "run": () => (/* binding */ run)
+});
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(438);
+;// CONCATENATED MODULE: ./src/services/Github/Rebase.ts
+// https://github.com/steveukx/git-js#readme
+// See https://github.com/actions/toolkit/tree/main/packages/github
+
+const rebase = (owner, repo, head, base) => {
+    // This is much harder than expected to get right - leaving a placeholder method for now.
+    (0,core.info)(`Todo: rebasing ${owner}/${repo} ${base} → ${head}...`);
+};
+
+;// CONCATENATED MODULE: ./src/actions/rebase-epic-action/index.ts
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+/**
+ * Runs whenever a commit is added to a pull request.
+ *
+ * Checks if the Pull request title starts with [Epic]. If so, it rebases the PR.
+ */
+const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { payload: { pull_request, repository }, } = (yield github.context);
+    if (!pull_request.title.startsWith('[Epic] ')) {
+        (0,core.info)(`${repository.name}#${pull_request.number} is not an epic PR - ignoring`);
+        return;
+    }
+    yield rebase(repository.owner.login, repository.name, pull_request.head.ref, pull_request.base.ref);
+});
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+run().catch(err => {
+    (0,core.error)(err);
+    (0,core.error)(err.stack);
+    (0,core.setFailed)(err.message);
+});
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
