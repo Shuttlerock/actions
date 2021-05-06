@@ -61330,10 +61330,6 @@ __nccwpck_require__.d(Inputs_namespaceObject, {
   "slackToken": () => (slackToken)
 });
 
-// NAMESPACE OBJECT: ./node_modules/mustache/mustache.mjs
-var mustache_namespaceObject = {};
-__nccwpck_require__.r(mustache_namespaceObject);
-
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
@@ -63557,7 +63553,7 @@ mustache.Scanner = Scanner;
 mustache.Context = Context;
 mustache.Writer = Writer;
 
-/* harmony default export */ const mustache_mustache = ((/* unused pure expression or super */ null && (mustache)));
+/* harmony default export */ const mustache_mustache = (mustache);
 
 ;// CONCATENATED MODULE: ./src/services/Template.ts
 
@@ -63569,7 +63565,7 @@ mustache.Writer = Writer;
  *
  * @returns {string} The rendered template.
  */
-const render = (template, vars) => (0,mustache_namespaceObject.render)(template, vars);
+const render = (template, vars) => mustache_mustache.render(template, vars);
 const PullRequestForEpicTemplate = `
 ## {{&summary}}
 

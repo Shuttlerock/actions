@@ -1,4 +1,4 @@
-import { render as mustacheRender } from 'mustache'
+import mustache from 'mustache'
 
 interface TemplateVars {
   [key: string]: string | number | boolean | undefined
@@ -13,7 +13,7 @@ interface TemplateVars {
  * @returns {string} The rendered template.
  */
 export const render = (template: string, vars: TemplateVars): string =>
-  mustacheRender(template, vars)
+  mustache.render(template, vars)
 
 export const PullRequestForEpicTemplate = `
 ## {{&summary}}
