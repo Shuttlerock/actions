@@ -146,7 +146,7 @@ describe('createPullRequestForJiraIssue', () => {
     jiraIssueSpy.mockImplementation((_key: string) =>
       Promise.resolve(noRepository)
     )
-    await createPullRequestForJiraIssue(email, '')
+    await createPullRequestForJiraIssue(email, issueKey)
     const message = `No repository is set for issue <https://${jiraHost()}/browse/${issueKey}|${issueKey}>, so no pull request was created`
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
