@@ -61406,7 +61406,7 @@ function parseTemplate (template, tags) {
     closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
   }
 
-  compileTags(tags || mustache.tags);
+  compileTags(tags || mustache_mustache.tags);
 
   var scanner = new Scanner(template);
 
@@ -61770,7 +61770,7 @@ Writer.prototype.clearCache = function clearCache () {
  */
 Writer.prototype.parse = function parse (template, tags) {
   var cache = this.templateCache;
-  var cacheKey = template + ':' + (tags || mustache.tags).join(':');
+  var cacheKey = template + ':' + (tags || mustache_mustache.tags).join(':');
   var isCacheEnabled = typeof cache !== 'undefined';
   var tokens = isCacheEnabled ? cache.get(cacheKey) : undefined;
 
@@ -61922,10 +61922,10 @@ Writer.prototype.unescapedValue = function unescapedValue (token, context) {
 };
 
 Writer.prototype.escapedValue = function escapedValue (token, context, config) {
-  var escape = this.getConfigEscape(config) || mustache.escape;
+  var escape = this.getConfigEscape(config) || mustache_mustache.escape;
   var value = context.lookup(token[1]);
   if (value != null)
-    return (typeof value === 'number' && escape === mustache.escape) ? String(value) : escape(value);
+    return (typeof value === 'number' && escape === mustache_mustache.escape) ? String(value) : escape(value);
 };
 
 Writer.prototype.rawValue = function rawValue (token) {
@@ -61953,7 +61953,7 @@ Writer.prototype.getConfigEscape = function getConfigEscape (config) {
   }
 };
 
-var mustache = {
+var mustache_mustache = {
   name: 'mustache.js',
   version: '4.2.0',
   tags: [ '{{', '}}' ],
@@ -61986,7 +61986,7 @@ var defaultWriter = new Writer();
 /**
  * Clears all cached templates in the default writer.
  */
-mustache.clearCache = function clearCache () {
+mustache_mustache.clearCache = function clearCache () {
   return defaultWriter.clearCache();
 };
 
@@ -61995,7 +61995,7 @@ mustache.clearCache = function clearCache () {
  * array of tokens it contains. Doing this ahead of time avoids the need to
  * parse templates on the fly as they are rendered.
  */
-mustache.parse = function parse (template, tags) {
+mustache_mustache.parse = function parse (template, tags) {
   return defaultWriter.parse(template, tags);
 };
 
@@ -62003,7 +62003,7 @@ mustache.parse = function parse (template, tags) {
  * Renders the `template` with the given `view`, `partials`, and `config`
  * using the default writer.
  */
-mustache.render = function render (template, view, partials, config) {
+mustache_mustache.render = function render (template, view, partials, config) {
   if (typeof template !== 'string') {
     throw new TypeError('Invalid template! Template should be a "string" ' +
                         'but "' + typeStr(template) + '" was given as the first ' +
@@ -62015,14 +62015,14 @@ mustache.render = function render (template, view, partials, config) {
 
 // Export the escaping function so that the user may override it.
 // See https://github.com/janl/mustache.js/issues/244
-mustache.escape = escapeHtml;
+mustache_mustache.escape = escapeHtml;
 
 // Export these mainly for testing, but also for advanced usage.
-mustache.Scanner = Scanner;
-mustache.Context = Context;
-mustache.Writer = Writer;
+mustache_mustache.Scanner = Scanner;
+mustache_mustache.Context = Context;
+mustache_mustache.Writer = Writer;
 
-/* harmony default export */ const mustache_mustache = ((/* unused pure expression or super */ null && (mustache)));
+/* harmony default export */ const node_modules_mustache_mustache = ((/* unused pure expression or super */ null && (mustache_mustache)));
 
 ;// CONCATENATED MODULE: ./src/services/Template.ts
 
@@ -62034,7 +62034,7 @@ mustache.Writer = Writer;
  *
  * @returns {string} The rendered template.
  */
-const Template_render = (template, vars) => mustacheRender(template, vars);
+const Template_render = (template, vars) => mustache.render(template, vars);
 const Template_PullRequestForEpicTemplate = (/* unused pure expression or super */ null && (`
 ## {{&summary}}
 
