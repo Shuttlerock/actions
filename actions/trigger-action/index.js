@@ -64059,10 +64059,11 @@ var createPullRequestForJiraIssue_awaiter = (undefined && undefined.__awaiter) |
  * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
  * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
  *
- * @param {string} email    The email address of the user who will own the pull request.
- * @param {string} issueKey The key of the Jira issue we will base the pull request on.
+ * @param {string} email       The email address of the user who will own the pull request.
+ * @param {string} userCommand The command given by the user of the Jira issue we will base the pull request on.
  */
-const createPullRequestForJiraIssue = (email, issueKey) => createPullRequestForJiraIssue_awaiter(void 0, void 0, void 0, function* () {
+const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestForJiraIssue_awaiter(void 0, void 0, void 0, function* () {
+  const [issueKey, repositoryName] = userCommand.trim().split(/\s+/);
     var _a, _b;
     (0,core.info)(`Creating a pull request for issue ${issueKey} / ${email}`);
     (0,core.info)('Fetching the Jira issue details...');
@@ -64099,7 +64100,7 @@ const createPullRequestForJiraIssue = (email, issueKey) => createPullRequestForJ
         yield sendUserMessage(credentials.slack_id, message);
         return;
     }
-    if (isNil_default()(issue.fields.repository)) {
+    if (isNil_default()(repositoryName || issue.fields.repository)) {
         const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
         (0,core.error)(message);
         yield sendUserMessage(credentials.slack_id, message);
@@ -64113,7 +64114,7 @@ const createPullRequestForJiraIssue = (email, issueKey) => createPullRequestForJ
     }
     (0,core.info)('Checking if there is an open pull request for this issue...');
     let pullRequestNumber;
-    const repo = yield getRepository(issue.fields.repository);
+    const repo = yield getRepository(repositoryName || issue.fields.repository);
     const pullRequestNumbers = yield getIssuePullRequestNumbers(issue.id, repo.name);
     if (pullRequestNumbers.length > 0) {
         ;
@@ -64133,7 +64134,7 @@ const createPullRequestForJiraIssue = (email, issueKey) => createPullRequestForJ
             !((_a = epic.fields.labels) === null || _a === void 0 ? void 0 : _a.includes(JiraLabelSkipPR)) &&
             !((_b = issue.fields.labels) === null || _b === void 0 ? void 0 : _b.includes(JiraLabelSkipPR))) {
             (0,core.info)(`Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`);
-            const epicPr = yield createEpicPullRequest(epic, issue.fields.repository);
+            const epicPr = yield createEpicPullRequest(epic, repositoryName || issue.fields.repository);
             baseBranchName = epicPr.head.ref;
         }
         (0,core.info)(`Checking if the branch '${newBranchName}' already exists...`);

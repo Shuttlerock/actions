@@ -151,7 +151,7 @@ describe('createPullRequestForJiraIssue', () => {
     expect(slackSpy).toHaveBeenCalledWith(mockCredentials.slack_id, message)
   })
 
-  it('sends an error message if no Story  is set for the issue', async () => {
+  it('sends an error message if no Story is set for the issue', async () => {
     const noEstimate = {
       ...mockJiraIssue,
       fields: { ...mockJiraIssue.fields, storyPointEstimate: undefined },

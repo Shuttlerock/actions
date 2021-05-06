@@ -38,13 +38,15 @@ import { PullRequestForIssueTemplate, render } from '@sr-services/Template'
  * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "createPullRequestForJiraIssue", "param": "STUDIO-232" }}' \
  * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
  *
- * @param {string} email    The email address of the user who will own the pull request.
- * @param {string} issueKey The key of the Jira issue we will base the pull request on.
+ * @param {string} email       The email address of the user who will own the pull request.
+ * @param {string} userCommand The command given by the user of the Jira issue we will base the pull request on.
  */
 export const createPullRequestForJiraIssue = async (
   email: string,
-  issueKey: string
+  userCommand: string
 ): Promise<void> => {
+  const [issueKey, repositoryName] = userCommand.trim().split(/\s+/)
+
   info(`Creating a pull request for issue ${issueKey} / ${email}`)
   info('Fetching the Jira issue details...')
   const issue = await getIssue(issueKey)
@@ -57,6 +59,8 @@ export const createPullRequestForJiraIssue = async (
   }
 
   const jiraUrl = issueUrl(issue.key)
+  // If no repository is supplied then it will default to the Jira issue repository.
+  const repository = repositoryName || issue.fields.repository
   info(`The Jira URL is ${jiraUrl}`)
 
   info('Finding out who the pull request should belong to...')
@@ -90,7 +94,7 @@ export const createPullRequestForJiraIssue = async (
     return
   }
 
-  if (isNil(issue.fields.repository)) {
+  if (isNil(repository)) {
     const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`
     error(message)
     await sendUserMessage(credentials.slack_id, message)
@@ -106,7 +110,7 @@ export const createPullRequestForJiraIssue = async (
 
   info('Checking if there is an open pull request for this issue...')
   let pullRequestNumber
-  const repo = await getRepository(issue.fields.repository)
+  const repo = await getRepository(repository)
   const pullRequestNumbers = await getIssuePullRequestNumbers(
     issue.id,
     repo.name
@@ -134,7 +138,7 @@ export const createPullRequestForJiraIssue = async (
       info(
         `Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`
       )
-      const epicPr = await createEpicPullRequest(epic, issue.fields.repository)
+      const epicPr = await createEpicPullRequest(epic, repository)
       baseBranchName = epicPr.head.ref
     }
 
