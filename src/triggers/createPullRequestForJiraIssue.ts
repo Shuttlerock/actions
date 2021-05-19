@@ -153,7 +153,7 @@ export const createPullRequestForJiraIssue = async (
         newBranchName,
         `.meta/${issue.key}.md`,
         `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
-        `[${issue.key}] [skip ci] Create pull request.`
+        `[${issue.key}] [skip ci] [skip netlify] Create pull request.`
       )
     }
 
