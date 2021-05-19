@@ -61960,6 +61960,7 @@ const GithubWriteUser = 'sr-devops';
 const DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const ReleaseBranchName = `${GithubWriteUser}/release-candidate`;
+const TemplateUpdateBranchName = `${GithubWriteUser}/update-templates`;
 
 // EXTERNAL MODULE: ./node_modules/lodash/isEqual.js
 var isEqual = __nccwpck_require__(20052);
@@ -64439,7 +64440,97 @@ const jiraStoryPointsUpdated = (email, issueKey) => jiraStoryPointsUpdated_await
     (0,core.info)(`Finished summing ${issue.fields.parent.key}`);
 });
 
+;// CONCATENATED MODULE: ./src/triggers/updateTemplates.ts
+var updateTemplates_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+
+
+/**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ *
+ * @returns {void}
+ */
+const updateTemplates_reportError = (slackId, message) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
+    yield sendUserMessage(slackId, message);
+    (0,core.error)(message);
+    return undefined;
+});
+/**
+ * Looks for an existing branch for a release, and creates one if it doesn't already exist.
+ *
+ * @param {Repository} repoName The name of the repository that the branch will belong to.
+ * @param {string}     sha      The commit sha to branch from.
+ *
+ * @returns {ReposGetBranchResponseData} The branch data.
+ */
+const ensureBranch = (repoName, sha) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
+    (0,core.info)(`Looking for an existing template update branch (${TemplateUpdateBranchName})...`);
+    const updateBranch = yield getBranch(repoName, TemplateUpdateBranchName);
+    if (isNil_default()(updateBranch)) {
+        (0,core.info)('Existing template update branch not found - creating it...');
+        yield createGitBranch(repoName, TemplateUpdateBranchName, sha);
+        // This is inefficient, but we look up the branch we just created to keep types consistent.
+        return ensureBranch(repoName, sha);
+    }
+    if (updateBranch.commit.sha === sha) {
+        (0,core.info)(`The template update branch already exists, and is up to date (${sha})`);
+        return updateBranch;
+    }
+    (0,core.info)('The template update branch already exists, but is out of date - re-creating it...');
+    yield deleteBranch(repoName, TemplateUpdateBranchName);
+    return ensureBranch(repoName, sha);
+});
+/**
+ * To trigger this event manually:
+ *
+ * $ act --job trigger_action --eventpath src/actions/trigger-action/__tests__/fixtures/updateTemplates.json
+ *
+ * or to trigger it via the Github API:
+ *
+ * $ curl --header "Accept: application/vnd.github.v3+json" \
+ * --header  "Authorization: token YOUR_TOKEN" \
+ * --request POST \
+ * --data    '{"ref": "develop", "inputs": { "email": "dave@shuttlerock.com", "event": "updateTemplates", "param": "compliance" }}' \
+ * https://api.github.com/repos/Shuttlerock/actions/actions/workflows/trigger-action.yml/dispatches
+ *
+ * @param {string} email          The email address of the user who will own the pull request.
+ * @param {string} repositoryName The name of the repository whose templates we want to update.
+ *
+ * @returns {void}
+ */
+const updateTemplates = (email, repositoryName) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
+    (0,core.info)(`User ${email} requested an update of templates for the repository ${repositoryName}...`);
+    (0,core.info)(`Fetching credentials for user '${email}'...`);
+    const credentials = yield fetchCredentials(email);
+    (0,core.info)(`Checking if the repository '${repositoryName}' exists...`);
+    const repo = yield getRepository(repositoryName);
+    let message = `Creating a pull request to update templates for *<${repo.html_url}|${repo.name}>*...`;
+    yield sendUserMessage(credentials.slack_id, message);
+    const developBranch = yield getBranch(repo.name, repo.default_branch);
+    if (isNil_default()(developBranch)) {
+        message = `Branch '${repo.default_branch}' could not be found for repository ${repo.name} - giving up`;
+        return updateTemplates_reportError(credentials.slack_id, message);
+    }
+    yield ensureBranch(repo.name, developBranch.commit.sha);
+    return undefined;
+});
+
 ;// CONCATENATED MODULE: ./src/triggers/index.ts
+
 
 
 
@@ -64480,6 +64571,9 @@ const run = () => trigger_action_awaiter(void 0, void 0, void 0, function* () {
             break;
         case 'jiraIssueTransitioned':
             yield jiraIssueTransitioned(email, param);
+            break;
+        case 'updateTemplates':
+            yield updateTemplates(email, param);
             break;
         default:
             throw new Error(`Unknown event ${event}`);

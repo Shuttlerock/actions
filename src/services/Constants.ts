@@ -21,3 +21,4 @@ export const GithubWriteUser = 'sr-devops'
 export const DevelopBranchName = 'develop'
 export const MasterBranchName = 'master'
 export const ReleaseBranchName = `${GithubWriteUser}/release-candidate`
+export const TemplateUpdateBranchName = `${GithubWriteUser}/update-templates`

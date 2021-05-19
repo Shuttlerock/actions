@@ -60052,6 +60052,7 @@ const Constants_GithubWriteUser = 'sr-devops';
 const Constants_DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
+const TemplateUpdateBranchName = `${Constants_GithubWriteUser}/update-templates`;
 
 // EXTERNAL MODULE: external "crypto"
 var external_crypto_ = __nccwpck_require__(6417);

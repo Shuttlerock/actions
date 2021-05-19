@@ -8,6 +8,7 @@ import {
   createRelease,
   jiraIssueTransitioned,
   jiraStoryPointsUpdated,
+  updateTemplates,
 } from '@sr-triggers/index'
 
 interface Context {
@@ -45,6 +46,9 @@ export const run = async (): Promise<void> => {
       break
     case 'jiraIssueTransitioned':
       await jiraIssueTransitioned(email, param)
+      break
+    case 'updateTemplates':
+      await updateTemplates(email, param)
       break
     default:
       throw new Error(`Unknown event ${event}`)

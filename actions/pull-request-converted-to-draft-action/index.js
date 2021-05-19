@@ -60049,6 +60049,7 @@ const Constants_GithubWriteUser = 'sr-devops';
 const Constants_DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
+const TemplateUpdateBranchName = `${Constants_GithubWriteUser}/update-templates`;
 
 // EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
 var lodash_isUndefined = __nccwpck_require__(2825);
