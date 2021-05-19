@@ -3,6 +3,7 @@ import Schema from '@octokit/webhooks-definitions/schema'
 import isNil from 'lodash/isNil'
 
 import { ReleaseBranchName } from '@sr-services/Constants'
+import { fetchRepository } from '@sr-services/Credentials'
 import { createReleaseTag, getIssueKey } from '@sr-services/Github'
 import {
   createRelease as createJiraRelease,
@@ -42,14 +43,17 @@ export const pullRequestClosed = async (
     } else {
       const releaseVersion = `v${matches[1]}` // v2021-01-12-0426
       const releaseName = matches[2] // Energetic Eagle
+      const repo = await fetchRepository(repository.name)
 
-      info(`Creating Jira release ${releaseVersion} (${releaseName})...`)
-      await createJiraRelease(
-        repository.name,
-        pullRequest.number,
-        releaseVersion,
-        releaseName
-      )
+      if (repo?.allow_jira_release) {
+        info(`Creating Jira release ${releaseVersion} (${releaseName})...`)
+        await createJiraRelease(
+          repository.name,
+          pullRequest.number,
+          releaseVersion,
+          releaseName
+        )
+      }
 
       // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
       info(`Creating Github release ${releaseVersion} (${releaseName})...`)
