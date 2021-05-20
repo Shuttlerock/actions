@@ -59962,10 +59962,11 @@ const Constants_DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
 
-// EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
-var lodash_isUndefined = __nccwpck_require__(2825);
-// EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
-var dist_node = __nccwpck_require__(5375);
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __nccwpck_require__(6417);
+// EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
+var lib = __nccwpck_require__(467);
+var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 ;// CONCATENATED MODULE: ./src/services/Inputs.ts
 
 // The base URL to use when connecting to the internal credentials API.
@@ -59989,6 +59990,72 @@ const Inputs_slackErrorChannelId = () => getInput('slack-error-channel-id', { re
 // Token with write access to Slack.
 const slackToken = () => (0,core.getInput)('slack-token', { required: true });
 
+;// CONCATENATED MODULE: ./src/services/Credentials.ts
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+/**
+ * Fetches the user credentials from the remote credential service for the given email or name.
+ *
+ * @param {string} identifier The email address or Jira display name of the user to look up.
+ *
+ * @returns {Credentials} The credentials object.
+ */
+const Credentials_fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, function* () {
+    if (isNil(identifier)) {
+        throw new Error('Could not lookup user credentials because no identifier or display name was found');
+    }
+    const id = Buffer.from(identifier).toString('base64');
+    const signature = createHmac('sha256', credentialsApiSecret())
+        .update(identifier)
+        .digest('hex');
+    const url = `${credentialsApiPrefix()}credentials/${id}`;
+    const response = yield fetch(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const credentials = (yield response.json());
+    if (credentials.status !== 'ok') {
+        throw new Error(`Could not get credentials for the user ${identifier}`);
+    }
+    return credentials;
+});
+/**
+ * Fetches the repository with the given name from the remote credential service.
+ *
+ * @param {string} name The name of the repository to look up.
+ *
+ * @returns {Repository} The repository object.
+ */
+const fetchRepository = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Buffer.from(name).toString('base64');
+    const signature = (0,external_crypto_.createHmac)('sha256', Inputs_credentialsApiSecret())
+        .update(name)
+        .digest('hex');
+    const url = `${Inputs_credentialsApiPrefix()}repositories/${id}`;
+    const response = yield lib_default()(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const repository = (yield response.json());
+    if (repository.status !== 'ok') {
+        throw new Error(`Could not get repository with the name ${name}`);
+    }
+    return repository;
+});
+
+// EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
+var lodash_isUndefined = __nccwpck_require__(2825);
+// EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
+var dist_node = __nccwpck_require__(5375);
 ;// CONCATENATED MODULE: ./src/services/Github/Client.ts
 
 
@@ -59999,7 +60066,7 @@ const Client_clientForToken = (token) => {
 };
 
 ;// CONCATENATED MODULE: ./src/services/Github/Git.ts
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+var Git_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -60028,7 +60095,7 @@ const Git_TreeTypes = {
  *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
-const Git_createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createBlob({
         owner: organizationName(),
         repo,
@@ -60046,7 +60113,7 @@ const Git_createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, f
  *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
-const Git_createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createCommit({
         owner: organizationName(),
         repo,
@@ -60065,7 +60132,7 @@ const Git_createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, v
  *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-const Git_createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createRef({
         owner: organizationName(),
         repo,
@@ -60083,7 +60150,7 @@ const Git_createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, voi
  *
  * @returns {GitCreateTreeResponseData} The branch data.
  */
-const Git_createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createTree({
         owner: organizationName(),
         repo,
@@ -60100,7 +60167,7 @@ const Git_createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, vo
  *
  * @returns {GitGetCommitResponseData} The commit data.
  */
-const getCommit = (repo, sha) => __awaiter(void 0, void 0, void 0, function* () {
+const getCommit = (repo, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield readClient.git.getCommit({
         owner: organizationName(),
         repo,
@@ -60565,9 +60632,6 @@ const Label_addLabels = (repo, number, added) => Label_awaiter(void 0, void 0, v
     return Label_setLabels(repo, number, toKeep);
 });
 
-// EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
-var lib = __nccwpck_require__(467);
-var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 // EXTERNAL MODULE: ./node_modules/jira-client/lib/jira.js
 var jira = __nccwpck_require__(6411);
 var jira_default = /*#__PURE__*/__nccwpck_require__.n(jira);
@@ -60980,70 +61044,6 @@ var lodash_isEmpty = __nccwpck_require__(2384);
 var isEmpty_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isEmpty);
 // EXTERNAL MODULE: external "querystring"
 var external_querystring_ = __nccwpck_require__(1191);
-// EXTERNAL MODULE: external "crypto"
-var external_crypto_ = __nccwpck_require__(6417);
-;// CONCATENATED MODULE: ./src/services/Credentials.ts
-var Credentials_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-
-
-
-/**
- * Fetches the user credentials from the remote credential service for the given email or name.
- *
- * @param {string} identifier The email address or Jira display name of the user to look up.
- *
- * @returns {Credentials} The credentials object.
- */
-const Credentials_fetchCredentials = (identifier) => Credentials_awaiter(void 0, void 0, void 0, function* () {
-    if (isNil(identifier)) {
-        throw new Error('Could not lookup user credentials because no identifier or display name was found');
-    }
-    const id = Buffer.from(identifier).toString('base64');
-    const signature = createHmac('sha256', credentialsApiSecret())
-        .update(identifier)
-        .digest('hex');
-    const url = `${credentialsApiPrefix()}credentials/${id}`;
-    const response = yield fetch(url, {
-        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
-    });
-    const credentials = (yield response.json());
-    if (credentials.status !== 'ok') {
-        throw new Error(`Could not get credentials for the user ${identifier}`);
-    }
-    return credentials;
-});
-/**
- * Fetches the repository with the given name from the remote credential service.
- *
- * @param {string} name The name of the repository to look up.
- *
- * @returns {Repository} The repository object.
- */
-const fetchRepository = (name) => Credentials_awaiter(void 0, void 0, void 0, function* () {
-    const id = Buffer.from(name).toString('base64');
-    const signature = (0,external_crypto_.createHmac)('sha256', Inputs_credentialsApiSecret())
-        .update(name)
-        .digest('hex');
-    const url = `${Inputs_credentialsApiPrefix()}repositories/${id}`;
-    const response = yield lib_default()(url, {
-        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
-    });
-    const repository = (yield response.json());
-    if (repository.status !== 'ok') {
-        throw new Error(`Could not get repository with the name ${name}`);
-    }
-    return repository;
-});
-
 ;// CONCATENATED MODULE: ./src/services/Jira/Release.ts
 var Release_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -62574,6 +62574,7 @@ var pullRequestClosed_awaiter = (undefined && undefined.__awaiter) || function (
 
 
 
+
 /**
  * Runs whenever a pull request is closed (not necessarily merged).
  *
@@ -62597,8 +62598,11 @@ const pullRequestClosed = (payload) => pullRequestClosed_awaiter(void 0, void 0,
         else {
             const releaseVersion = `v${matches[1]}`; // v2021-01-12-0426
             const releaseName = matches[2]; // Energetic Eagle
-            (0,core.info)(`Creating Jira release ${releaseVersion} (${releaseName})...`);
-            yield createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
+            const repo = yield fetchRepository(repository.name);
+            if (repo === null || repo === void 0 ? void 0 : repo.allow_jira_release) {
+                (0,core.info)(`Creating Jira release ${releaseVersion} (${releaseName})...`);
+                yield createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
+            }
             // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
             (0,core.info)(`Creating Github release ${releaseVersion} (${releaseName})...`);
             const [, ...releaseNotes] = pullRequest.body.split('\n');

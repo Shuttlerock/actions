@@ -64063,8 +64063,8 @@ var createPullRequestForJiraIssue_awaiter = (undefined && undefined.__awaiter) |
  * @param {string} userCommand The command given by the user of the Jira issue we will base the pull request on.
  */
 const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestForJiraIssue_awaiter(void 0, void 0, void 0, function* () {
-  const [issueKey, repositoryName] = userCommand.trim().split(/\s+/);
     var _a, _b;
+    const [issueKey, repositoryName] = userCommand.trim().split(/\s+/);
     (0,core.info)(`Creating a pull request for issue ${issueKey} / ${email}`);
     (0,core.info)('Fetching the Jira issue details...');
     const issue = yield getIssue(issueKey);
@@ -64076,6 +64076,8 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
         return;
     }
     const jiraUrl = issueUrl(issue.key);
+    // If no repository is supplied then it will default to the Jira issue repository.
+    const repository = repositoryName || issue.fields.repository;
     (0,core.info)(`The Jira URL is ${jiraUrl}`);
     (0,core.info)('Finding out who the pull request should belong to...');
     if (isNil_default()(issue.fields.assignee)) {
@@ -64100,7 +64102,7 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
         yield sendUserMessage(credentials.slack_id, message);
         return;
     }
-    if (isNil_default()(repositoryName || issue.fields.repository)) {
+    if (isNil_default()(repository)) {
         const message = `No repository is set for issue <${jiraUrl}|${issue.key}>, so no pull request was created`;
         (0,core.error)(message);
         yield sendUserMessage(credentials.slack_id, message);
@@ -64114,7 +64116,7 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
     }
     (0,core.info)('Checking if there is an open pull request for this issue...');
     let pullRequestNumber;
-    const repo = yield getRepository(repositoryName || issue.fields.repository);
+    const repo = yield getRepository(repository);
     const pullRequestNumbers = yield getIssuePullRequestNumbers(issue.id, repo.name);
     if (pullRequestNumbers.length > 0) {
         ;
@@ -64134,13 +64136,13 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
             !((_a = epic.fields.labels) === null || _a === void 0 ? void 0 : _a.includes(JiraLabelSkipPR)) &&
             !((_b = issue.fields.labels) === null || _b === void 0 ? void 0 : _b.includes(JiraLabelSkipPR))) {
             (0,core.info)(`Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`);
-            const epicPr = yield createEpicPullRequest(epic, repositoryName || issue.fields.repository);
+            const epicPr = yield createEpicPullRequest(epic, repository);
             baseBranchName = epicPr.head.ref;
         }
         (0,core.info)(`Checking if the branch '${newBranchName}' already exists...`);
         if (isNil_default()(branch)) {
             (0,core.info)(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
-            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${issue.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${issue.key}] [skip ci] Create pull request.`);
+            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${issue.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${issue.key}] [skip ci] [skip netlify] Create pull request.`);
         }
         (0,core.info)('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
