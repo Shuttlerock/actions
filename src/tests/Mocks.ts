@@ -57,43 +57,46 @@ export const mockGitCommit = {
   },
 }
 
-export const mockGithubBranch = ({
+export const mockGithubBranch = {
   commit: {
     sha: 'branch-sha',
   },
   name: 'my-branch',
   sha: 'branch-sha',
-} as unknown) as ReposGetBranchResponseData
+} as unknown as ReposGetBranchResponseData
 
-export const mockGithubPullRequestCreateResponse = ({
+export const mockGithubPullRequestCreateResponse = {
   id: 1234,
   number: 123,
   title: 'Add a Widget',
-} as unknown) as PullsCreateResponseData
+} as unknown as PullsCreateResponseData
 
-export const mockGithubPullRequestReviewResponse = ({
+export const mockGithubPullRequestReviewResponse = {
   id: 1234,
   body: ':thumbsup:',
-} as unknown) as PullsCreateReviewResponseData
+} as unknown as PullsCreateReviewResponseData
 
-export const mockGithubPullRequestUpdateResponse = ({
+export const mockGithubPullRequestUpdateResponse = {
   id: 1234,
   number: 123,
   title: 'Add a Widget',
-} as unknown) as PullsUpdateResponseData
+} as unknown as PullsUpdateResponseData
 
-export const mockGithubPullRequestPayload = (pullRequestPayload as unknown) as Schema.PullRequestEvent
+export const mockGithubPullRequestPayload =
+  pullRequestPayload as unknown as Schema.PullRequestEvent
 
-export const mockGithubPullRequest = (mockGithubPullRequestPayload.pull_request as unknown) as PullsGetResponseData
+export const mockGithubPullRequest =
+  mockGithubPullRequestPayload.pull_request as unknown as PullsGetResponseData
 
 export const mockGithubReleaseName = 'Energetic Eagle'
 
-export const mockGithubRelease = ({
+export const mockGithubRelease = {
   name: `v2021-01-12-0426 (${mockGithubReleaseName})`,
   tag_name: 'v2021-01-12-0426',
-} as unknown) as ReposCreateReleaseResponseData
+} as unknown as ReposCreateReleaseResponseData
 
-export const mockGithubRepository = (repository as unknown) as ReposGetResponseData
+export const mockGithubRepository =
+  repository as unknown as ReposGetResponseData
 
 export const mockIssuesAddAssigneesResponseData = {
   id: 1234,

@@ -24,7 +24,6 @@ import { positiveEmoji, sendUserMessage } from '@sr-services/Slack'
  * @param {Issue}                issue       The Jira issue that the PR is linked to.
  * @param {Repository}           repoName    The name of the Github repository.
  * @param {PullsGetResponseData} pullRequest The pull request being checked.
- *
  * @returns {string | undefined} A message to be sent to the user in Slack.
  */
 const handleFailure = async (
@@ -45,7 +44,6 @@ const handleFailure = async (
  *
  * @param {string}               checkName   The name of the Github app running the check.
  * @param {PullsGetResponseData} pullRequest The pull request being checked.
- *
  * @returns {string | undefined} A message to be sent to the user in Slack.
  */
 const handleSuccess = (

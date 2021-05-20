@@ -12,7 +12,7 @@ import { rebase } from '@sr-services/Github/Rebase'
 export const run = async (): Promise<void> => {
   const {
     payload: { pull_request, repository },
-  } = ((await context) as unknown) as {
+  } = (await context) as unknown as {
     payload: Schema.PullRequestEvent
   }
 

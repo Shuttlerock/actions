@@ -36,7 +36,7 @@ describe('pull-request-labeled-action', () => {
     let sendUserMessageSpy: jest.SpyInstance
 
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
-    const payload = (rawPayload as unknown) as Schema.PullRequestLabeledEvent
+    const payload = rawPayload as unknown as Schema.PullRequestLabeledEvent
 
     beforeEach(() => {
       addLabelsSpy = jest
@@ -64,24 +64,24 @@ describe('pull-request-labeled-action', () => {
     })
 
     it('does nothing if the event was triggered by another Github action', async () => {
-      const automatedPayload = ({
+      const automatedPayload = {
         ...payload,
         sender: {
           login: GithubWriteUser,
         },
-      } as unknown) as Schema.PullRequestLabeledEvent
+      } as unknown as Schema.PullRequestLabeledEvent
       await pullRequestLabeled(automatedPayload)
       expect(addLabelsSpy).toHaveBeenCalledTimes(0)
     })
 
     it('assigns owners', async () => {
       const assignReviewersSpy = jest.spyOn(Github, 'assignReviewers')
-      const dependabotPayload = ({
+      const dependabotPayload = {
         ...payload,
         label: {
           name: DependenciesLabel,
         },
-      } as unknown) as Schema.PullRequestLabeledEvent
+      } as unknown as Schema.PullRequestLabeledEvent
       await pullRequestLabeled(dependabotPayload)
       expect(assignReviewersSpy).toHaveBeenCalledWith(
         payload.repository.name,
@@ -97,12 +97,12 @@ describe('pull-request-labeled-action', () => {
 
     it('assigns reviewers to dependabot PRs', async () => {
       const assignOwnersSpy = jest.spyOn(Github, 'assignOwners')
-      const dependabotPayload = ({
+      const dependabotPayload = {
         ...payload,
         label: {
           name: SecurityLabel,
         },
-      } as unknown) as Schema.PullRequestLabeledEvent
+      } as unknown as Schema.PullRequestLabeledEvent
       await pullRequestLabeled(dependabotPayload)
       expect(assignOwnersSpy).toHaveBeenCalledWith(
         payload.repository.name,
@@ -113,12 +113,12 @@ describe('pull-request-labeled-action', () => {
     })
 
     describe('security label', () => {
-      const securityPayload = ({
+      const securityPayload = {
         ...payload,
         label: {
           name: SecurityLabel,
         },
-      } as unknown) as Schema.PullRequestLabeledEvent
+      } as unknown as Schema.PullRequestLabeledEvent
 
       it('assigns a priority', async () => {
         await pullRequestLabeled(securityPayload)
@@ -141,7 +141,7 @@ describe('pull-request-labeled-action', () => {
       })
 
       it('does nothing if the PR has already been prioritized', async () => {
-        const prioritizedPayload = ({
+        const prioritizedPayload = {
           ...securityPayload,
           pull_request: {
             ...securityPayload.pull_request,
@@ -151,7 +151,7 @@ describe('pull-request-labeled-action', () => {
               },
             ],
           },
-        } as unknown) as Schema.PullRequestLabeledEvent
+        } as unknown as Schema.PullRequestLabeledEvent
         await pullRequestLabeled(prioritizedPayload)
         expect(addLabelsSpy).toHaveBeenCalledWith('actions', 493, [
           SecurityLabel,

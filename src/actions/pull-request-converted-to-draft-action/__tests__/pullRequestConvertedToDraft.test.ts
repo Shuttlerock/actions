@@ -24,10 +24,10 @@ jest.mock('@sr-services/Github', () => ({
 
 describe('pull-request-converted-to-draft-action', () => {
   describe('pullRequestConvertedToDraft', () => {
-    const payload = ({
+    const payload = {
       ...mockGithubPullRequestPayload,
       action: 'converted_to_draft',
-    } as unknown) as Schema.PullRequestConvertedToDraftEvent
+    } as unknown as Schema.PullRequestConvertedToDraftEvent
     const prName = `${payload.repository.name}#${payload.pull_request.number}`
     let addLabelsSpy: jest.SpyInstance
     let getInProgressColumnSpy: jest.SpyInstance

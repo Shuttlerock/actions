@@ -28,7 +28,7 @@ export const run = async (): Promise<void> => {
     payload: {
       inputs: { email, event, param },
     },
-  } = ((await context) as unknown) as Context
+  } = (await context) as unknown as Context
 
   switch (event) {
     case 'approvePullRequest':
