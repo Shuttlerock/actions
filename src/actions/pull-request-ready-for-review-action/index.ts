@@ -12,7 +12,7 @@ import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-re
  * $ act --job pull_request_ready_for_review_action --eventpath src/actions/pull-request-ready-for-review-action/__tests__/fixtures/pull-request-ready-for-review.json
  */
 export const run = async (): Promise<void> => {
-  const { payload } = ((await context) as unknown) as {
+  const { payload } = (await context) as unknown as {
     payload: Schema.PullRequestEvent
   }
   await pullRequestReadyForReview(payload)

@@ -23,7 +23,6 @@ import { organizationName } from '@sr-services/Inputs'
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {void}
  */
 export const deleteBranch = async (
@@ -54,7 +53,6 @@ export const deleteBranch = async (
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 export const getBranch = async (
@@ -88,7 +86,6 @@ export const getBranch = async (
  * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
  * @param {string}     fileContent    The text that the file will contain.
  * @param {string}     commitMessage  The text to use as the commit message.
- *
  * @returns {GitCreateRefResponseData} The new branch data.
  */
 export const createBranch = async (

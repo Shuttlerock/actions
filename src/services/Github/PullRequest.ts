@@ -22,7 +22,6 @@ export interface PullRequestContent {
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {IssuesAddAssigneesResponseData} The PR data.
  */
 export const assignOwners = async (
@@ -49,7 +48,6 @@ export const assignOwners = async (
  * @param {string}     title The title of the PR.
  * @param {string}     body  The body of the PR.
  * @param {string}     token The Github API token to use when creating the PR.
- *
  * @returns {PullsGetResponseData} The PR data.
  */
 export const createPullRequest = async (
@@ -77,7 +75,6 @@ export const createPullRequest = async (
  * Returns the Jira issue key for the pull request with the given number.
  *
  * @param {PullRequestContent} pr The body of the pull request which we will parse.
- *
  * @returns {string | undefined} The Jira issue key.
  */
 export const getIssueKey = (pr: PullRequestContent): string | undefined => {
@@ -106,7 +103,6 @@ export const getIssueKey = (pr: PullRequestContent): string | undefined => {
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 export const getPullRequest = async (
@@ -138,7 +134,6 @@ export const getPullRequest = async (
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {PullsRequestReviewersResponseData} The PR data.
  */
 export const assignReviewers = async (
@@ -172,7 +167,6 @@ export const assignReviewers = async (
  * Extracts a pull request from a commit message, in the format "[#123] Do something".
  *
  * @param {string} message The commit message to extract the pull request number from.
- *
  * @returns {number | undefined} The number of the pull request, if one can be found.
  */
 export const extractPullRequestNumber = (message: string): number | undefined =>
@@ -185,7 +179,6 @@ export const extractPullRequestNumber = (message: string): number | undefined =>
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number whose commits we want to fetch.
- *
  * @returns {PullsListCommitsResponseData} The pull request data.
  */
 export const listPullRequestCommits = async (
@@ -206,7 +199,6 @@ export const listPullRequestCommits = async (
  *
  * @param {Repository} repo   The name of the repository that the PR will belong to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {string} The URL of the pull request.
  */
 export const pullRequestUrl = (repo: Repository, number: number): string =>
@@ -219,7 +211,6 @@ export const pullRequestUrl = (repo: Repository, number: number): string =>
  * @param {number}     number    The PR number.
  * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
  * @param {string}     body      The review body.
- *
  * @returns {PullsCreateReviewResponseData} The review data.
  */
 export const reviewPullRequest = async (
@@ -245,7 +236,6 @@ export const reviewPullRequest = async (
  * @param {Repository} repo       The name of the repository that the PR belongs to.
  * @param {number}     number     The pull request number to update.
  * @param {object}     attributes The data to update.
- *
  * @returns {PullsGetResponseData} The updated pull request data.
  */
 export const updatePullRequest = async (

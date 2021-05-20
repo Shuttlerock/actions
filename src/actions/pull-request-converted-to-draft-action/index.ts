@@ -12,7 +12,7 @@ import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-
  * $ act --job pull_request_converted_to_draft_action --eventpath src/actions/pull-request-converted-to-draft-action/__tests__/fixtures/pull-request-converted-to-draft.json
  */
 export const run = async (): Promise<void> => {
-  const { payload } = ((await context) as unknown) as {
+  const { payload } = (await context) as unknown as {
     payload: Schema.PullRequestEvent
   }
   await pullRequestConvertedToDraft(payload)

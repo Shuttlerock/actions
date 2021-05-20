@@ -20,6 +20,7 @@ export interface Credentials extends User {
 
 export interface Repository {
   allow_auto_review: boolean
+  allow_jira_release: boolean
   jira_project_id?: number
   leads: User[]
   reviewers: User[]
@@ -30,7 +31,6 @@ export interface Repository {
  * Fetches the user credentials from the remote credential service for the given email or name.
  *
  * @param {string} identifier The email address or Jira display name of the user to look up.
- *
  * @returns {Credentials} The credentials object.
  */
 export const fetchCredentials = async (
@@ -65,7 +65,6 @@ export const fetchCredentials = async (
  * Fetches the repository with the given name from the remote credential service.
  *
  * @param {string} name The name of the repository to look up.
- *
  * @returns {Repository} The repository object.
  */
 export const fetchRepository = async (name: string): Promise<Repository> => {

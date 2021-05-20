@@ -3,12 +3,14 @@ import Schema from '@octokit/webhooks-definitions/schema'
 
 import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
 import { ReleaseBranchName } from '@sr-services/Constants'
+import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
 import {
   mockGithubPullRequestPayload,
   mockGithubRelease,
   mockJiraIssue,
+  mockRepository,
 } from '@sr-tests/Mocks'
 
 jest.mock('@sr-services/Jira', () => ({
@@ -21,6 +23,7 @@ jest.mock('@sr-services/Jira', () => ({
 jest.mock('@sr-services/Github', () => ({
   createReleaseTag: jest.fn(),
   getIssueKey: jest.fn(),
+  fetchRepositorySpy: jest.fn(),
 }))
 
 describe('pull-request-closed-action', () => {
@@ -31,6 +34,8 @@ describe('pull-request-closed-action', () => {
     let getValidatedColumnSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let setIssueStatusSpy: jest.SpyInstance
+    let fetchRepositorySpy: jest.SpyInstance
+    let createJiraReleaseSpy: jest.SpyInstance
 
     beforeEach(() => {
       getIssueSpy = jest
@@ -52,6 +57,10 @@ describe('pull-request-closed-action', () => {
         .mockImplementation((_issueId: string, _newStatus: string) =>
           Promise.resolve(undefined)
         )
+      fetchRepositorySpy = jest
+        .spyOn(Credentials, 'fetchRepository')
+        .mockReturnValue(Promise.resolve(mockRepository))
+      createJiraReleaseSpy = jest.spyOn(Jira, 'createRelease')
     })
 
     afterEach(() => {
@@ -60,6 +69,8 @@ describe('pull-request-closed-action', () => {
       getValidatedColumnSpy.mockRestore()
       infoSpy.mockRestore()
       setIssueStatusSpy.mockRestore()
+      fetchRepositorySpy.mockRestore()
+      createJiraReleaseSpy.mockRestore()
     })
 
     it('sets the status of the Jira issue', async () => {
@@ -86,7 +97,6 @@ describe('pull-request-closed-action', () => {
       } as Schema.PullRequestClosedEvent
 
       it('creates a Jira release', async () => {
-        const createJiraReleaseSpy = jest.spyOn(Jira, 'createRelease')
         await pullRequestClosed(releasePayload)
         expect(createJiraReleaseSpy).toHaveBeenCalledWith(
           mockGithubPullRequestPayload.repository.name,
@@ -94,7 +104,14 @@ describe('pull-request-closed-action', () => {
           `v${releaseVersion}`,
           releaseName
         )
-        createJiraReleaseSpy.mockRestore()
+      })
+
+      it('does not create a Jira release', async () => {
+        fetchRepositorySpy.mockImplementation((_name?: string) =>
+          Promise.resolve({ ...mockRepository, allow_jira_release: false })
+        )
+        await pullRequestClosed(releasePayload)
+        expect(createJiraReleaseSpy).toHaveBeenCalledTimes(0)
       })
 
       it('creates a Github release', async () => {

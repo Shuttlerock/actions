@@ -61,7 +61,6 @@ export interface Tree {
  *
  * @param {Repository} repo    The name of the repository that the blob will belong to.
  * @param {string}     content The content to put in the blob.
- *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
 export const createGitBlob = async (
@@ -84,7 +83,6 @@ export const createGitBlob = async (
  * @param {string}     message The commit message.
  * @param {Sha}        tree    The tree to attach the commit to.
  * @param {Sha}        parent  The parent to attach the commit to.
- *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
 export const createGitCommit = async (
@@ -110,7 +108,6 @@ export const createGitCommit = async (
  * @param {Repository} repo   The name of the repository that the branch will belong to.
  * @param {Branch}     branch The name of the branch to create.
  * @param {Sha}        sha    The commit sha to base the branch on.
- *
  * @returns {GitCreateRefResponseData} The branch data.
  */
 export const createGitBranch = async (
@@ -134,7 +131,6 @@ export const createGitBranch = async (
  * @param {Repository} repo     The name of the repository that the branch will belong to.
  * @param {Tree[]}     tree     The data to use when creating the tree.
  * @param {Sha}        baseTree The tree to base the new tree on.
- *
  * @returns {GitCreateTreeResponseData} The branch data.
  */
 export const createGitTree = async (
@@ -157,7 +153,6 @@ export const createGitTree = async (
  *
  * @param {Repository} repo The name of the repository whose commit we want to fetch.
  * @param {Sha}        sha  The sha hash of the commit.
- *
  * @returns {GitGetCommitResponseData} The commit data.
  */
 export const getCommit = async (

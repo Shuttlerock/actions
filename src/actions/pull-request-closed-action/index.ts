@@ -12,7 +12,7 @@ import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRe
  * $ act --job pull_request_closed_action --eventpath src/actions/pull-request-closed-action/__tests__/fixtures/pull-request-closed.json
  */
 export const run = async (): Promise<void> => {
-  const { payload } = ((await context) as unknown) as {
+  const { payload } = (await context) as unknown as {
     payload: Schema.PullRequestEvent
   }
   await pullRequestClosed(payload)

@@ -153,7 +153,7 @@ export const createPullRequestForJiraIssue = async (
         newBranchName,
         `.meta/${issue.key}.md`,
         `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
-        `[${issue.key}] [skip ci] Create pull request.`
+        `[${issue.key}] [skip ci] [skip netlify] Create pull request.`
       )
     }
 
@@ -197,7 +197,8 @@ export const createPullRequestForJiraIssue = async (
   info(`Notifying Slack user ${credentials.slack_id}...`)
   const url = pullRequestUrl(repo.name, pullRequestNumber)
 
-  const message = `Here's your pull request: *<${url}|${repo.name}#${pullRequestNumber}>*
+  const message =
+    `Here's your pull request: *<${url}|${repo.name}#${pullRequestNumber}>*
     Please prefix your commits with \`[#${pullRequestNumber}] [${issue.key}]\`\n
     Checkout the new branch with:
     \`git checkout --track origin/${newBranchName}\`

@@ -5,7 +5,7 @@
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.1.0","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":">=1.0.0 <3.0.0","@slack/types":"^1.7.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
+module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.2.3","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
 
 /***/ }),
 
@@ -3764,6 +3764,7 @@ exports.v = Octokit;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsoleLogger = exports.LogLevel = void 0;
 /**
  * Severity levels for log entries
  */
@@ -3836,6 +3837,7 @@ class ConsoleLogger {
         return ConsoleLogger.severity[a] >= ConsoleLogger.severity[b];
     }
 }
+exports.ConsoleLogger = ConsoleLogger;
 /** Map of labels for each log level */
 ConsoleLogger.labels = (() => {
     const entries = Object.entries(LogLevel);
@@ -3851,7 +3853,6 @@ ConsoleLogger.severity = {
     [LogLevel.INFO]: 200,
     [LogLevel.DEBUG]: 100,
 };
-exports.ConsoleLogger = ConsoleLogger;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -3927,6 +3928,7 @@ const p_queue_1 = __importDefault(__nccwpck_require__(8983)); // tslint:disable-
 const p_retry_1 = __importStar(__nccwpck_require__(2548));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const form_data_1 = __importDefault(__nccwpck_require__(4334)); // tslint:disable-line:import-name
+const is_electron_1 = __importDefault(__nccwpck_require__(7439));
 const methods_1 = __nccwpck_require__(1571);
 const instrument_1 = __nccwpck_require__(7763);
 const errors_1 = __nccwpck_require__(9781);
@@ -3943,7 +3945,7 @@ class WebClient extends methods_1.Methods {
     /**
      * @param token - An API token to authenticate/authorize with Slack (usually start with `xoxp`, `xoxb`)
      */
-    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = logger_1.LogLevel.INFO, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
+    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = undefined, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
         super();
         this.token = token;
         this.slackApiUrl = slackApiUrl;
@@ -3961,13 +3963,11 @@ class WebClient extends methods_1.Methods {
             }
         }
         else {
-            this.logger = logger_1.getLogger(WebClient.loggerName, logLevel, logger);
+            this.logger = logger_1.getLogger(WebClient.loggerName, logLevel !== null && logLevel !== void 0 ? logLevel : logger_1.LogLevel.INFO, logger);
         }
         this.axios = axios_1.default.create({
             baseURL: slackApiUrl,
-            headers: Object.assign({
-                'User-Agent': instrument_1.getUserAgent(),
-            }, headers),
+            headers: is_electron_1.default() ? headers : Object.assign({ 'User-Agent': instrument_1.getUserAgent() }, headers),
             httpAgent: agent,
             httpsAgent: agent,
             transformRequest: [this.serializeApiCallOptions.bind(this)],
@@ -3992,6 +3992,8 @@ class WebClient extends methods_1.Methods {
     async apiCall(method, options) {
         this.logger.debug(`apiCall('${method}') start`);
         warnDeprecations(method, this.logger);
+        warnIfFallbackIsMissing(method, this.logger, options);
+        warnIfThreadTsIsNotString(method, this.logger, options);
         if (typeof options === 'string' || typeof options === 'number' || typeof options === 'boolean') {
             throw new TypeError(`Expected an options argument but instead received a ${typeof options}`);
         }
@@ -4231,7 +4233,7 @@ class WebClient extends methods_1.Methods {
         }, initialValue));
     }
     /**
-     * Processes an HTTP response into a WebAPICallResult by performing JSON parsing on the body and merging relevent
+     * Processes an HTTP response into a WebAPICallResult by performing JSON parsing on the body and merging relevant
      * HTTP headers into the object.
      * @param response - an http response
      */
@@ -4323,6 +4325,44 @@ function warnDeprecations(method, logger) {
     }
     else if (isDeprecated) {
         logger.warn(`${method} is deprecated. Please check on https://api.slack.com/methods for an alternative.`);
+    }
+}
+/**
+ * Log a warning when using chat.postMessage without text argument or attachments with fallback argument
+ * @param method api method being called
+ * @param logger instance of we clients logger
+ * @param options arguments for the Web API method
+ */
+function warnIfFallbackIsMissing(method, logger, options) {
+    const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'chat.update'];
+    const isTargetMethod = targetMethods.includes(method);
+    const missingAttachmentFallbackDetected = (args) => Array.isArray(args.attachments)
+        && args.attachments.some(attachment => !attachment.fallback || attachment.fallback.trim() === 0);
+    const isEmptyText = (args) => args.text === undefined || args.text === null || args.text === '';
+    const buildWarningMessage = (missing) => `The \`${missing}\` argument is missing in the request payload for a ${method} call - ` +
+        `It's a best practice to always provide a \`${missing}\` argument when posting a message. ` +
+        `The \`${missing}\` is used in places where the content cannot be rendered such as: ` +
+        'system push notifications, assistive technology such as screen readers, etc.';
+    if (isTargetMethod && typeof options === 'object' && isEmptyText(options)) {
+        if (missingAttachmentFallbackDetected(options)) {
+            logger.warn(buildWarningMessage('fallback'));
+        }
+        else {
+            logger.warn(buildWarningMessage('text'));
+        }
+    }
+}
+/**
+ * Log a warning when thread_ts is not a string
+ * @param method api method being called
+ * @param logger instance of web clients logger
+ * @param options arguments for the Web API method
+ */
+function warnIfThreadTsIsNotString(method, logger, options) {
+    const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'files.upload'];
+    const isTargetMethod = targetMethods.includes(method);
+    if (isTargetMethod && (options === null || options === void 0 ? void 0 : options.thread_ts) !== undefined && typeof (options === null || options === void 0 ? void 0 : options.thread_ts) !== 'string') {
+        logger.warn(`The given thread_ts value in the request payload for a ${method} call is a float value. We highly recommend using a string value instead.`);
     }
 }
 //# sourceMappingURL=WebClient.js.map
@@ -4457,6 +4497,7 @@ Object.defineProperty(exports, "retryPolicies", ({ enumerable: true, get: functi
 var instrument_1 = __nccwpck_require__(7763);
 Object.defineProperty(exports, "addAppMetadata", ({ enumerable: true, get: function () { return instrument_1.addAppMetadata; } }));
 __exportStar(__nccwpck_require__(1571), exports);
+__exportStar(__nccwpck_require__(677), exports);
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -4599,11 +4640,13 @@ class Methods extends eventemitter3_1.EventEmitter {
     constructor() {
         super();
         this.admin = {
+            // TODO: admin.analytics.getFile
             apps: {
                 approve: bindApiCall(this, 'admin.apps.approve'),
                 approved: {
                     list: bindApiCall(this, 'admin.apps.approved.list'),
                 },
+                clearResolution: bindApiCall(this, 'admin.apps.clearResolution'),
                 requests: {
                     list: bindApiCall(this, 'admin.apps.requests.list'),
                 },
@@ -4611,6 +4654,7 @@ class Methods extends eventemitter3_1.EventEmitter {
                 restricted: {
                     list: bindApiCall(this, 'admin.apps.restricted.list'),
                 },
+                uninstall: bindApiCall(this, 'admin.apps.uninstall'),
             },
             barriers: {
                 create: bindApiCall(this, 'admin.barriers.create'),
@@ -4692,6 +4736,9 @@ class Methods extends eventemitter3_1.EventEmitter {
                     list: bindApiCall(this, 'admin.users.session.list'),
                     reset: bindApiCall(this, 'admin.users.session.reset'),
                     invalidate: bindApiCall(this, 'admin.users.session.invalidate'),
+                    getSettings: bindApiCall(this, 'admin.users.session.getSettings'),
+                    setSettings: bindApiCall(this, 'admin.users.session.setSettings'),
+                    clearSettings: bindApiCall(this, 'admin.users.session.clearSettings'),
                 },
                 setAdmin: bindApiCall(this, 'admin.users.setAdmin'),
                 setExpiration: bindApiCall(this, 'admin.users.setExpiration'),
@@ -4733,23 +4780,6 @@ class Methods extends eventemitter3_1.EventEmitter {
                 remove: bindApiCall(this, 'calls.participants.remove'),
             },
         };
-        this.channels = {
-            archive: bindApiCall(this, 'channels.archive'),
-            create: bindApiCall(this, 'channels.create'),
-            history: bindApiCall(this, 'channels.history'),
-            info: bindApiCall(this, 'channels.info'),
-            invite: bindApiCall(this, 'channels.invite'),
-            join: bindApiCall(this, 'channels.join'),
-            kick: bindApiCall(this, 'channels.kick'),
-            leave: bindApiCall(this, 'channels.leave'),
-            list: bindApiCall(this, 'channels.list'),
-            mark: bindApiCall(this, 'channels.mark'),
-            rename: bindApiCall(this, 'channels.rename'),
-            replies: bindApiCall(this, 'channels.replies'),
-            setPurpose: bindApiCall(this, 'channels.setPurpose'),
-            setTopic: bindApiCall(this, 'channels.setTopic'),
-            unarchive: bindApiCall(this, 'channels.unarchive'),
-        };
         this.chat = {
             delete: bindApiCall(this, 'chat.delete'),
             deleteScheduledMessage: bindApiCall(this, 'chat.deleteScheduledMessage'),
@@ -4784,12 +4814,6 @@ class Methods extends eventemitter3_1.EventEmitter {
             setTopic: bindApiCall(this, 'conversations.setTopic'),
             unarchive: bindApiCall(this, 'conversations.unarchive'),
         };
-        this.views = {
-            open: bindApiCall(this, 'views.open'),
-            publish: bindApiCall(this, 'views.publish'),
-            push: bindApiCall(this, 'views.push'),
-            update: bindApiCall(this, 'views.update'),
-        };
         this.dialog = {
             open: bindApiCall(this, 'dialog.open'),
         };
@@ -4822,42 +4846,8 @@ class Methods extends eventemitter3_1.EventEmitter {
                 share: bindApiCall(this, 'files.remote.share'),
             },
         };
-        this.groups = {
-            archive: bindApiCall(this, 'groups.archive'),
-            create: bindApiCall(this, 'groups.create'),
-            createChild: bindApiCall(this, 'groups.createChild'),
-            history: bindApiCall(this, 'groups.history'),
-            info: bindApiCall(this, 'groups.info'),
-            invite: bindApiCall(this, 'groups.invite'),
-            kick: bindApiCall(this, 'groups.kick'),
-            leave: bindApiCall(this, 'groups.leave'),
-            list: bindApiCall(this, 'groups.list'),
-            mark: bindApiCall(this, 'groups.mark'),
-            open: bindApiCall(this, 'groups.open'),
-            rename: bindApiCall(this, 'groups.rename'),
-            replies: bindApiCall(this, 'groups.replies'),
-            setPurpose: bindApiCall(this, 'groups.setPurpose'),
-            setTopic: bindApiCall(this, 'groups.setTopic'),
-            unarchive: bindApiCall(this, 'groups.unarchive'),
-        };
-        this.im = {
-            close: bindApiCall(this, 'im.close'),
-            history: bindApiCall(this, 'im.history'),
-            list: bindApiCall(this, 'im.list'),
-            mark: bindApiCall(this, 'im.mark'),
-            open: bindApiCall(this, 'im.open'),
-            replies: bindApiCall(this, 'im.replies'),
-        };
         this.migration = {
             exchange: bindApiCall(this, 'migration.exchange'),
-        };
-        this.mpim = {
-            close: bindApiCall(this, 'mpim.close'),
-            history: bindApiCall(this, 'mpim.history'),
-            list: bindApiCall(this, 'mpim.list'),
-            mark: bindApiCall(this, 'mpim.mark'),
-            open: bindApiCall(this, 'mpim.open'),
-            replies: bindApiCall(this, 'mpim.replies'),
         };
         this.oauth = {
             access: bindApiCall(this, 'oauth.access'),
@@ -4932,10 +4922,70 @@ class Methods extends eventemitter3_1.EventEmitter {
                 set: bindApiCall(this, 'users.profile.set'),
             },
         };
+        this.views = {
+            open: bindApiCall(this, 'views.open'),
+            publish: bindApiCall(this, 'views.publish'),
+            push: bindApiCall(this, 'views.push'),
+            update: bindApiCall(this, 'views.update'),
+        };
         this.workflows = {
             stepCompleted: bindApiCall(this, 'workflows.stepCompleted'),
             stepFailed: bindApiCall(this, 'workflows.stepFailed'),
             updateStep: bindApiCall(this, 'workflows.updateStep'),
+        };
+        // ---------------------------------
+        // Deprecated methods
+        // ---------------------------------
+        this.channels = {
+            archive: bindApiCall(this, 'channels.archive'),
+            create: bindApiCall(this, 'channels.create'),
+            history: bindApiCall(this, 'channels.history'),
+            info: bindApiCall(this, 'channels.info'),
+            invite: bindApiCall(this, 'channels.invite'),
+            join: bindApiCall(this, 'channels.join'),
+            kick: bindApiCall(this, 'channels.kick'),
+            leave: bindApiCall(this, 'channels.leave'),
+            list: bindApiCall(this, 'channels.list'),
+            mark: bindApiCall(this, 'channels.mark'),
+            rename: bindApiCall(this, 'channels.rename'),
+            replies: bindApiCall(this, 'channels.replies'),
+            setPurpose: bindApiCall(this, 'channels.setPurpose'),
+            setTopic: bindApiCall(this, 'channels.setTopic'),
+            unarchive: bindApiCall(this, 'channels.unarchive'),
+        };
+        this.groups = {
+            archive: bindApiCall(this, 'groups.archive'),
+            create: bindApiCall(this, 'groups.create'),
+            createChild: bindApiCall(this, 'groups.createChild'),
+            history: bindApiCall(this, 'groups.history'),
+            info: bindApiCall(this, 'groups.info'),
+            invite: bindApiCall(this, 'groups.invite'),
+            kick: bindApiCall(this, 'groups.kick'),
+            leave: bindApiCall(this, 'groups.leave'),
+            list: bindApiCall(this, 'groups.list'),
+            mark: bindApiCall(this, 'groups.mark'),
+            open: bindApiCall(this, 'groups.open'),
+            rename: bindApiCall(this, 'groups.rename'),
+            replies: bindApiCall(this, 'groups.replies'),
+            setPurpose: bindApiCall(this, 'groups.setPurpose'),
+            setTopic: bindApiCall(this, 'groups.setTopic'),
+            unarchive: bindApiCall(this, 'groups.unarchive'),
+        };
+        this.im = {
+            close: bindApiCall(this, 'im.close'),
+            history: bindApiCall(this, 'im.history'),
+            list: bindApiCall(this, 'im.list'),
+            mark: bindApiCall(this, 'im.mark'),
+            open: bindApiCall(this, 'im.open'),
+            replies: bindApiCall(this, 'im.replies'),
+        };
+        this.mpim = {
+            close: bindApiCall(this, 'mpim.close'),
+            history: bindApiCall(this, 'mpim.history'),
+            list: bindApiCall(this, 'mpim.list'),
+            mark: bindApiCall(this, 'mpim.mark'),
+            open: bindApiCall(this, 'mpim.open'),
+            replies: bindApiCall(this, 'mpim.replies'),
         };
         // Check that the class being created extends from `WebClient` rather than this class
         if (new.target !== WebClient_1.WebClient && !(new.target.prototype instanceof WebClient_1.WebClient)) {
@@ -4983,6 +5033,16 @@ exports.cursorPaginationEnabledMethods.add('users.conversations');
 exports.cursorPaginationEnabledMethods.add('users.list');
 __exportStar(__nccwpck_require__(4380), exports);
 //# sourceMappingURL=methods.js.map
+
+/***/ }),
+
+/***/ 677:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -26756,6 +26816,34 @@ module.exports = {
     return (h1.equals(h2));
   }
 };
+
+
+/***/ }),
+
+/***/ 7439:
+/***/ ((module) => {
+
+// https://github.com/electron/electron/issues/2288
+function isElectron() {
+    // Renderer process
+    if (typeof window !== 'undefined' && typeof window.process === 'object' && window.process.type === 'renderer') {
+        return true;
+    }
+
+    // Main process
+    if (typeof process !== 'undefined' && typeof process.versions === 'object' && !!process.versions.electron) {
+        return true;
+    }
+
+    // Detect the user agent when the `nodeIntegration` option is set to true
+    if (typeof navigator === 'object' && typeof navigator.userAgent === 'string' && navigator.userAgent.indexOf('Electron') >= 0) {
+        return true;
+    }
+
+    return false;
+}
+
+module.exports = isElectron;
 
 
 /***/ }),
@@ -59962,10 +60050,11 @@ const Constants_DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
 
-// EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
-var lodash_isUndefined = __nccwpck_require__(2825);
-// EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
-var dist_node = __nccwpck_require__(5375);
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __nccwpck_require__(6417);
+// EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
+var lib = __nccwpck_require__(467);
+var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 ;// CONCATENATED MODULE: ./src/services/Inputs.ts
 
 // The base URL to use when connecting to the internal credentials API.
@@ -59989,6 +60078,70 @@ const Inputs_slackErrorChannelId = () => getInput('slack-error-channel-id', { re
 // Token with write access to Slack.
 const slackToken = () => (0,core.getInput)('slack-token', { required: true });
 
+;// CONCATENATED MODULE: ./src/services/Credentials.ts
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+/**
+ * Fetches the user credentials from the remote credential service for the given email or name.
+ *
+ * @param {string} identifier The email address or Jira display name of the user to look up.
+ * @returns {Credentials} The credentials object.
+ */
+const Credentials_fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, function* () {
+    if (isNil(identifier)) {
+        throw new Error('Could not lookup user credentials because no identifier or display name was found');
+    }
+    const id = Buffer.from(identifier).toString('base64');
+    const signature = createHmac('sha256', credentialsApiSecret())
+        .update(identifier)
+        .digest('hex');
+    const url = `${credentialsApiPrefix()}credentials/${id}`;
+    const response = yield fetch(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const credentials = (yield response.json());
+    if (credentials.status !== 'ok') {
+        throw new Error(`Could not get credentials for the user ${identifier}`);
+    }
+    return credentials;
+});
+/**
+ * Fetches the repository with the given name from the remote credential service.
+ *
+ * @param {string} name The name of the repository to look up.
+ * @returns {Repository} The repository object.
+ */
+const fetchRepository = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Buffer.from(name).toString('base64');
+    const signature = (0,external_crypto_.createHmac)('sha256', Inputs_credentialsApiSecret())
+        .update(name)
+        .digest('hex');
+    const url = `${Inputs_credentialsApiPrefix()}repositories/${id}`;
+    const response = yield lib_default()(url, {
+        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
+    });
+    const repository = (yield response.json());
+    if (repository.status !== 'ok') {
+        throw new Error(`Could not get repository with the name ${name}`);
+    }
+    return repository;
+});
+
+// EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
+var lodash_isUndefined = __nccwpck_require__(2825);
+// EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
+var dist_node = __nccwpck_require__(5375);
 ;// CONCATENATED MODULE: ./src/services/Github/Client.ts
 
 
@@ -59999,7 +60152,7 @@ const Client_clientForToken = (token) => {
 };
 
 ;// CONCATENATED MODULE: ./src/services/Github/Git.ts
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+var Git_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -60025,10 +60178,9 @@ const Git_TreeTypes = {
  *
  * @param {Repository} repo    The name of the repository that the blob will belong to.
  * @param {string}     content The content to put in the blob.
- *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
-const Git_createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createBlob({
         owner: organizationName(),
         repo,
@@ -60043,10 +60195,9 @@ const Git_createGitBlob = (repo, content) => __awaiter(void 0, void 0, void 0, f
  * @param {string}     message The commit message.
  * @param {Sha}        tree    The tree to attach the commit to.
  * @param {Sha}        parent  The parent to attach the commit to.
- *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
-const Git_createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createCommit({
         owner: organizationName(),
         repo,
@@ -60062,10 +60213,9 @@ const Git_createGitCommit = (repo, message, tree, parent) => __awaiter(void 0, v
  * @param {Repository} repo   The name of the repository that the branch will belong to.
  * @param {Branch}     branch The name of the branch to create.
  * @param {Sha}        sha    The commit sha to base the branch on.
- *
  * @returns {GitCreateRefResponseData} The branch data.
  */
-const Git_createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createRef({
         owner: organizationName(),
         repo,
@@ -60080,10 +60230,9 @@ const Git_createGitBranch = (repo, branch, sha) => __awaiter(void 0, void 0, voi
  * @param {Repository} repo     The name of the repository that the branch will belong to.
  * @param {Tree[]}     tree     The data to use when creating the tree.
  * @param {Sha}        baseTree The tree to base the new tree on.
- *
  * @returns {GitCreateTreeResponseData} The branch data.
  */
-const Git_createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, void 0, function* () {
+const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield client.git.createTree({
         owner: organizationName(),
         repo,
@@ -60097,10 +60246,9 @@ const Git_createGitTree = (repo, tree, baseTree) => __awaiter(void 0, void 0, vo
  *
  * @param {Repository} repo The name of the repository whose commit we want to fetch.
  * @param {Sha}        sha  The sha hash of the commit.
- *
  * @returns {GitGetCommitResponseData} The commit data.
  */
-const getCommit = (repo, sha) => __awaiter(void 0, void 0, void 0, function* () {
+const getCommit = (repo, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
     const response = yield readClient.git.getCommit({
         owner: organizationName(),
         repo,
@@ -60127,7 +60275,6 @@ var Repository_awaiter = (undefined && undefined.__awaiter) || function (thisArg
  * @param {Repository} repo The name of the repository to fetch.
  * @param {Sha}        base The base commit to merge INTO (eg. master, when making a release).
  * @param {Sha}        head The head commit to merge FROM (eg. develop, when making a release).
- *
  * @returns {ReposCompareCommitsResponseData} The diff data.
  */
 const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60143,7 +60290,6 @@ const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
- *
  * @returns {number}   The number of the next PR.
  */
 const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60165,7 +60311,6 @@ const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0,
  * Returns the repository with the given name.
  *
  * @param {Repository} repo The name of the repository to fetch.
- *
  * @returns {ReposGetResponseData} The repository data.
  */
 const Repository_getRepository = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60179,7 +60324,6 @@ const Repository_getRepository = (repo) => Repository_awaiter(void 0, void 0, vo
  * Returns the URL of the repository with the given name.
  *
  * @param {Repository} repo The name of the repository.
- *
  * @returns {string} The URL of the repository.
  */
 const Repository_repositoryUrl = (repo) => `https://github.com/${organizationName()}/${repo}`;
@@ -60204,7 +60348,6 @@ var Branch_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _a
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {void}
  */
 const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60229,7 +60372,6 @@ const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, voi
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60258,7 +60400,6 @@ const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0
  * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
  * @param {string}     fileContent    The text that the file will contain.
  * @param {string}     commitMessage  The text to use as the commit message.
- *
  * @returns {GitCreateRefResponseData} The new branch data.
  */
 const Branch_createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60302,7 +60443,6 @@ var PullRequest_awaiter = (undefined && undefined.__awaiter) || function (thisAr
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {IssuesAddAssigneesResponseData} The PR data.
  */
 const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60323,7 +60463,6 @@ const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaite
  * @param {string}     title The title of the PR.
  * @param {string}     body  The body of the PR.
  * @param {string}     token The Github API token to use when creating the PR.
- *
  * @returns {PullsGetResponseData} The PR data.
  */
 const PullRequest_createPullRequest = (repo, base, head, title, body, token) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60342,7 +60481,6 @@ const PullRequest_createPullRequest = (repo, base, head, title, body, token) => 
  * Returns the Jira issue key for the pull request with the given number.
  *
  * @param {PullRequestContent} pr The body of the pull request which we will parse.
- *
  * @returns {string | undefined} The Jira issue key.
  */
 const PullRequest_getIssueKey = (pr) => {
@@ -60366,7 +60504,6 @@ const PullRequest_getIssueKey = (pr) => {
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 const PullRequest_getPullRequest = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60392,7 +60529,6 @@ const PullRequest_getPullRequest = (repo, number) => PullRequest_awaiter(void 0,
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {PullsRequestReviewersResponseData} The PR data.
  */
 const assignReviewers = (repo, number, usernames) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60414,7 +60550,6 @@ const assignReviewers = (repo, number, usernames) => PullRequest_awaiter(void 0,
  * Extracts a pull request from a commit message, in the format "[#123] Do something".
  *
  * @param {string} message The commit message to extract the pull request number from.
- *
  * @returns {number | undefined} The number of the pull request, if one can be found.
  */
 const PullRequest_extractPullRequestNumber = (message) => parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) ||
@@ -60425,7 +60560,6 @@ const PullRequest_extractPullRequestNumber = (message) => parseInt(message.repla
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number whose commits we want to fetch.
- *
  * @returns {PullsListCommitsResponseData} The pull request data.
  */
 const listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60441,7 +60575,6 @@ const listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, voi
  *
  * @param {Repository} repo   The name of the repository that the PR will belong to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {string} The URL of the pull request.
  */
 const PullRequest_pullRequestUrl = (repo, number) => `https://github.com/${Inputs_organizationName()}/${repo}/pull/${number}`;
@@ -60452,7 +60585,6 @@ const PullRequest_pullRequestUrl = (repo, number) => `https://github.com/${Input
  * @param {number}     number    The PR number.
  * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
  * @param {string}     body      The review body.
- *
  * @returns {PullsCreateReviewResponseData} The review data.
  */
 const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60471,7 +60603,6 @@ const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(voi
  * @param {Repository} repo       The name of the repository that the PR belongs to.
  * @param {number}     number     The pull request number to update.
  * @param {object}     attributes The data to update.
- *
  * @returns {PullsGetResponseData} The updated pull request data.
  */
 const PullRequest_updatePullRequest = (repo, number, attributes) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60510,7 +60641,6 @@ const mutuallyExclusiveLabels = [
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   labels The list of labels to set.
- *
  * @returns {IssuesSetLabelsResponseData} The PR data.
  */
 const Label_setLabels = (repo, number, labels) => Label_awaiter(void 0, void 0, void 0, function* () {
@@ -60528,7 +60658,6 @@ const Label_setLabels = (repo, number, labels) => Label_awaiter(void 0, void 0, 
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   added  The labels to add.
- *
  * @returns {IssuesAddLabelsResponseData} The PR data.
  */
 const Label_addLabels = (repo, number, added) => Label_awaiter(void 0, void 0, void 0, function* () {
@@ -60565,9 +60694,6 @@ const Label_addLabels = (repo, number, added) => Label_awaiter(void 0, void 0, v
     return Label_setLabels(repo, number, toKeep);
 });
 
-// EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
-var lib = __nccwpck_require__(467);
-var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 // EXTERNAL MODULE: ./node_modules/jira-client/lib/jira.js
 var jira = __nccwpck_require__(6411);
 var jira_default = /*#__PURE__*/__nccwpck_require__.n(jira);
@@ -60621,7 +60747,6 @@ const JiraFieldStoryPointEstimate = 'Story point estimate';
  *
  * @param {Issue}  issue     The issue whose fields we want to search.
  * @param {string} fieldName The human-readable field name to search for.
- *
  * @returns {string} The field ID.
  */
 const idForFieldName = (issue, fieldName) => {
@@ -60633,7 +60758,6 @@ const idForFieldName = (issue, fieldName) => {
  * identifiers mapped to the 'names' list.
  *
  * @param {Issue} issue The issue whose data we want to populate.
- *
  * @returns {Issue} The issues, with fields populated.
  */
 const populateExplicitFields = (issue) => {
@@ -60661,7 +60785,6 @@ const populateExplicitFields = (issue) => {
  * Fetches all direct children of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue[]} The direct child issues.
  */
 const getChildIssues = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60685,7 +60808,6 @@ const getChildIssues = (key) => Issue_awaiter(void 0, void 0, void 0, function* 
  * Fetches the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The issue data.
  */
 const getIssue = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60704,7 +60826,6 @@ const getIssue = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
  * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The epic issue data.
  */
 const getEpic = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60732,7 +60853,6 @@ const recursiveGetEpic = (key) => Issue_awaiter(void 0, void 0, void 0, function
  *
  * @param {string}     issueId The ID of the Jira issue (eg. '10910').
  * @param {Repository} repo    The name of the repository we're dealing with.
- *
  * @returns {number[]} The PR numbers.
  */
 const Issue_getIssuePullRequestNumbers = (issueId, repo) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60752,7 +60872,6 @@ const Issue_getIssuePullRequestNumbers = (issueId, repo) => Issue_awaiter(void 0
  *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {boolean} True if the issue is on the board.
  */
 const isIssueOnBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60766,7 +60885,6 @@ const isIssueOnBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 
  * Returns the URL of the issue with the given key.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {string} The URL of the issue.
  */
 const Issue_issueUrl = (key) => `https://${jiraHost()}/browse/${key}`;
@@ -60774,10 +60892,8 @@ const Issue_issueUrl = (key) => `https://${jiraHost()}/browse/${key}`;
  * Moves the issue to the board with the given ID.
  *
  * @see https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/#api-agile-1-0-board-boardid-issue-post
- *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {number} The status code of the response.
  */
 const moveIssueToBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60860,7 +60976,6 @@ var Project_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
  * Fetches the board definition for the given project ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoard | undefined} The board belonging to te project.
  */
 const getBoard = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60876,7 +60991,6 @@ const getBoard = (projectId) => Project_awaiter(void 0, void 0, void 0, function
  * Fetches the list of columns for the project with the given ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoardColumn[] | undefined} The board belonging to te project.
  */
 const getColumns = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60896,7 +61010,6 @@ const getColumns = (projectId) => Project_awaiter(void 0, void 0, void 0, functi
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as in-progress.
  */
 const getInProgressColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60920,7 +61033,6 @@ const getInProgressColumn = (projectId) => Project_awaiter(void 0, void 0, void 
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as ready-for-review.
  */
 const getReviewColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60944,7 +61056,6 @@ const getReviewColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, f
  * 'Review', if it exists.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as validated.
  */
 const getValidatedColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60967,7 +61078,6 @@ const getValidatedColumn = (projectId) => Project_awaiter(void 0, void 0, void 0
  * Fetches the project with the given ID.
  *
  * @param {string} projectKey The key of the Jira project (eg. 'STUDIO').
- *
  * @returns {JiraProject} The project.
  */
 const getProject = (projectKey) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60980,70 +61090,6 @@ var lodash_isEmpty = __nccwpck_require__(2384);
 var isEmpty_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isEmpty);
 // EXTERNAL MODULE: external "querystring"
 var external_querystring_ = __nccwpck_require__(1191);
-// EXTERNAL MODULE: external "crypto"
-var external_crypto_ = __nccwpck_require__(6417);
-;// CONCATENATED MODULE: ./src/services/Credentials.ts
-var Credentials_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-
-
-
-/**
- * Fetches the user credentials from the remote credential service for the given email or name.
- *
- * @param {string} identifier The email address or Jira display name of the user to look up.
- *
- * @returns {Credentials} The credentials object.
- */
-const Credentials_fetchCredentials = (identifier) => Credentials_awaiter(void 0, void 0, void 0, function* () {
-    if (isNil(identifier)) {
-        throw new Error('Could not lookup user credentials because no identifier or display name was found');
-    }
-    const id = Buffer.from(identifier).toString('base64');
-    const signature = createHmac('sha256', credentialsApiSecret())
-        .update(identifier)
-        .digest('hex');
-    const url = `${credentialsApiPrefix()}credentials/${id}`;
-    const response = yield fetch(url, {
-        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
-    });
-    const credentials = (yield response.json());
-    if (credentials.status !== 'ok') {
-        throw new Error(`Could not get credentials for the user ${identifier}`);
-    }
-    return credentials;
-});
-/**
- * Fetches the repository with the given name from the remote credential service.
- *
- * @param {string} name The name of the repository to look up.
- *
- * @returns {Repository} The repository object.
- */
-const fetchRepository = (name) => Credentials_awaiter(void 0, void 0, void 0, function* () {
-    const id = Buffer.from(name).toString('base64');
-    const signature = (0,external_crypto_.createHmac)('sha256', Inputs_credentialsApiSecret())
-        .update(name)
-        .digest('hex');
-    const url = `${Inputs_credentialsApiPrefix()}repositories/${id}`;
-    const response = yield lib_default()(url, {
-        headers: { 'Shuttlerock-Signature': `sha256=${signature}` },
-    });
-    const repository = (yield response.json());
-    if (repository.status !== 'ok') {
-        throw new Error(`Could not get repository with the name ${name}`);
-    }
-    return repository;
-});
-
 ;// CONCATENATED MODULE: ./src/services/Jira/Release.ts
 var Release_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -61070,7 +61116,6 @@ var Release_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
  * @param {string} projectKey  The key of the project which we will create a release for.
  * @param {string} name        The name of the release.
  * @param {string} description The release description.
- *
  * @returns {JiraRelease} The newly created release.
  */
 const createJiraRelease = (projectKey, name, description) => Release_awaiter(void 0, void 0, void 0, function* () {
@@ -61100,7 +61145,6 @@ const createJiraRelease = (projectKey, name, description) => Release_awaiter(voi
  *
  * @param {string} projectKey The key of the project whose release we are looking for.
  * @param {string} name       The name of the release.
- *
  * @returns {JiraRelease | undefined} The release if it exists, or undefined if it doesn't.
  */
 const findJiraRelease = (projectKey, name) => Release_awaiter(void 0, void 0, void 0, function* () {
@@ -61207,7 +61251,6 @@ var lodash_startCase = __nccwpck_require__(9274);
  * Converts strings to a format safe for use in URLs, branch names etc.
  *
  * @param {string} str The string to parameterize.
- *
  * @returns {string} The parameterized string.
  */
 const String_parameterize = (str) => snakeCase(str.trim().toLowerCase())
@@ -62015,7 +62058,6 @@ mustache_mustache.Writer = Writer;
  *
  * @param {string} template The mustache.js template string.
  * @param {object} vars     The vars to replace in the template.
- *
  * @returns {string} The rendered template.
  */
 const Template_render = (template, vars) => mustache.render(template, vars);
@@ -62100,7 +62142,6 @@ var Epic_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
  * @param {Issue} epic            The Jira epic we will create the pull request for.
  * @param {string} repositoryName Jira Epics don't have a repository - if we encounter an issue
  *                                belonging to an epic, we will use the child issue's repository.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 const createEpicPullRequest = (epic, repositoryName) => Epic_awaiter(void 0, void 0, void 0, function* () {
@@ -62229,7 +62270,6 @@ const positiveEmoji = () => {
  * Makes sure that secrets in the message are scrubbed out.
  *
  * @param {string} message The message to send.
- *
  * @returns {string} The scrubbed message
  */
 const scrubMessage = (message) => {
@@ -62247,7 +62287,6 @@ const scrubMessage = (message) => {
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const sendErrorMessage = (message) => Message_awaiter(void 0, void 0, void 0, function* () {
@@ -62266,7 +62305,6 @@ const sendErrorMessage = (message) => Message_awaiter(void 0, void 0, void 0, fu
  *
  * @param {string} userId  The Slack user ID to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const Message_sendUserMessage = (userId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
@@ -62326,7 +62364,6 @@ var Github_Release_awaiter = (undefined && undefined.__awaiter) || function (thi
  * @param {string}     releaseDate The formatted date and time of the release.
  * @param {string}     releaseName The name of the release.
  * @param {Commit[]}   commits     The list of commits that make up the release.
- *
  * @returns {string} The pull request description.
  */
 const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62387,7 +62424,6 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => Github_
  *
  * @param {Repository} repoName The name of the repository that the branch will belong to.
  * @param {string}     sha      The commit sha to branch from.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62414,7 +62450,6 @@ const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, vo
  * @param {string}     releaseDate The name of the release (basically a formatted datetime).
  * @param {string}     releaseName The name of the release.
  * @param {string}     body        The pull request release notes.
- *
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
 const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62444,7 +62479,6 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Gith
  *
  * @param {string} slackId The Slack user ID of the person to send the error message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62457,7 +62491,6 @@ const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0,
  *
  * @param {string} slackId The Slack user ID of the person to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62470,7 +62503,6 @@ const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, 
  *
  * @param {string} email         The email address of the user who requested the release be created.
  * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
- *
  * @returns {void}
  */
 const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62533,7 +62565,6 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
  * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
  * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
  * @param {string}     releaseNotes The notes to include as the body of the release.
- *
  * @returns {ReposCreateReleaseResponseData} The resulting release.
  */
 const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62574,6 +62605,7 @@ var pullRequestClosed_awaiter = (undefined && undefined.__awaiter) || function (
 
 
 
+
 /**
  * Runs whenever a pull request is closed (not necessarily merged).
  *
@@ -62597,8 +62629,11 @@ const pullRequestClosed = (payload) => pullRequestClosed_awaiter(void 0, void 0,
         else {
             const releaseVersion = `v${matches[1]}`; // v2021-01-12-0426
             const releaseName = matches[2]; // Energetic Eagle
-            (0,core.info)(`Creating Jira release ${releaseVersion} (${releaseName})...`);
-            yield createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
+            const repo = yield fetchRepository(repository.name);
+            if (repo === null || repo === void 0 ? void 0 : repo.allow_jira_release) {
+                (0,core.info)(`Creating Jira release ${releaseVersion} (${releaseName})...`);
+                yield createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
+            }
             // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
             (0,core.info)(`Creating Github release ${releaseVersion} (${releaseName})...`);
             const [, ...releaseNotes] = pullRequest.body.split('\n');

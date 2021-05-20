@@ -37,7 +37,6 @@ interface FindJiraReleaseResponse {
  * @param {string} projectKey  The key of the project which we will create a release for.
  * @param {string} name        The name of the release.
  * @param {string} description The release description.
- *
  * @returns {JiraRelease} The newly created release.
  */
 export const createJiraRelease = async (
@@ -64,7 +63,7 @@ export const createJiraRelease = async (
   }
   // The types for createVersion() are messed up, and expect a string.
   const data = (await client.createVersion(
-    (args as unknown) as string
+    args as unknown as string
   )) as JiraRelease
   return data
 }
@@ -74,7 +73,6 @@ export const createJiraRelease = async (
  *
  * @param {string} projectKey The key of the project whose release we are looking for.
  * @param {string} name       The name of the release.
- *
  * @returns {JiraRelease | undefined} The release if it exists, or undefined if it doesn't.
  */
 export const findJiraRelease = async (
