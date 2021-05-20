@@ -5,7 +5,7 @@
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.1.0","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":">=1.0.0 <3.0.0","@slack/types":"^1.7.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
+module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.2.3","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
 
 /***/ }),
 
@@ -3764,6 +3764,7 @@ exports.v = Octokit;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConsoleLogger = exports.LogLevel = void 0;
 /**
  * Severity levels for log entries
  */
@@ -3836,6 +3837,7 @@ class ConsoleLogger {
         return ConsoleLogger.severity[a] >= ConsoleLogger.severity[b];
     }
 }
+exports.ConsoleLogger = ConsoleLogger;
 /** Map of labels for each log level */
 ConsoleLogger.labels = (() => {
     const entries = Object.entries(LogLevel);
@@ -3851,7 +3853,6 @@ ConsoleLogger.severity = {
     [LogLevel.INFO]: 200,
     [LogLevel.DEBUG]: 100,
 };
-exports.ConsoleLogger = ConsoleLogger;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -3927,6 +3928,7 @@ const p_queue_1 = __importDefault(__nccwpck_require__(8983)); // tslint:disable-
 const p_retry_1 = __importStar(__nccwpck_require__(2548));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const form_data_1 = __importDefault(__nccwpck_require__(4334)); // tslint:disable-line:import-name
+const is_electron_1 = __importDefault(__nccwpck_require__(7439));
 const methods_1 = __nccwpck_require__(1571);
 const instrument_1 = __nccwpck_require__(7763);
 const errors_1 = __nccwpck_require__(9781);
@@ -3943,7 +3945,7 @@ class WebClient extends methods_1.Methods {
     /**
      * @param token - An API token to authenticate/authorize with Slack (usually start with `xoxp`, `xoxb`)
      */
-    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = logger_1.LogLevel.INFO, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
+    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = undefined, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
         super();
         this.token = token;
         this.slackApiUrl = slackApiUrl;
@@ -3961,13 +3963,11 @@ class WebClient extends methods_1.Methods {
             }
         }
         else {
-            this.logger = logger_1.getLogger(WebClient.loggerName, logLevel, logger);
+            this.logger = logger_1.getLogger(WebClient.loggerName, logLevel !== null && logLevel !== void 0 ? logLevel : logger_1.LogLevel.INFO, logger);
         }
         this.axios = axios_1.default.create({
             baseURL: slackApiUrl,
-            headers: Object.assign({
-                'User-Agent': instrument_1.getUserAgent(),
-            }, headers),
+            headers: is_electron_1.default() ? headers : Object.assign({ 'User-Agent': instrument_1.getUserAgent() }, headers),
             httpAgent: agent,
             httpsAgent: agent,
             transformRequest: [this.serializeApiCallOptions.bind(this)],
@@ -3992,6 +3992,8 @@ class WebClient extends methods_1.Methods {
     async apiCall(method, options) {
         this.logger.debug(`apiCall('${method}') start`);
         warnDeprecations(method, this.logger);
+        warnIfFallbackIsMissing(method, this.logger, options);
+        warnIfThreadTsIsNotString(method, this.logger, options);
         if (typeof options === 'string' || typeof options === 'number' || typeof options === 'boolean') {
             throw new TypeError(`Expected an options argument but instead received a ${typeof options}`);
         }
@@ -4231,7 +4233,7 @@ class WebClient extends methods_1.Methods {
         }, initialValue));
     }
     /**
-     * Processes an HTTP response into a WebAPICallResult by performing JSON parsing on the body and merging relevent
+     * Processes an HTTP response into a WebAPICallResult by performing JSON parsing on the body and merging relevant
      * HTTP headers into the object.
      * @param response - an http response
      */
@@ -4323,6 +4325,44 @@ function warnDeprecations(method, logger) {
     }
     else if (isDeprecated) {
         logger.warn(`${method} is deprecated. Please check on https://api.slack.com/methods for an alternative.`);
+    }
+}
+/**
+ * Log a warning when using chat.postMessage without text argument or attachments with fallback argument
+ * @param method api method being called
+ * @param logger instance of we clients logger
+ * @param options arguments for the Web API method
+ */
+function warnIfFallbackIsMissing(method, logger, options) {
+    const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'chat.update'];
+    const isTargetMethod = targetMethods.includes(method);
+    const missingAttachmentFallbackDetected = (args) => Array.isArray(args.attachments)
+        && args.attachments.some(attachment => !attachment.fallback || attachment.fallback.trim() === 0);
+    const isEmptyText = (args) => args.text === undefined || args.text === null || args.text === '';
+    const buildWarningMessage = (missing) => `The \`${missing}\` argument is missing in the request payload for a ${method} call - ` +
+        `It's a best practice to always provide a \`${missing}\` argument when posting a message. ` +
+        `The \`${missing}\` is used in places where the content cannot be rendered such as: ` +
+        'system push notifications, assistive technology such as screen readers, etc.';
+    if (isTargetMethod && typeof options === 'object' && isEmptyText(options)) {
+        if (missingAttachmentFallbackDetected(options)) {
+            logger.warn(buildWarningMessage('fallback'));
+        }
+        else {
+            logger.warn(buildWarningMessage('text'));
+        }
+    }
+}
+/**
+ * Log a warning when thread_ts is not a string
+ * @param method api method being called
+ * @param logger instance of web clients logger
+ * @param options arguments for the Web API method
+ */
+function warnIfThreadTsIsNotString(method, logger, options) {
+    const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'files.upload'];
+    const isTargetMethod = targetMethods.includes(method);
+    if (isTargetMethod && (options === null || options === void 0 ? void 0 : options.thread_ts) !== undefined && typeof (options === null || options === void 0 ? void 0 : options.thread_ts) !== 'string') {
+        logger.warn(`The given thread_ts value in the request payload for a ${method} call is a float value. We highly recommend using a string value instead.`);
     }
 }
 //# sourceMappingURL=WebClient.js.map
@@ -4457,6 +4497,7 @@ Object.defineProperty(exports, "retryPolicies", ({ enumerable: true, get: functi
 var instrument_1 = __nccwpck_require__(7763);
 Object.defineProperty(exports, "addAppMetadata", ({ enumerable: true, get: function () { return instrument_1.addAppMetadata; } }));
 __exportStar(__nccwpck_require__(1571), exports);
+__exportStar(__nccwpck_require__(677), exports);
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -4599,11 +4640,13 @@ class Methods extends eventemitter3_1.EventEmitter {
     constructor() {
         super();
         this.admin = {
+            // TODO: admin.analytics.getFile
             apps: {
                 approve: bindApiCall(this, 'admin.apps.approve'),
                 approved: {
                     list: bindApiCall(this, 'admin.apps.approved.list'),
                 },
+                clearResolution: bindApiCall(this, 'admin.apps.clearResolution'),
                 requests: {
                     list: bindApiCall(this, 'admin.apps.requests.list'),
                 },
@@ -4611,6 +4654,7 @@ class Methods extends eventemitter3_1.EventEmitter {
                 restricted: {
                     list: bindApiCall(this, 'admin.apps.restricted.list'),
                 },
+                uninstall: bindApiCall(this, 'admin.apps.uninstall'),
             },
             barriers: {
                 create: bindApiCall(this, 'admin.barriers.create'),
@@ -4692,6 +4736,9 @@ class Methods extends eventemitter3_1.EventEmitter {
                     list: bindApiCall(this, 'admin.users.session.list'),
                     reset: bindApiCall(this, 'admin.users.session.reset'),
                     invalidate: bindApiCall(this, 'admin.users.session.invalidate'),
+                    getSettings: bindApiCall(this, 'admin.users.session.getSettings'),
+                    setSettings: bindApiCall(this, 'admin.users.session.setSettings'),
+                    clearSettings: bindApiCall(this, 'admin.users.session.clearSettings'),
                 },
                 setAdmin: bindApiCall(this, 'admin.users.setAdmin'),
                 setExpiration: bindApiCall(this, 'admin.users.setExpiration'),
@@ -4733,23 +4780,6 @@ class Methods extends eventemitter3_1.EventEmitter {
                 remove: bindApiCall(this, 'calls.participants.remove'),
             },
         };
-        this.channels = {
-            archive: bindApiCall(this, 'channels.archive'),
-            create: bindApiCall(this, 'channels.create'),
-            history: bindApiCall(this, 'channels.history'),
-            info: bindApiCall(this, 'channels.info'),
-            invite: bindApiCall(this, 'channels.invite'),
-            join: bindApiCall(this, 'channels.join'),
-            kick: bindApiCall(this, 'channels.kick'),
-            leave: bindApiCall(this, 'channels.leave'),
-            list: bindApiCall(this, 'channels.list'),
-            mark: bindApiCall(this, 'channels.mark'),
-            rename: bindApiCall(this, 'channels.rename'),
-            replies: bindApiCall(this, 'channels.replies'),
-            setPurpose: bindApiCall(this, 'channels.setPurpose'),
-            setTopic: bindApiCall(this, 'channels.setTopic'),
-            unarchive: bindApiCall(this, 'channels.unarchive'),
-        };
         this.chat = {
             delete: bindApiCall(this, 'chat.delete'),
             deleteScheduledMessage: bindApiCall(this, 'chat.deleteScheduledMessage'),
@@ -4784,12 +4814,6 @@ class Methods extends eventemitter3_1.EventEmitter {
             setTopic: bindApiCall(this, 'conversations.setTopic'),
             unarchive: bindApiCall(this, 'conversations.unarchive'),
         };
-        this.views = {
-            open: bindApiCall(this, 'views.open'),
-            publish: bindApiCall(this, 'views.publish'),
-            push: bindApiCall(this, 'views.push'),
-            update: bindApiCall(this, 'views.update'),
-        };
         this.dialog = {
             open: bindApiCall(this, 'dialog.open'),
         };
@@ -4822,42 +4846,8 @@ class Methods extends eventemitter3_1.EventEmitter {
                 share: bindApiCall(this, 'files.remote.share'),
             },
         };
-        this.groups = {
-            archive: bindApiCall(this, 'groups.archive'),
-            create: bindApiCall(this, 'groups.create'),
-            createChild: bindApiCall(this, 'groups.createChild'),
-            history: bindApiCall(this, 'groups.history'),
-            info: bindApiCall(this, 'groups.info'),
-            invite: bindApiCall(this, 'groups.invite'),
-            kick: bindApiCall(this, 'groups.kick'),
-            leave: bindApiCall(this, 'groups.leave'),
-            list: bindApiCall(this, 'groups.list'),
-            mark: bindApiCall(this, 'groups.mark'),
-            open: bindApiCall(this, 'groups.open'),
-            rename: bindApiCall(this, 'groups.rename'),
-            replies: bindApiCall(this, 'groups.replies'),
-            setPurpose: bindApiCall(this, 'groups.setPurpose'),
-            setTopic: bindApiCall(this, 'groups.setTopic'),
-            unarchive: bindApiCall(this, 'groups.unarchive'),
-        };
-        this.im = {
-            close: bindApiCall(this, 'im.close'),
-            history: bindApiCall(this, 'im.history'),
-            list: bindApiCall(this, 'im.list'),
-            mark: bindApiCall(this, 'im.mark'),
-            open: bindApiCall(this, 'im.open'),
-            replies: bindApiCall(this, 'im.replies'),
-        };
         this.migration = {
             exchange: bindApiCall(this, 'migration.exchange'),
-        };
-        this.mpim = {
-            close: bindApiCall(this, 'mpim.close'),
-            history: bindApiCall(this, 'mpim.history'),
-            list: bindApiCall(this, 'mpim.list'),
-            mark: bindApiCall(this, 'mpim.mark'),
-            open: bindApiCall(this, 'mpim.open'),
-            replies: bindApiCall(this, 'mpim.replies'),
         };
         this.oauth = {
             access: bindApiCall(this, 'oauth.access'),
@@ -4932,10 +4922,70 @@ class Methods extends eventemitter3_1.EventEmitter {
                 set: bindApiCall(this, 'users.profile.set'),
             },
         };
+        this.views = {
+            open: bindApiCall(this, 'views.open'),
+            publish: bindApiCall(this, 'views.publish'),
+            push: bindApiCall(this, 'views.push'),
+            update: bindApiCall(this, 'views.update'),
+        };
         this.workflows = {
             stepCompleted: bindApiCall(this, 'workflows.stepCompleted'),
             stepFailed: bindApiCall(this, 'workflows.stepFailed'),
             updateStep: bindApiCall(this, 'workflows.updateStep'),
+        };
+        // ---------------------------------
+        // Deprecated methods
+        // ---------------------------------
+        this.channels = {
+            archive: bindApiCall(this, 'channels.archive'),
+            create: bindApiCall(this, 'channels.create'),
+            history: bindApiCall(this, 'channels.history'),
+            info: bindApiCall(this, 'channels.info'),
+            invite: bindApiCall(this, 'channels.invite'),
+            join: bindApiCall(this, 'channels.join'),
+            kick: bindApiCall(this, 'channels.kick'),
+            leave: bindApiCall(this, 'channels.leave'),
+            list: bindApiCall(this, 'channels.list'),
+            mark: bindApiCall(this, 'channels.mark'),
+            rename: bindApiCall(this, 'channels.rename'),
+            replies: bindApiCall(this, 'channels.replies'),
+            setPurpose: bindApiCall(this, 'channels.setPurpose'),
+            setTopic: bindApiCall(this, 'channels.setTopic'),
+            unarchive: bindApiCall(this, 'channels.unarchive'),
+        };
+        this.groups = {
+            archive: bindApiCall(this, 'groups.archive'),
+            create: bindApiCall(this, 'groups.create'),
+            createChild: bindApiCall(this, 'groups.createChild'),
+            history: bindApiCall(this, 'groups.history'),
+            info: bindApiCall(this, 'groups.info'),
+            invite: bindApiCall(this, 'groups.invite'),
+            kick: bindApiCall(this, 'groups.kick'),
+            leave: bindApiCall(this, 'groups.leave'),
+            list: bindApiCall(this, 'groups.list'),
+            mark: bindApiCall(this, 'groups.mark'),
+            open: bindApiCall(this, 'groups.open'),
+            rename: bindApiCall(this, 'groups.rename'),
+            replies: bindApiCall(this, 'groups.replies'),
+            setPurpose: bindApiCall(this, 'groups.setPurpose'),
+            setTopic: bindApiCall(this, 'groups.setTopic'),
+            unarchive: bindApiCall(this, 'groups.unarchive'),
+        };
+        this.im = {
+            close: bindApiCall(this, 'im.close'),
+            history: bindApiCall(this, 'im.history'),
+            list: bindApiCall(this, 'im.list'),
+            mark: bindApiCall(this, 'im.mark'),
+            open: bindApiCall(this, 'im.open'),
+            replies: bindApiCall(this, 'im.replies'),
+        };
+        this.mpim = {
+            close: bindApiCall(this, 'mpim.close'),
+            history: bindApiCall(this, 'mpim.history'),
+            list: bindApiCall(this, 'mpim.list'),
+            mark: bindApiCall(this, 'mpim.mark'),
+            open: bindApiCall(this, 'mpim.open'),
+            replies: bindApiCall(this, 'mpim.replies'),
         };
         // Check that the class being created extends from `WebClient` rather than this class
         if (new.target !== WebClient_1.WebClient && !(new.target.prototype instanceof WebClient_1.WebClient)) {
@@ -4983,6 +5033,16 @@ exports.cursorPaginationEnabledMethods.add('users.conversations');
 exports.cursorPaginationEnabledMethods.add('users.list');
 __exportStar(__nccwpck_require__(4380), exports);
 //# sourceMappingURL=methods.js.map
+
+/***/ }),
+
+/***/ 677:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -26756,6 +26816,34 @@ module.exports = {
     return (h1.equals(h2));
   }
 };
+
+
+/***/ }),
+
+/***/ 7439:
+/***/ ((module) => {
+
+// https://github.com/electron/electron/issues/2288
+function isElectron() {
+    // Renderer process
+    if (typeof window !== 'undefined' && typeof window.process === 'object' && window.process.type === 'renderer') {
+        return true;
+    }
+
+    // Main process
+    if (typeof process !== 'undefined' && typeof process.versions === 'object' && !!process.versions.electron) {
+        return true;
+    }
+
+    // Detect the user agent when the `nodeIntegration` option is set to true
+    if (typeof navigator === 'object' && typeof navigator.userAgent === 'string' && navigator.userAgent.indexOf('Electron') >= 0) {
+        return true;
+    }
+
+    return false;
+}
+
+module.exports = isElectron;
 
 
 /***/ }),
