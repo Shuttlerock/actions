@@ -46,7 +46,7 @@ describe('check-suite-completed-action', () => {
     let infoSpy: jest.SpyInstance
 
     // Cast this via 'unknown' to avoid having to fill in a bunch of unused payload fields.
-    const checkSuitePayload = (rawPayload as unknown) as Schema.CheckSuiteEvent
+    const checkSuitePayload = rawPayload as unknown as Schema.CheckSuiteEvent
 
     beforeEach(() => {
       addLabelsSpy = jest

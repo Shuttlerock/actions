@@ -9,7 +9,6 @@ interface TemplateVars {
  *
  * @param {string} template The mustache.js template string.
  * @param {object} vars     The vars to replace in the template.
- *
  * @returns {string} The rendered template.
  */
 export const render = (template: string, vars: TemplateVars): string =>

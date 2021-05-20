@@ -181,28 +181,26 @@ describe('PullRequest', () => {
 
   describe('getIssueKey', () => {
     it('gets the key from the title if possible', () => {
-      const pullRequest = ({
-        body:
-          '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
+      const pullRequest = {
+        body: '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
         title: '[ISSUE-456] My Issue',
-      } as unknown) as Schema.PullRequest
+      } as unknown as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toEqual('ISSUE-456')
     })
 
     it('gets the key from the body if possible', () => {
-      const pullRequest = ({
-        body:
-          '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
+      const pullRequest = {
+        body: '[Jira Tech task](https://example.atlassian.net/browse/ISSUE-789)',
         title: 'My Issue',
-      } as unknown) as Schema.PullRequest
+      } as unknown as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toEqual('ISSUE-789')
     })
 
     it("returns undefined if the key can't be found", () => {
-      const pullRequest = ({
+      const pullRequest = {
         body: 'My body',
         title: 'My Issue',
-      } as unknown) as Schema.PullRequest
+      } as unknown as Schema.PullRequest
       expect(getIssueKey(pullRequest)).toBeUndefined()
     })
   })
@@ -240,9 +238,9 @@ describe('PullRequest', () => {
       const spy = jest
         .spyOn(Client.readClient.pulls, 'listCommits')
         .mockReturnValue(
-          Promise.resolve(({
+          Promise.resolve({
             data: [mockGitCommit],
-          } as unknown) as OctokitResponse<PullsListCommitsResponseData>)
+          } as unknown as OctokitResponse<PullsListCommitsResponseData>)
         )
       const result = await listPullRequestCommits(repo, 123)
       expect(spy).toHaveBeenCalledWith({

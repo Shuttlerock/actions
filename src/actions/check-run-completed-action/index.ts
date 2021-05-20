@@ -16,7 +16,7 @@ export const run = async (): Promise<void> => {
     payload: {
       check_run: { check_suite: checkSuite },
     },
-  } = ((await context) as unknown) as {
+  } = (await context) as unknown as {
     payload: Schema.CheckRunEvent
   }
   await checkSuiteCompleted({

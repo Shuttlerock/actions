@@ -12,7 +12,7 @@ import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/ch
  * $ act --job check_suite_completed_action --eventpath src/actions/check-suite-completed-action/__tests__/fixtures/check-suite-success-payload.json
  */
 export const run = async (): Promise<void> => {
-  const { payload } = ((await context) as unknown) as {
+  const { payload } = (await context) as unknown as {
     payload: Schema.CheckSuiteEvent
   }
   await checkSuiteCompleted(payload)

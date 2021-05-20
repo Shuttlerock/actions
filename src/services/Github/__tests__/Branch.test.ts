@@ -169,7 +169,7 @@ describe('Branch', () => {
       const spy = jest
         .spyOn(client.git, 'deleteRef')
         .mockImplementation((_args?: DeleteBranchParams) =>
-          Promise.resolve(({ status: 204 } as unknown) as OctokitResponse<void>)
+          Promise.resolve({ status: 204 } as unknown as OctokitResponse<void>)
         )
       const result = await Branch.deleteBranch(repo, branch)
       expect(spy).toHaveBeenCalledWith(deleteBranchParams)

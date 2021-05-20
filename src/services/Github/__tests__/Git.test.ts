@@ -149,9 +149,9 @@ describe('Git', () => {
         .spyOn(readClient.git, 'getCommit')
         .mockImplementation(
           (_args?: { owner: string; repo: Repository; commit_sha: string }) =>
-            Promise.resolve(({
+            Promise.resolve({
               data: { message: 'Fix the widget' },
-            } as unknown) as OctokitResponse<GitGetCommitResponseData>)
+            } as unknown as OctokitResponse<GitGetCommitResponseData>)
         )
       const result = await getCommit(repo, 'my-sha')
       expect(spy).toHaveBeenCalledWith({

@@ -46,7 +46,6 @@ interface JiraProject {
  * Fetches the board definition for the given project ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoard | undefined} The board belonging to te project.
  */
 export const getBoard = async (
@@ -68,7 +67,6 @@ export const getBoard = async (
  * Fetches the list of columns for the project with the given ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoardColumn[] | undefined} The board belonging to te project.
  */
 export const getColumns = async (
@@ -93,7 +91,6 @@ export const getColumns = async (
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as in-progress.
  */
 export const getInProgressColumn = async (
@@ -126,7 +123,6 @@ export const getInProgressColumn = async (
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as ready-for-review.
  */
 export const getReviewColumn = async (projectId: string): Promise<string> => {
@@ -157,7 +153,6 @@ export const getReviewColumn = async (projectId: string): Promise<string> => {
  * 'Review', if it exists.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as validated.
  */
 export const getValidatedColumn = async (
@@ -189,7 +184,6 @@ export const getValidatedColumn = async (
  * Fetches the project with the given ID.
  *
  * @param {string} projectKey The key of the Jira project (eg. 'STUDIO').
- *
  * @returns {JiraProject} The project.
  */
 export const getProject = async (projectKey: string): Promise<JiraProject> => {
