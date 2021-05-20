@@ -1,16 +1,17 @@
 import { error, info } from '@actions/core'
-import { ReposGetBranchResponseData } from '@octokit/types'
+import {
+  ReposGetBranchResponseData,
+  ReposGetResponseData,
+} from '@octokit/types'
 import isNil from 'lodash/isNil'
 
 import { TemplateUpdateBranchName } from '@sr-services/Constants'
 import { fetchCredentials } from '@sr-services/Credentials'
 import {
-  createGitBranch,
+  createBranch,
   deleteBranch,
   getBranch,
   getRepository,
-  Sha,
-  Repository,
 } from '@sr-services/Github'
 import { sendUserMessage } from '@sr-services/Slack'
 
@@ -19,7 +20,6 @@ import { sendUserMessage } from '@sr-services/Slack'
  *
  * @param {string} slackId The Slack user ID of the person to send the error message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportError = async (slackId: string, message: string) => {
@@ -31,38 +31,46 @@ const reportError = async (slackId: string, message: string) => {
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
  *
- * @param {Repository} repoName The name of the repository that the branch will belong to.
- * @param {string}     sha      The commit sha to branch from.
- *
+ * @param {ReposGetResponseData} repo The repository that the branch will belong to.
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const ensureBranch = async (
-  repoName: Repository,
-  sha: Sha
+  repo: ReposGetResponseData
 ): Promise<ReposGetBranchResponseData> => {
   info(
     `Looking for an existing template update branch (${TemplateUpdateBranchName})...`
   )
-  const updateBranch = await getBranch(repoName, TemplateUpdateBranchName)
-  if (isNil(updateBranch)) {
+  let branch = await getBranch(repo.name, TemplateUpdateBranchName)
+  if (isNil(branch)) {
     info('Existing template update branch not found - creating it...')
-    await createGitBranch(repoName, TemplateUpdateBranchName, sha)
-    // This is inefficient, but we look up the branch we just created to keep types consistent.
-    return ensureBranch(repoName, sha)
-  }
 
-  if (updateBranch.commit.sha === sha) {
-    info(
-      `The template update branch already exists, and is up to date (${sha})`
+    await createBranch(
+      repo.name,
+      repo.default_branch,
+      TemplateUpdateBranchName,
+      {
+        '.github/PULL_REQUEST_TEMPLATE.md': 'PR Template contents',
+        '.github/test.md': 'test contents',
+      },
+      '[skip ci] [skip netlify] Update templates.'
     )
-    return updateBranch
+
+    // This is inefficient, but we look up the branch we just created to keep types consistent.
+    branch = await getBranch(repo.name, TemplateUpdateBranchName)
+    if (isNil(branch)) {
+      throw new Error(
+        `Branch '${repo.default_branch}' failed to be created for repository ${repo.name}`
+      )
+    }
+
+    return branch
   }
 
   info(
     'The template update branch already exists, but is out of date - re-creating it...'
   )
-  await deleteBranch(repoName, TemplateUpdateBranchName)
-  return ensureBranch(repoName, sha)
+  await deleteBranch(repo.name, TemplateUpdateBranchName)
+  return ensureBranch(repo)
 }
 
 /**
@@ -80,7 +88,6 @@ const ensureBranch = async (
  *
  * @param {string} email          The email address of the user who will own the pull request.
  * @param {string} repositoryName The name of the repository whose templates we want to update.
- *
  * @returns {void}
  */
 export const updateTemplates = async (
@@ -105,7 +112,9 @@ export const updateTemplates = async (
     return reportError(credentials.slack_id, message)
   }
 
-  await ensureBranch(repo.name, developBranch.commit.sha)
+  await ensureBranch(repo)
+
+  // TODO: add the requester as a reviewer to each PR.
 
   return undefined
 }
