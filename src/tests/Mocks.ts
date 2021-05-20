@@ -152,7 +152,7 @@ export const mockJiraRelease = {
 
 export const mockRepository = {
   allow_auto_review: true,
-  allow_jira_release: true,
+  skip_jira_release: false,
   leads: [{ github_username: 'dhh', slack_id: 'slack-dhh' }],
   reviewers: [{ github_username: 'wycats', slack_id: 'slack-wycats' }],
   status: 'ok',
