@@ -12,7 +12,7 @@ import { pullRequestLabeled } from '@sr-actions/pull-request-labeled-action/pull
  * $ act --job pull_request_labeled_action --eventpath src/actions/pull-request-labeled-action/__tests__/fixtures/pull-request-labeled.json
  */
 export const run = async (): Promise<void> => {
-  const { payload } = ((await context) as unknown) as {
+  const { payload } = (await context) as unknown as {
     payload: Schema.PullRequestLabeledEvent
   }
   await pullRequestLabeled(payload)

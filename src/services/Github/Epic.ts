@@ -26,7 +26,6 @@ import { PullRequestForEpicTemplate, render } from '@sr-services/Template'
  * @param {Issue} epic            The Jira epic we will create the pull request for.
  * @param {string} repositoryName Jira Epics don't have a repository - if we encounter an issue
  *                                belonging to an epic, we will use the child issue's repository.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 export const createEpicPullRequest = async (

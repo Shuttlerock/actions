@@ -91,7 +91,6 @@ export const JiraFieldStoryPointEstimate = 'Story point estimate'
  *
  * @param {Issue}  issue     The issue whose fields we want to search.
  * @param {string} fieldName The human-readable field name to search for.
- *
  * @returns {string} The field ID.
  */
 const idForFieldName = (
@@ -107,7 +106,6 @@ const idForFieldName = (
  * identifiers mapped to the 'names' list.
  *
  * @param {Issue} issue The issue whose data we want to populate.
- *
  * @returns {Issue} The issues, with fields populated.
  */
 const populateExplicitFields = (issue: Issue) => {
@@ -118,9 +116,11 @@ const populateExplicitFields = (issue: Issue) => {
   fieldId = idForFieldName(issue, JiraFieldRepository)
   if (fieldId) {
     Object.assign(issue.fields, {
-      repository: ((issue.fields as unknown) as {
-        [customField: string]: { value: string }
-      })[fieldId]?.value,
+      repository: (
+        issue.fields as unknown as {
+          [customField: string]: { value: string }
+        }
+      )[fieldId]?.value,
     })
   }
 
@@ -129,9 +129,11 @@ const populateExplicitFields = (issue: Issue) => {
   fieldId = idForFieldName(issue, JiraFieldStoryPointEstimate)
   if (fieldId) {
     Object.assign(issue.fields, {
-      storyPointEstimate: ((issue.fields as unknown) as {
-        [customField: string]: number
-      })[fieldId],
+      storyPointEstimate: (
+        issue.fields as unknown as {
+          [customField: string]: number
+        }
+      )[fieldId],
     })
   }
 
@@ -142,7 +144,6 @@ const populateExplicitFields = (issue: Issue) => {
  * Fetches all direct children of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue[]} The direct child issues.
  */
 export const getChildIssues = async (key: string): Promise<Issue[]> => {
@@ -172,7 +173,6 @@ export const getChildIssues = async (key: string): Promise<Issue[]> => {
  * Fetches the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The issue data.
  */
 export const getIssue = async (key: string): Promise<Issue | undefined> => {
@@ -193,7 +193,6 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
  * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The epic issue data.
  */
 export const getEpic = async (key: string): Promise<Issue | undefined> => {
@@ -225,7 +224,6 @@ export const recursiveGetEpic = async (
  *
  * @param {string}     issueId The ID of the Jira issue (eg. '10910').
  * @param {Repository} repo    The name of the repository we're dealing with.
- *
  * @returns {number[]} The PR numbers.
  */
 export const getIssuePullRequestNumbers = async (
@@ -257,7 +255,6 @@ export const getIssuePullRequestNumbers = async (
  *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {boolean} True if the issue is on the board.
  */
 export const isIssueOnBoard = async (
@@ -276,7 +273,6 @@ export const isIssueOnBoard = async (
  * Returns the URL of the issue with the given key.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {string} The URL of the issue.
  */
 export const issueUrl = (key: string): string =>
@@ -286,10 +282,8 @@ export const issueUrl = (key: string): string =>
  * Moves the issue to the board with the given ID.
  *
  * @see https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/#api-agile-1-0-board-boardid-issue-post
- *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {number} The status code of the response.
  */
 export const moveIssueToBoard = async (

@@ -60024,7 +60024,6 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
  * Fetches the user credentials from the remote credential service for the given email or name.
  *
  * @param {string} identifier The email address or Jira display name of the user to look up.
- *
  * @returns {Credentials} The credentials object.
  */
 const Credentials_fetchCredentials = (identifier) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60049,7 +60048,6 @@ const Credentials_fetchCredentials = (identifier) => __awaiter(void 0, void 0, v
  * Fetches the repository with the given name from the remote credential service.
  *
  * @param {string} name The name of the repository to look up.
- *
  * @returns {Repository} The repository object.
  */
 const Credentials_fetchRepository = (name) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60108,7 +60106,6 @@ const Git_TreeTypes = {
  *
  * @param {Repository} repo    The name of the repository that the blob will belong to.
  * @param {string}     content The content to put in the blob.
- *
  * @returns {GitCreateBlobResponseData} The blob data.
  */
 const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0, function* () {
@@ -60126,7 +60123,6 @@ const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0,
  * @param {string}     message The commit message.
  * @param {Sha}        tree    The tree to attach the commit to.
  * @param {Sha}        parent  The parent to attach the commit to.
- *
  * @returns {GitCreateCommitResponseData} The commit data.
  */
 const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0, void 0, void 0, function* () {
@@ -60145,7 +60141,6 @@ const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0,
  * @param {Repository} repo   The name of the repository that the branch will belong to.
  * @param {Branch}     branch The name of the branch to create.
  * @param {Sha}        sha    The commit sha to base the branch on.
- *
  * @returns {GitCreateRefResponseData} The branch data.
  */
 const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
@@ -60163,7 +60158,6 @@ const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, v
  * @param {Repository} repo     The name of the repository that the branch will belong to.
  * @param {Tree[]}     tree     The data to use when creating the tree.
  * @param {Sha}        baseTree The tree to base the new tree on.
- *
  * @returns {GitCreateTreeResponseData} The branch data.
  */
 const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, void 0, function* () {
@@ -60180,7 +60174,6 @@ const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, 
  *
  * @param {Repository} repo The name of the repository whose commit we want to fetch.
  * @param {Sha}        sha  The sha hash of the commit.
- *
  * @returns {GitGetCommitResponseData} The commit data.
  */
 const getCommit = (repo, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
@@ -60210,7 +60203,6 @@ var Repository_awaiter = (undefined && undefined.__awaiter) || function (thisArg
  * @param {Repository} repo The name of the repository to fetch.
  * @param {Sha}        base The base commit to merge INTO (eg. master, when making a release).
  * @param {Sha}        head The head commit to merge FROM (eg. develop, when making a release).
- *
  * @returns {ReposCompareCommitsResponseData} The diff data.
  */
 const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60226,7 +60218,6 @@ const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
- *
  * @returns {number}   The number of the next PR.
  */
 const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60248,7 +60239,6 @@ const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0,
  * Returns the repository with the given name.
  *
  * @param {Repository} repo The name of the repository to fetch.
- *
  * @returns {ReposGetResponseData} The repository data.
  */
 const Repository_getRepository = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
@@ -60262,7 +60252,6 @@ const Repository_getRepository = (repo) => Repository_awaiter(void 0, void 0, vo
  * Returns the URL of the repository with the given name.
  *
  * @param {Repository} repo The name of the repository.
- *
  * @returns {string} The URL of the repository.
  */
 const Repository_repositoryUrl = (repo) => `https://github.com/${organizationName()}/${repo}`;
@@ -60287,7 +60276,6 @@ var Branch_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _a
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {void}
  */
 const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60312,7 +60300,6 @@ const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, voi
  *
  * @param {Repository} repo   The name of the repository that the branch belongs to.
  * @param {Branch}     branch The name of the branch to fetch.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60341,7 +60328,6 @@ const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0
  * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
  * @param {string}     fileContent    The text that the file will contain.
  * @param {string}     commitMessage  The text to use as the commit message.
- *
  * @returns {GitCreateRefResponseData} The new branch data.
  */
 const Branch_createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
@@ -60386,7 +60372,6 @@ var PullRequest_awaiter = (undefined && undefined.__awaiter) || function (thisAr
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {IssuesAddAssigneesResponseData} The PR data.
  */
 const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60407,7 +60392,6 @@ const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaite
  * @param {string}     title The title of the PR.
  * @param {string}     body  The body of the PR.
  * @param {string}     token The Github API token to use when creating the PR.
- *
  * @returns {PullsGetResponseData} The PR data.
  */
 const PullRequest_createPullRequest = (repo, base, head, title, body, token) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60426,7 +60410,6 @@ const PullRequest_createPullRequest = (repo, base, head, title, body, token) => 
  * Returns the Jira issue key for the pull request with the given number.
  *
  * @param {PullRequestContent} pr The body of the pull request which we will parse.
- *
  * @returns {string | undefined} The Jira issue key.
  */
 const PullRequest_getIssueKey = (pr) => {
@@ -60450,7 +60433,6 @@ const PullRequest_getIssueKey = (pr) => {
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 const PullRequest_getPullRequest = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60476,7 +60458,6 @@ const PullRequest_getPullRequest = (repo, number) => PullRequest_awaiter(void 0,
  * @param {Repository} repo      The name of the repository that the PR belongs to.
  * @param {number}     number    The PR number.
  * @param {string[]}   usernames The usernames of the users to assign as owners.
- *
  * @returns {PullsRequestReviewersResponseData} The PR data.
  */
 const assignReviewers = (repo, number, usernames) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60498,7 +60479,6 @@ const assignReviewers = (repo, number, usernames) => PullRequest_awaiter(void 0,
  * Extracts a pull request from a commit message, in the format "[#123] Do something".
  *
  * @param {string} message The commit message to extract the pull request number from.
- *
  * @returns {number | undefined} The number of the pull request, if one can be found.
  */
 const PullRequest_extractPullRequestNumber = (message) => parseInt(message.replace(/^.*\[#(\d+)\].*$/, '$1'), 10) ||
@@ -60509,7 +60489,6 @@ const PullRequest_extractPullRequestNumber = (message) => parseInt(message.repla
  *
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The pull request number whose commits we want to fetch.
- *
  * @returns {PullsListCommitsResponseData} The pull request data.
  */
 const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60525,7 +60504,6 @@ const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter
  *
  * @param {Repository} repo   The name of the repository that the PR will belong to.
  * @param {number}     number The pull request number to fetch.
- *
  * @returns {string} The URL of the pull request.
  */
 const PullRequest_pullRequestUrl = (repo, number) => `https://github.com/${Inputs_organizationName()}/${repo}/pull/${number}`;
@@ -60536,7 +60514,6 @@ const PullRequest_pullRequestUrl = (repo, number) => `https://github.com/${Input
  * @param {number}     number    The PR number.
  * @param {string}     event     The type of review ('APPROVE', 'COMMENT' or 'REQUEST_CHANGES').
  * @param {string}     body      The review body.
- *
  * @returns {PullsCreateReviewResponseData} The review data.
  */
 const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60555,7 +60532,6 @@ const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(voi
  * @param {Repository} repo       The name of the repository that the PR belongs to.
  * @param {number}     number     The pull request number to update.
  * @param {object}     attributes The data to update.
- *
  * @returns {PullsGetResponseData} The updated pull request data.
  */
 const PullRequest_updatePullRequest = (repo, number, attributes) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
@@ -60594,7 +60570,6 @@ const mutuallyExclusiveLabels = [
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   labels The list of labels to set.
- *
  * @returns {IssuesSetLabelsResponseData} The PR data.
  */
 const Label_setLabels = (repo, number, labels) => Label_awaiter(void 0, void 0, void 0, function* () {
@@ -60612,7 +60587,6 @@ const Label_setLabels = (repo, number, labels) => Label_awaiter(void 0, void 0, 
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   added  The labels to add.
- *
  * @returns {IssuesAddLabelsResponseData} The PR data.
  */
 const Label_addLabels = (repo, number, added) => Label_awaiter(void 0, void 0, void 0, function* () {
@@ -60702,7 +60676,6 @@ const JiraFieldStoryPointEstimate = 'Story point estimate';
  *
  * @param {Issue}  issue     The issue whose fields we want to search.
  * @param {string} fieldName The human-readable field name to search for.
- *
  * @returns {string} The field ID.
  */
 const idForFieldName = (issue, fieldName) => {
@@ -60714,7 +60687,6 @@ const idForFieldName = (issue, fieldName) => {
  * identifiers mapped to the 'names' list.
  *
  * @param {Issue} issue The issue whose data we want to populate.
- *
  * @returns {Issue} The issues, with fields populated.
  */
 const populateExplicitFields = (issue) => {
@@ -60742,7 +60714,6 @@ const populateExplicitFields = (issue) => {
  * Fetches all direct children of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue[]} The direct child issues.
  */
 const getChildIssues = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60766,7 +60737,6 @@ const getChildIssues = (key) => Issue_awaiter(void 0, void 0, void 0, function* 
  * Fetches the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The issue data.
  */
 const getIssue = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60785,7 +60755,6 @@ const getIssue = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
  * Fetches the parent epic (if one exists) of the issue with the given key from Jira.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {Issue} The epic issue data.
  */
 const getEpic = (key) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60813,7 +60782,6 @@ const recursiveGetEpic = (key) => Issue_awaiter(void 0, void 0, void 0, function
  *
  * @param {string}     issueId The ID of the Jira issue (eg. '10910').
  * @param {Repository} repo    The name of the repository we're dealing with.
- *
  * @returns {number[]} The PR numbers.
  */
 const Issue_getIssuePullRequestNumbers = (issueId, repo) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60833,7 +60801,6 @@ const Issue_getIssuePullRequestNumbers = (issueId, repo) => Issue_awaiter(void 0
  *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {boolean} True if the issue is on the board.
  */
 const isIssueOnBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60847,7 +60814,6 @@ const isIssueOnBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 
  * Returns the URL of the issue with the given key.
  *
  * @param {string} key The key of the Jira issue (eg. 'ISSUE-236').
- *
  * @returns {string} The URL of the issue.
  */
 const Issue_issueUrl = (key) => `https://${jiraHost()}/browse/${key}`;
@@ -60855,10 +60821,8 @@ const Issue_issueUrl = (key) => `https://${jiraHost()}/browse/${key}`;
  * Moves the issue to the board with the given ID.
  *
  * @see https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/#api-agile-1-0-board-boardid-issue-post
- *
  * @param {string} boardId The ID of the Jira board (eg. '4').
  * @param {string} issueId The ID of the Jira issue (eg. '10910').
- *
  * @returns {number} The status code of the response.
  */
 const moveIssueToBoard = (boardId, issueId) => Issue_awaiter(void 0, void 0, void 0, function* () {
@@ -60941,7 +60905,6 @@ var Project_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
  * Fetches the board definition for the given project ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoard | undefined} The board belonging to te project.
  */
 const getBoard = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60957,7 +60920,6 @@ const getBoard = (projectId) => Project_awaiter(void 0, void 0, void 0, function
  * Fetches the list of columns for the project with the given ID.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {JiraBoardColumn[] | undefined} The board belonging to te project.
  */
 const getColumns = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -60977,7 +60939,6 @@ const getColumns = (projectId) => Project_awaiter(void 0, void 0, void 0, functi
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as in-progress.
  */
 const getInProgressColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -61001,7 +60962,6 @@ const getInProgressColumn = (projectId) => Project_awaiter(void 0, void 0, void 
  * This fetches the column names for the project and decides which one is appropriate.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as ready-for-review.
  */
 const getReviewColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -61025,7 +60985,6 @@ const getReviewColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, f
  * 'Review', if it exists.
  *
  * @param {string} projectId The *numeric* ID of the Jira project (eg. 10003).
- *
  * @returns {string} The name of the column used to mark issues as validated.
  */
 const getValidatedColumn = (projectId) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -61048,7 +61007,6 @@ const getValidatedColumn = (projectId) => Project_awaiter(void 0, void 0, void 0
  * Fetches the project with the given ID.
  *
  * @param {string} projectKey The key of the Jira project (eg. 'STUDIO').
- *
  * @returns {JiraProject} The project.
  */
 const Project_getProject = (projectKey) => Project_awaiter(void 0, void 0, void 0, function* () {
@@ -61086,7 +61044,6 @@ var Release_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
  * @param {string} projectKey  The key of the project which we will create a release for.
  * @param {string} name        The name of the release.
  * @param {string} description The release description.
- *
  * @returns {JiraRelease} The newly created release.
  */
 const createJiraRelease = (projectKey, name, description) => Release_awaiter(void 0, void 0, void 0, function* () {
@@ -61116,7 +61073,6 @@ const createJiraRelease = (projectKey, name, description) => Release_awaiter(voi
  *
  * @param {string} projectKey The key of the project whose release we are looking for.
  * @param {string} name       The name of the release.
- *
  * @returns {JiraRelease | undefined} The release if it exists, or undefined if it doesn't.
  */
 const findJiraRelease = (projectKey, name) => Release_awaiter(void 0, void 0, void 0, function* () {
@@ -61223,7 +61179,6 @@ var lodash_startCase = __nccwpck_require__(9274);
  * Converts strings to a format safe for use in URLs, branch names etc.
  *
  * @param {string} str The string to parameterize.
- *
  * @returns {string} The parameterized string.
  */
 const String_parameterize = (str) => snakeCase(str.trim().toLowerCase())
@@ -62031,7 +61986,6 @@ mustache_mustache.Writer = Writer;
  *
  * @param {string} template The mustache.js template string.
  * @param {object} vars     The vars to replace in the template.
- *
  * @returns {string} The rendered template.
  */
 const Template_render = (template, vars) => mustache.render(template, vars);
@@ -62116,7 +62070,6 @@ var Epic_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
  * @param {Issue} epic            The Jira epic we will create the pull request for.
  * @param {string} repositoryName Jira Epics don't have a repository - if we encounter an issue
  *                                belonging to an epic, we will use the child issue's repository.
- *
  * @returns {PullsGetResponseData} The pull request data.
  */
 const createEpicPullRequest = (epic, repositoryName) => Epic_awaiter(void 0, void 0, void 0, function* () {
@@ -62247,7 +62200,6 @@ const positiveEmoji = () => {
  * Makes sure that secrets in the message are scrubbed out.
  *
  * @param {string} message The message to send.
- *
  * @returns {string} The scrubbed message
  */
 const scrubMessage = (message) => {
@@ -62265,7 +62217,6 @@ const scrubMessage = (message) => {
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const sendErrorMessage = (message) => Message_awaiter(void 0, void 0, void 0, function* () {
@@ -62284,7 +62235,6 @@ const sendErrorMessage = (message) => Message_awaiter(void 0, void 0, void 0, fu
  *
  * @param {string} userId  The Slack user ID to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const Message_sendUserMessage = (userId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
@@ -62344,7 +62294,6 @@ var Github_Release_awaiter = (undefined && undefined.__awaiter) || function (thi
  * @param {string}     releaseDate The formatted date and time of the release.
  * @param {string}     releaseName The name of the release.
  * @param {Commit[]}   commits     The list of commits that make up the release.
- *
  * @returns {string} The pull request description.
  */
 const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62405,7 +62354,6 @@ const getReleaseNotes = (repoName, releaseDate, releaseName, commits) => Github_
  *
  * @param {Repository} repoName The name of the repository that the branch will belong to.
  * @param {string}     sha      The commit sha to branch from.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62432,7 +62380,6 @@ const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, vo
  * @param {string}     releaseDate The name of the release (basically a formatted datetime).
  * @param {string}     releaseName The name of the release.
  * @param {string}     body        The pull request release notes.
- *
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
 const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62462,7 +62409,6 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Gith
  *
  * @param {string} slackId The Slack user ID of the person to send the error message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62475,7 +62421,6 @@ const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0,
  *
  * @param {string} slackId The Slack user ID of the person to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62488,7 +62433,6 @@ const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, 
  *
  * @param {string} email         The email address of the user who requested the release be created.
  * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
- *
  * @returns {void}
  */
 const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
@@ -62551,7 +62495,6 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
  * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
  * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
  * @param {string}     releaseNotes The notes to include as the body of the release.
- *
  * @returns {ReposCreateReleaseResponseData} The resulting release.
  */
 const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Release_awaiter(void 0, void 0, void 0, function* () {

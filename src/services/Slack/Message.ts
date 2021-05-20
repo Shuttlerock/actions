@@ -56,7 +56,6 @@ export const positiveEmoji = (): string => {
  * Makes sure that secrets in the message are scrubbed out.
  *
  * @param {string} message The message to send.
- *
  * @returns {string} The scrubbed message
  */
 export const scrubMessage = (message: string): string => {
@@ -75,7 +74,6 @@ export const scrubMessage = (message: string): string => {
  * Sends an error message to the default slack group.
  *
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 export const sendErrorMessage = async (message: string): Promise<void> => {
@@ -96,7 +94,6 @@ export const sendErrorMessage = async (message: string): Promise<void> => {
  *
  * @param {string} userId  The Slack user ID to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 export const sendUserMessage = async (

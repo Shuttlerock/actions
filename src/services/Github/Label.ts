@@ -35,7 +35,6 @@ const mutuallyExclusiveLabels = [
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   labels The list of labels to set.
- *
  * @returns {IssuesSetLabelsResponseData} The PR data.
  */
 export const setLabels = async (
@@ -59,7 +58,6 @@ export const setLabels = async (
  * @param {Repository} repo   The name of the repository that the PR belongs to.
  * @param {number}     number The PR number.
  * @param {string[]}   added  The labels to add.
- *
  * @returns {IssuesAddLabelsResponseData} The PR data.
  */
 export const addLabels = async (

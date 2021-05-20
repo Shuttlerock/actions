@@ -13,7 +13,6 @@ import { organizationName } from '@sr-services/Inputs'
  * @param {Repository} repo The name of the repository to fetch.
  * @param {Sha}        base The base commit to merge INTO (eg. master, when making a release).
  * @param {Sha}        head The head commit to merge FROM (eg. develop, when making a release).
- *
  * @returns {ReposCompareCommitsResponseData} The diff data.
  */
 export const compareCommits = async (
@@ -35,7 +34,6 @@ export const compareCommits = async (
  * Decides what number the next pull request will be.
  *
  * @param {Repository} repo The name of the repository that the PR will belong to.
- *
  * @returns {number}   The number of the next PR.
  */
 export const getNextPullRequestNumber = async (
@@ -62,7 +60,6 @@ export const getNextPullRequestNumber = async (
  * Returns the repository with the given name.
  *
  * @param {Repository} repo The name of the repository to fetch.
- *
  * @returns {ReposGetResponseData} The repository data.
  */
 export const getRepository = async (
@@ -79,7 +76,6 @@ export const getRepository = async (
  * Returns the URL of the repository with the given name.
  *
  * @param {Repository} repo The name of the repository.
- *
  * @returns {string} The URL of the repository.
  */
 export const repositoryUrl = (repo: Repository): string =>

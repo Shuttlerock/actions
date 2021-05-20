@@ -48,7 +48,6 @@ import { generateReleaseName } from '@sr-services/String'
  * @param {string}     releaseDate The formatted date and time of the release.
  * @param {string}     releaseName The name of the release.
  * @param {Commit[]}   commits     The list of commits that make up the release.
- *
  * @returns {string} The pull request description.
  */
 const getReleaseNotes = async (
@@ -139,7 +138,6 @@ const getReleaseNotes = async (
  *
  * @param {Repository} repoName The name of the repository that the branch will belong to.
  * @param {string}     sha      The commit sha to branch from.
- *
  * @returns {ReposGetBranchResponseData} The branch data.
  */
 const ensureReleasebranch = async (
@@ -174,7 +172,6 @@ const ensureReleasebranch = async (
  * @param {string}     releaseDate The name of the release (basically a formatted datetime).
  * @param {string}     releaseName The name of the release.
  * @param {string}     body        The pull request release notes.
- *
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
 const getReleasePullRequest = async (
@@ -222,7 +219,6 @@ const getReleasePullRequest = async (
  *
  * @param {string} slackId The Slack user ID of the person to send the error message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportError = async (slackId: string, message: string) => {
@@ -236,7 +232,6 @@ const reportError = async (slackId: string, message: string) => {
  *
  * @param {string} slackId The Slack user ID of the person to send the message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const reportInfo = async (slackId: string, message: string) => {
@@ -250,7 +245,6 @@ const reportInfo = async (slackId: string, message: string) => {
  *
  * @param {string} email         The email address of the user who requested the release be created.
  * @param {ReposGetResponseData} repo The Github repository that we will create the release / pull request for.
- *
  * @returns {void}
  */
 export const createReleasePullRequest = async (
@@ -353,7 +347,6 @@ export const createReleasePullRequest = async (
  * @param {string}     tagName      The string to tag the release with (eg. v2021-01-12-0426).
  * @param {string}     releaseName  The name of the release (eg. Energetic Eagle).
  * @param {string}     releaseNotes The notes to include as the body of the release.
- *
  * @returns {ReposCreateReleaseResponseData} The resulting release.
  */
 export const createReleaseTag = async (
