@@ -61913,26 +61913,25 @@ const getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, funct
  * @param {Repository} repo           The name of the repository that the branch will belong to.
  * @param {Branch}     baseBranchName The name of the base branch to branch off.
  * @param {Branch}     newBranchName  The name of the branch to create.
- * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
- * @param {string}     fileContent    The text that the file will contain.
+ * @param {object}     fileContents   A map of file paths to file contents, which will be committed to the branch.
  * @param {string}     commitMessage  The text to use as the commit message.
  * @returns {GitCreateRefResponseData} The new branch data.
  */
-const createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
+const createBranch = (repo, baseBranchName, newBranchName, fileContents, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
     const baseBranch = yield getBranch(repo, baseBranchName);
     if (isUndefined_default()(baseBranch)) {
         throw new Error(`Base branch not found for repository '${repo}'`);
     }
     const prNumber = yield getNextPullRequestNumber(repo);
-    const blob = yield createGitBlob(repo, fileContent);
-    const treeData = [
-        {
-            path: filePath,
+    const treeData = yield Promise.all(Object.entries(fileContents).map(([path, content]) => Branch_awaiter(void 0, void 0, void 0, function* () {
+        const blob = yield createGitBlob(repo, content);
+        return {
+            path,
             mode: TreeModes.ModeFile,
             type: TreeTypes.Blob,
             sha: blob.sha,
-        },
-    ];
+        };
+    })));
     const tree = yield createGitTree(repo, treeData, baseBranch.commit.sha);
     const commit = yield createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
     return createGitBranch(repo, newBranchName, commit.sha);
@@ -63709,7 +63708,9 @@ const createEpicPullRequest = (epic, repositoryName) => Epic_awaiter(void 0, voi
         (0,core.info)(`Checking if the epic branch '${newBranchName}' already exists...`);
         if (isNil_default()(branch)) {
             (0,core.info)(`The epic branch '${newBranchName}' does not exist yet: creating a new branch...`);
-            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${epic.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${epic.key}] [skip ci] Create pull request.`);
+            yield createBranch(repo.name, baseBranchName, newBranchName, {
+                [`.meta/${epic.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+            }, `[${epic.key}] [skip ci] Create pull request.`);
         }
         (0,core.info)('Creating the epic pull request...');
         const prTitle = `[${epic.key}] [Epic] ${epic.fields.summary}`;
@@ -64174,7 +64175,9 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
         (0,core.info)(`Checking if the branch '${newBranchName}' already exists...`);
         if (isNil_default()(branch)) {
             (0,core.info)(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
-            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${issue.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${issue.key}] [skip ci] [skip netlify] Create pull request.`);
+            yield createBranch(repo.name, baseBranchName, newBranchName, {
+                [`.meta/${issue.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+            }, `[${issue.key}] [skip ci] [skip netlify] Create pull request.`);
         }
         (0,core.info)('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
@@ -64461,7 +64464,6 @@ var updateTemplates_awaiter = (undefined && undefined.__awaiter) || function (th
  *
  * @param {string} slackId The Slack user ID of the person to send the error message to.
  * @param {string} message The message to send.
- *
  * @returns {void}
  */
 const updateTemplates_reportError = (slackId, message) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
@@ -64472,27 +64474,28 @@ const updateTemplates_reportError = (slackId, message) => updateTemplates_awaite
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
  *
- * @param {Repository} repoName The name of the repository that the branch will belong to.
- * @param {string}     sha      The commit sha to branch from.
- *
+ * @param {ReposGetResponseData} repo The repository that the branch will belong to.
  * @returns {ReposGetBranchResponseData} The branch data.
  */
-const ensureBranch = (repoName, sha) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
+const ensureBranch = (repo) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
     (0,core.info)(`Looking for an existing template update branch (${TemplateUpdateBranchName})...`);
-    const updateBranch = yield getBranch(repoName, TemplateUpdateBranchName);
-    if (isNil_default()(updateBranch)) {
+    let branch = yield getBranch(repo.name, TemplateUpdateBranchName);
+    if (isNil_default()(branch)) {
         (0,core.info)('Existing template update branch not found - creating it...');
-        yield createGitBranch(repoName, TemplateUpdateBranchName, sha);
+        yield createBranch(repo.name, repo.default_branch, TemplateUpdateBranchName, {
+            '.github/PULL_REQUEST_TEMPLATE.md': 'PR Template contents',
+            '.github/test.md': 'test contents',
+        }, '[skip ci] [skip netlify] Update templates.');
         // This is inefficient, but we look up the branch we just created to keep types consistent.
-        return ensureBranch(repoName, sha);
-    }
-    if (updateBranch.commit.sha === sha) {
-        (0,core.info)(`The template update branch already exists, and is up to date (${sha})`);
-        return updateBranch;
+        branch = yield getBranch(repo.name, TemplateUpdateBranchName);
+        if (isNil_default()(branch)) {
+            throw new Error(`Branch '${repo.default_branch}' failed to be created for repository ${repo.name}`);
+        }
+        return branch;
     }
     (0,core.info)('The template update branch already exists, but is out of date - re-creating it...');
-    yield deleteBranch(repoName, TemplateUpdateBranchName);
-    return ensureBranch(repoName, sha);
+    yield deleteBranch(repo.name, TemplateUpdateBranchName);
+    return ensureBranch(repo);
 });
 /**
  * To trigger this event manually:
@@ -64509,7 +64512,6 @@ const ensureBranch = (repoName, sha) => updateTemplates_awaiter(void 0, void 0, 
  *
  * @param {string} email          The email address of the user who will own the pull request.
  * @param {string} repositoryName The name of the repository whose templates we want to update.
- *
  * @returns {void}
  */
 const updateTemplates = (email, repositoryName) => updateTemplates_awaiter(void 0, void 0, void 0, function* () {
@@ -64525,7 +64527,8 @@ const updateTemplates = (email, repositoryName) => updateTemplates_awaiter(void 
         message = `Branch '${repo.default_branch}' could not be found for repository ${repo.name} - giving up`;
         return updateTemplates_reportError(credentials.slack_id, message);
     }
-    yield ensureBranch(repo.name, developBranch.commit.sha);
+    yield ensureBranch(repo);
+    // TODO: add the requester as a reviewer to each PR.
     return undefined;
 });
 

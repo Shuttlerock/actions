@@ -60333,26 +60333,25 @@ const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0
  * @param {Repository} repo           The name of the repository that the branch will belong to.
  * @param {Branch}     baseBranchName The name of the base branch to branch off.
  * @param {Branch}     newBranchName  The name of the branch to create.
- * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
- * @param {string}     fileContent    The text that the file will contain.
+ * @param {object}     fileContents   A map of file paths to file contents, which will be committed to the branch.
  * @param {string}     commitMessage  The text to use as the commit message.
  * @returns {GitCreateRefResponseData} The new branch data.
  */
-const Branch_createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
+const Branch_createBranch = (repo, baseBranchName, newBranchName, fileContents, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
     const baseBranch = yield Branch_getBranch(repo, baseBranchName);
     if (isUndefined(baseBranch)) {
         throw new Error(`Base branch not found for repository '${repo}'`);
     }
     const prNumber = yield getNextPullRequestNumber(repo);
-    const blob = yield createGitBlob(repo, fileContent);
-    const treeData = [
-        {
-            path: filePath,
+    const treeData = yield Promise.all(Object.entries(fileContents).map(([path, content]) => Branch_awaiter(void 0, void 0, void 0, function* () {
+        const blob = yield createGitBlob(repo, content);
+        return {
+            path,
             mode: TreeModes.ModeFile,
             type: TreeTypes.Blob,
             sha: blob.sha,
-        },
-    ];
+        };
+    })));
     const tree = yield createGitTree(repo, treeData, baseBranch.commit.sha);
     const commit = yield createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
     return createGitBranch(repo, newBranchName, commit.sha);
@@ -62165,7 +62164,9 @@ const createEpicPullRequest = (epic, repositoryName) => Epic_awaiter(void 0, voi
         info(`Checking if the epic branch '${newBranchName}' already exists...`);
         if (isNil(branch)) {
             info(`The epic branch '${newBranchName}' does not exist yet: creating a new branch...`);
-            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${epic.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${epic.key}] [skip ci] Create pull request.`);
+            yield createBranch(repo.name, baseBranchName, newBranchName, {
+                [`.meta/${epic.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+            }, `[${epic.key}] [skip ci] Create pull request.`);
         }
         info('Creating the epic pull request...');
         const prTitle = `[${epic.key}] [Epic] ${epic.fields.summary}`;
