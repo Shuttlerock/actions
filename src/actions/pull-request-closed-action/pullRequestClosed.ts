@@ -45,7 +45,7 @@ export const pullRequestClosed = async (
       const releaseName = matches[2] // Energetic Eagle
       const repo = await fetchRepository(repository.name)
 
-      if (repo?.allow_jira_release) {
+      if (!repo?.skip_jira_release) {
         info(`Creating Jira release ${releaseVersion} (${releaseName})...`)
         await createJiraRelease(
           repository.name,

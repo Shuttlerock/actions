@@ -62630,7 +62630,7 @@ const pullRequestClosed = (payload) => pullRequestClosed_awaiter(void 0, void 0,
             const releaseVersion = `v${matches[1]}`; // v2021-01-12-0426
             const releaseName = matches[2]; // Energetic Eagle
             const repo = yield fetchRepository(repository.name);
-            if (repo === null || repo === void 0 ? void 0 : repo.allow_jira_release) {
+            if (!(repo === null || repo === void 0 ? void 0 : repo.skip_jira_release)) {
                 (0,core.info)(`Creating Jira release ${releaseVersion} (${releaseName})...`);
                 yield createRelease(repository.name, pullRequest.number, releaseVersion, releaseName);
             }
