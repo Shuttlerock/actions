@@ -108,7 +108,7 @@ describe('pull-request-closed-action', () => {
 
       it('does not create a Jira release', async () => {
         fetchRepositorySpy.mockImplementation((_name?: string) =>
-          Promise.resolve({ ...mockRepository, allow_jira_release: false })
+          Promise.resolve({ ...mockRepository, skip_jira_release: true })
         )
         await pullRequestClosed(releasePayload)
         expect(createJiraReleaseSpy).toHaveBeenCalledTimes(0)
