@@ -42,12 +42,14 @@ export const assignOwners = async (
 /**
  * Creates a new pull request.
  *
- * @param {Repository} repo  The name of the repository that the PR will belong to.
- * @param {Branch}     base  The base branch, which the PR will be merged into.
- * @param {Branch}     head  The head branch, which the PR will be based on.
- * @param {string}     title The title of the PR.
- * @param {string}     body  The body of the PR.
- * @param {string}     token The Github API token to use when creating the PR.
+ * @param {Repository} repo          The name of the repository that the PR will belong to.
+ * @param {Branch}     base          The base branch, which the PR will be merged into.
+ * @param {Branch}     head          The head branch, which the PR will be based on.
+ * @param {string}     title         The title of the PR.
+ * @param {string}     body          The body of the PR.
+ * @param {string}     token         The Github API token to use when creating the PR.
+ * @param {object}     options       Miscellaneous options to tweak PR creation.
+ * @param {boolean}    options.draft True if we should make a draft PR. Defaults to false.
  * @returns {PullsGetResponseData} The PR data.
  */
 export const createPullRequest = async (
@@ -56,12 +58,13 @@ export const createPullRequest = async (
   head: Branch,
   title: string,
   body: string,
-  token: string
+  token: string,
+  options?: { draft?: boolean }
 ): Promise<PullsGetResponseData> => {
   const response = await clientForToken(token).pulls.create({
     base,
     body,
-    draft: true,
+    draft: options?.draft !== false,
     head,
     owner: organizationName(),
     repo,

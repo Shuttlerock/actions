@@ -59,7 +59,6 @@ export const run = async (): Promise<void> => {
 run().catch(async err => {
   error(err)
   error(err.stack)
-
   await sendErrorMessage(err.message)
   setFailed(err.message)
 })

@@ -60393,19 +60393,21 @@ const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaite
 /**
  * Creates a new pull request.
  *
- * @param {Repository} repo  The name of the repository that the PR will belong to.
- * @param {Branch}     base  The base branch, which the PR will be merged into.
- * @param {Branch}     head  The head branch, which the PR will be based on.
- * @param {string}     title The title of the PR.
- * @param {string}     body  The body of the PR.
- * @param {string}     token The Github API token to use when creating the PR.
+ * @param {Repository} repo          The name of the repository that the PR will belong to.
+ * @param {Branch}     base          The base branch, which the PR will be merged into.
+ * @param {Branch}     head          The head branch, which the PR will be based on.
+ * @param {string}     title         The title of the PR.
+ * @param {string}     body          The body of the PR.
+ * @param {string}     token         The Github API token to use when creating the PR.
+ * @param {object}     options       Miscellaneous options to tweak PR creation.
+ * @param {boolean}    options.draft True if we should make a draft PR. Defaults to false.
  * @returns {PullsGetResponseData} The PR data.
  */
-const PullRequest_createPullRequest = (repo, base, head, title, body, token) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
+const PullRequest_createPullRequest = (repo, base, head, title, body, token, options) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     const response = yield clientForToken(token).pulls.create({
         base,
         body,
-        draft: true,
+        draft: (options === null || options === void 0 ? void 0 : options.draft) !== false,
         head,
         owner: organizationName(),
         repo,
@@ -62224,6 +62226,7 @@ var Message_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
 
 
 
+
 /**
  * Returns a random 'negative' emoji.
  *
@@ -62328,6 +62331,30 @@ const Message_sendUserMessage = (userId, message) => Message_awaiter(void 0, voi
         }
         throw err;
     }
+});
+/**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+const Message_reportError = (slackId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
+    yield Message_sendUserMessage(slackId, message);
+    error(message);
+    return undefined;
+});
+/**
+ * Sends an informational message to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+const Message_reportInfo = (slackId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
+    yield Message_sendUserMessage(slackId, message);
+    info(message);
+    return undefined;
 });
 
 ;// CONCATENATED MODULE: ./src/services/Slack/index.ts
@@ -62477,30 +62504,6 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Gith
     return updatePullRequest(repoName, prNumber, { body, title });
 });
 /**
- * Sends an error to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the error message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
-    yield sendUserMessage(slackId, message);
-    error(message);
-    return undefined;
-});
-/**
- * Sends an informational message to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
-    yield sendUserMessage(slackId, message);
-    info(message);
-    return undefined;
-});
-/**
  * Creates a release pull request for the given repository.
  *
  * @param {string} email         The email address of the user who requested the release be created.
@@ -62558,7 +62561,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
             ReleaseLabel,
         ]);
     }
-    return reportInfo(credentials.slack_id, `Here's your release PR: _<${pullRequestUrl(repo.name, pullRequest.number)}|${repo.name}#${pullRequest.number}>_`);
+    return reportInfo(credentials.slack_id, `Here's your release PR: *<${pullRequestUrl(repo.name, pullRequest.number)}|${repo.name}#${pullRequest.number}>*`);
 });
 /**
  * Creates a release tag for the given repository.
