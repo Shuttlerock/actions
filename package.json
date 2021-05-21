@@ -50,7 +50,7 @@
     "lodash": "^4.17.21",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1",
-    "unique-names-generator": "^4.4.0"
+    "unique-names-generator": "^4.5.0"
   },
   "devDependencies": {
     "@octokit/webhooks": "^9.6.1",
