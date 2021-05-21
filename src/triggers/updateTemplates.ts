@@ -1,32 +1,34 @@
-import { error, info } from '@actions/core'
+import { info } from '@actions/core'
 import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
+import { readFileSync } from 'fs'
+import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
-import { TemplateUpdateBranchName } from '@sr-services/Constants'
-import { fetchCredentials } from '@sr-services/Credentials'
 import {
+  PleaseReviewLabel,
+  TemplateUpdateBranchName,
+} from '@sr-services/Constants'
+import {
+  fetchCredentials,
+  fetchRepository,
+  User,
+} from '@sr-services/Credentials'
+import {
+  assignOwners,
+  assignReviewers,
   createBranch,
+  createPullRequest,
   deleteBranch,
   getBranch,
   getRepository,
+  pullRequestUrl,
+  setLabels,
 } from '@sr-services/Github'
-import { sendUserMessage } from '@sr-services/Slack'
-
-/**
- * Sends an error to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the error message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportError = async (slackId: string, message: string) => {
-  await sendUserMessage(slackId, message)
-  error(message)
-  return undefined
-}
+import { githubWriteToken } from '@sr-services/Inputs'
+import { reportError, reportInfo, sendUserMessage } from '@sr-services/Slack'
 
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
@@ -34,7 +36,7 @@ const reportError = async (slackId: string, message: string) => {
  * @param {ReposGetResponseData} repo The repository that the branch will belong to.
  * @returns {ReposGetBranchResponseData} The branch data.
  */
-const ensureBranch = async (
+const createTemplateBranch = async (
   repo: ReposGetResponseData
 ): Promise<ReposGetBranchResponseData> => {
   info(
@@ -44,13 +46,15 @@ const ensureBranch = async (
   if (isNil(branch)) {
     info('Existing template update branch not found - creating it...')
 
+    const pullRequestTemplate = readFileSync(
+      '.github/PULL_REQUEST_TEMPLATE.md'
+    ).toString('utf8')
     await createBranch(
       repo.name,
       repo.default_branch,
       TemplateUpdateBranchName,
       {
-        '.github/PULL_REQUEST_TEMPLATE.md': 'PR Template contents',
-        '.github/test.md': 'test contents',
+        '.github/PULL_REQUEST_TEMPLATE.md': pullRequestTemplate,
       },
       '[skip ci] [skip netlify] Update templates.'
     )
@@ -70,7 +74,7 @@ const ensureBranch = async (
     'The template update branch already exists, but is out of date - re-creating it...'
   )
   await deleteBranch(repo.name, TemplateUpdateBranchName)
-  return ensureBranch(repo)
+  return createTemplateBranch(repo)
 }
 
 /**
@@ -112,9 +116,59 @@ export const updateTemplates = async (
     return reportError(credentials.slack_id, message)
   }
 
-  await ensureBranch(repo)
+  await createTemplateBranch(repo)
 
-  // TODO: add the requester as a reviewer to each PR.
+  info('Creating a pull request...')
+  const pullRequest = await createPullRequest(
+    repo.name,
+    repo.default_branch,
+    TemplateUpdateBranchName,
+    '[devops] Update repository configuration',
+    'Update repository configuration to the latest defaults.',
+    githubWriteToken(),
+    { draft: false }
+  )
 
-  return undefined
+  if (isNil(pullRequest)) {
+    message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`
+    return reportError(credentials.slack_id, message)
+  }
+
+  // Assign someone, if no-one has been assigned yet.
+  if (isEmpty(pullRequest.assignees)) {
+    if (isNil(credentials.github_username)) {
+      info(
+        `Credentials for ${email} don't have a Github account linked, so we can't assign an owner`
+      )
+    } else {
+      info(`Assigning @${credentials.github_username} as the owner...`)
+      await assignOwners(repo.name, pullRequest.number, [
+        credentials.github_username,
+      ])
+    }
+  }
+
+  info('Fetching repository settings...')
+  const repoSettings = await fetchRepository(repo.name)
+  const reviewers = repoSettings.reviewers.map(
+    (user: User) => user.github_username
+  )
+  if (reviewers.length > 0) {
+    info(`Assigning reviewers (${reviewers.join(', ')})...`)
+    await assignReviewers(repo.name, pullRequest.number, reviewers)
+  }
+
+  // Add labels, if the PR has not been labeled yet.
+  if (isEmpty(pullRequest.labels)) {
+    info(`Adding the label '${PleaseReviewLabel}'...`)
+    await setLabels(repo.name, pullRequest.number, [PleaseReviewLabel])
+  }
+
+  return reportInfo(
+    credentials.slack_id,
+    `Here's your template update PR: *<${pullRequestUrl(
+      repo.name,
+      pullRequest.number
+    )}|${repo.name}#${pullRequest.number}>*`
+  )
 }

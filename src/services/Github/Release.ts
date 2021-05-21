@@ -38,7 +38,7 @@ import {
 import { compareCommits, repositoryUrl } from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
 import { issueUrl } from '@sr-services/Jira'
-import { sendUserMessage } from '@sr-services/Slack'
+import { reportError, reportInfo, sendUserMessage } from '@sr-services/Slack'
 import { generateReleaseName } from '@sr-services/String'
 
 /**
@@ -215,32 +215,6 @@ const getReleasePullRequest = async (
 }
 
 /**
- * Sends an error to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the error message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportError = async (slackId: string, message: string) => {
-  await sendUserMessage(slackId, message)
-  error(message)
-  return undefined
-}
-
-/**
- * Sends an informational message to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportInfo = async (slackId: string, message: string) => {
-  await sendUserMessage(slackId, message)
-  info(message)
-  return undefined
-}
-
-/**
  * Creates a release pull request for the given repository.
  *
  * @param {string} email         The email address of the user who requested the release be created.
@@ -333,10 +307,10 @@ export const createReleasePullRequest = async (
 
   return reportInfo(
     credentials.slack_id,
-    `Here's your release PR: _<${pullRequestUrl(
+    `Here's your release PR: *<${pullRequestUrl(
       repo.name,
       pullRequest.number
-    )}|${repo.name}#${pullRequest.number}>_`
+    )}|${repo.name}#${pullRequest.number}>*`
   )
 }
 
