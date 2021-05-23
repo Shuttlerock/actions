@@ -1,4 +1,4 @@
-import { info } from '@actions/core'
+import { error, info } from '@actions/core'
 import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
@@ -118,6 +118,8 @@ export const updateTemplates = async (
 
   await createTemplateBranch(repo)
 
+  // Todo - check if the file(s) have actually changed by diffing the branch with the target via the API.
+
   info('Creating a pull request...')
   const pullRequest = await createPullRequest(
     repo.name,
@@ -149,13 +151,19 @@ export const updateTemplates = async (
   }
 
   info('Fetching repository settings...')
-  const repoSettings = await fetchRepository(repo.name)
-  const reviewers = repoSettings.reviewers.map(
-    (user: User) => user.github_username
-  )
-  if (reviewers.length > 0) {
-    info(`Assigning reviewers (${reviewers.join(', ')})...`)
-    await assignReviewers(repo.name, pullRequest.number, reviewers)
+  try {
+    const repoSettings = await fetchRepository(repo.name)
+    const reviewers = repoSettings.reviewers.map(
+      (user: User) => user.github_username
+    )
+    if (reviewers.length > 0) {
+      info(`Assigning reviewers (${reviewers.join(', ')})...`)
+      await assignReviewers(repo.name, pullRequest.number, reviewers)
+    }
+  } catch (err) {
+    error(
+      "Couldn't find repository settings, so no reviewers will be assigned."
+    )
   }
 
   // Add labels, if the PR has not been labeled yet.

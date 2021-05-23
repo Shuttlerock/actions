@@ -64524,6 +64524,7 @@ const updateTemplates = (email, repositoryName) => updateTemplates_awaiter(void 
         return reportError(credentials.slack_id, message);
     }
     yield createTemplateBranch(repo);
+    // Todo - check if the file(s) have actually changed by diffing the branch with the target via the API.
     (0,core.info)('Creating a pull request...');
     const pullRequest = yield createPullRequest(repo.name, repo.default_branch, TemplateUpdateBranchName, '[devops] Update repository configuration', 'Update repository configuration to the latest defaults.', githubWriteToken(), { draft: false });
     if (isNil_default()(pullRequest)) {
@@ -64543,11 +64544,16 @@ const updateTemplates = (email, repositoryName) => updateTemplates_awaiter(void 
         }
     }
     (0,core.info)('Fetching repository settings...');
-    const repoSettings = yield Credentials_fetchRepository(repo.name);
-    const reviewers = repoSettings.reviewers.map((user) => user.github_username);
-    if (reviewers.length > 0) {
-        (0,core.info)(`Assigning reviewers (${reviewers.join(', ')})...`);
-        yield assignReviewers(repo.name, pullRequest.number, reviewers);
+    try {
+        const repoSettings = yield Credentials_fetchRepository(repo.name);
+        const reviewers = repoSettings.reviewers.map((user) => user.github_username);
+        if (reviewers.length > 0) {
+            (0,core.info)(`Assigning reviewers (${reviewers.join(', ')})...`);
+            yield assignReviewers(repo.name, pullRequest.number, reviewers);
+        }
+    }
+    catch (err) {
+        (0,core.error)("Couldn't find repository settings, so no reviewers will be assigned.");
     }
     // Add labels, if the PR has not been labeled yet.
     if (isEmpty_default()(pullRequest.labels)) {
