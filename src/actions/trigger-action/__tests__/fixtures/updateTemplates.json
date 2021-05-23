@@ -3,6 +3,6 @@
   "inputs": {
     "email": "dave@shuttlerock.com",
     "event": "updateTemplates",
-    "param": "compliance"
+    "param": "data-infrastructure"
   }
 }
