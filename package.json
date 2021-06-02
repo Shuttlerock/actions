@@ -58,7 +58,7 @@
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.23",
     "@types/jira-client": "^6.13.1",
-    "@types/lodash": "^4.14.169",
+    "@types/lodash": "^4.14.170",
     "@types/mustache": "^4.1.1",
     "@types/node": "^15.3.1",
     "@types/node-fetch": "^2.5.10",
