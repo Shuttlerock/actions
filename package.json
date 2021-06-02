@@ -53,14 +53,14 @@
     "unique-names-generator": "^4.5.0"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^9.6.1",
+    "@octokit/webhooks": "^9.6.3",
     "@octokit/webhooks-definitions": "^3.67.2",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.23",
     "@types/jira-client": "^6.13.1",
     "@types/lodash": "^4.14.170",
     "@types/mustache": "^4.1.1",
-    "@types/node": "^15.6.1",
+    "@types/node": "^15.6.2",
     "@types/node-fetch": "^2.5.10",
     "@typescript-eslint/parser": "^4.24.0",
     "@vercel/ncc": "0.28.5",
@@ -77,12 +77,12 @@
     "eslint-plugin-unused-imports": "^1.1.1",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
-    "jest-circus": "^26.6.3",
+    "jest-circus": "^27.0.3",
     "js-yaml": "^4.1.0",
     "lint-staged": "^11.0.0",
     "prettier": "2.3.0",
     "ts-jest": "^26.5.6",
     "tscpaths": "^0.0.9",
-    "typescript": "^4.2.4"
+    "typescript": "^4.3.2"
   }
 }
