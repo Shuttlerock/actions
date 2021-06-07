@@ -29,6 +29,7 @@ import * as Slack from '@sr-services/Slack'
 import {
   mockCredentials,
   mockGitCommit,
+  mockGithubCompareCommits,
   mockGithubBranch,
   mockGithubPullRequest,
   mockGithubRelease,
@@ -99,12 +100,7 @@ describe('Release', () => {
       assignOwnersSpy = jest.spyOn(PullRequest, 'assignOwners')
       compareCommitsSpy = jest
         .spyOn(Repository, 'compareCommits')
-        .mockReturnValue(
-          Promise.resolve({
-            commits: [mockGitCommit],
-            total_commits: 1,
-          } as unknown as ReposCompareCommitsResponseData)
-        )
+        .mockReturnValue(Promise.resolve(mockGithubCompareCommits))
       createGitBranchSpy = jest.spyOn(Git, 'createGitBranch')
       createPullRequestSpy = jest.spyOn(PullRequest, 'createPullRequest')
       deleteBranchSpy = jest.spyOn(Branch, 'deleteBranch')

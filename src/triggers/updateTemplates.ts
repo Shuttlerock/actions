@@ -19,6 +19,7 @@ import {
 import {
   assignOwners,
   assignReviewers,
+  compareCommits,
   createBranch,
   createPullRequest,
   deleteBranch,
@@ -28,7 +29,12 @@ import {
   setLabels,
 } from '@sr-services/Github'
 import { githubWriteToken } from '@sr-services/Inputs'
-import { reportError, reportInfo, sendUserMessage } from '@sr-services/Slack'
+import {
+  positiveEmoji,
+  reportError,
+  reportInfo,
+  sendUserMessage,
+} from '@sr-services/Slack'
 
 /**
  * Looks for an existing branch for a release, and creates one if it doesn't already exist.
@@ -116,9 +122,20 @@ export const updateTemplates = async (
     return reportError(credentials.slack_id, message)
   }
 
-  await createTemplateBranch(repo)
+  const templateBranch = await createTemplateBranch(repo)
 
-  // Todo - check if the file(s) have actually changed by diffing the branch with the target via the API.
+  // Check if the file(s) have actually changed by diffing the branch with the target via the API.
+  const compare = await compareCommits(
+    repo.name,
+    templateBranch.commit.sha,
+    developBranch.commit.sha
+  )
+  if (compare.total_commits === 0) {
+    message = `*<${repo.html_url}|${
+      repo.name
+    }>* already has the latest templates - nothing to do ${positiveEmoji()}`
+    return sendUserMessage(credentials.slack_id, message)
+  }
 
   info('Creating a pull request...')
   const pullRequest = await createPullRequest(
