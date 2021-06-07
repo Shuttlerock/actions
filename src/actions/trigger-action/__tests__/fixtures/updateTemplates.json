@@ -1,0 +1,8 @@
+{
+  "ref": "develop",
+  "inputs": {
+    "email": "dave@shuttlerock.com",
+    "event": "updateTemplates",
+    "param": "data-infrastructure"
+  }
+}

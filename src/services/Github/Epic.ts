@@ -64,8 +64,9 @@ export const createEpicPullRequest = async (
         repo.name,
         baseBranchName,
         newBranchName,
-        `.meta/${epic.key}.md`,
-        `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+        {
+          [`.meta/${epic.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+        },
         `[${epic.key}] [skip ci] Create pull request.`
       )
     }

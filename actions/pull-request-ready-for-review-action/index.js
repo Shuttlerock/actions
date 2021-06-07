@@ -14,14 +14,27 @@ module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.2.3","descrip
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issue = exports.issueCommand = void 0;
 const os = __importStar(__nccwpck_require__(2087));
 const utils_1 = __nccwpck_require__(5278);
 /**
@@ -100,6 +113,25 @@ function escapeProperty(s) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -109,14 +141,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
@@ -183,7 +209,9 @@ function addPath(inputPath) {
 }
 exports.addPath = addPath;
 /**
- * Gets the value of an input.  The value is also trimmed.
+ * Gets the value of an input.
+ * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
+ * Returns an empty string if the value is not defined.
  *
  * @param     name     name of the input to get
  * @param     options  optional. See InputOptions.
@@ -194,9 +222,34 @@ function getInput(name, options) {
     if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
     }
+    if (options && options.trimWhitespace === false) {
+        return val;
+    }
     return val.trim();
 }
 exports.getInput = getInput;
+/**
+ * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
+ * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
+ * The return value is also in boolean type.
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   boolean
+ */
+function getBooleanInput(name, options) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    const val = getInput(name, options);
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
+        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+}
+exports.getBooleanInput = getBooleanInput;
 /**
  * Sets the value of an output.
  *
@@ -347,14 +400,27 @@ exports.getState = getState;
 "use strict";
 
 // For internal use, subject to change.
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(5747));
@@ -385,6 +451,7 @@ exports.issueCommand = issueCommand;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -60049,6 +60116,7 @@ const Constants_GithubWriteUser = 'sr-devops';
 const Constants_DevelopBranchName = 'develop';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
+const TemplateUpdateBranchName = `${Constants_GithubWriteUser}/update-templates`;
 
 // EXTERNAL MODULE: external "crypto"
 var external_crypto_ = __nccwpck_require__(6417);
@@ -60397,26 +60465,25 @@ const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0
  * @param {Repository} repo           The name of the repository that the branch will belong to.
  * @param {Branch}     baseBranchName The name of the base branch to branch off.
  * @param {Branch}     newBranchName  The name of the branch to create.
- * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
- * @param {string}     fileContent    The text that the file will contain.
+ * @param {object}     fileContents   A map of file paths to file contents, which will be committed to the branch.
  * @param {string}     commitMessage  The text to use as the commit message.
  * @returns {GitCreateRefResponseData} The new branch data.
  */
-const Branch_createBranch = (repo, baseBranchName, newBranchName, filePath, fileContent, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
+const Branch_createBranch = (repo, baseBranchName, newBranchName, fileContents, commitMessage) => Branch_awaiter(void 0, void 0, void 0, function* () {
     const baseBranch = yield Branch_getBranch(repo, baseBranchName);
     if (isUndefined(baseBranch)) {
         throw new Error(`Base branch not found for repository '${repo}'`);
     }
     const prNumber = yield getNextPullRequestNumber(repo);
-    const blob = yield createGitBlob(repo, fileContent);
-    const treeData = [
-        {
-            path: filePath,
+    const treeData = yield Promise.all(Object.entries(fileContents).map(([path, content]) => Branch_awaiter(void 0, void 0, void 0, function* () {
+        const blob = yield createGitBlob(repo, content);
+        return {
+            path,
             mode: TreeModes.ModeFile,
             type: TreeTypes.Blob,
             sha: blob.sha,
-        },
-    ];
+        };
+    })));
     const tree = yield createGitTree(repo, treeData, baseBranch.commit.sha);
     const commit = yield createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
     return createGitBranch(repo, newBranchName, commit.sha);
@@ -60458,19 +60525,21 @@ const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaite
 /**
  * Creates a new pull request.
  *
- * @param {Repository} repo  The name of the repository that the PR will belong to.
- * @param {Branch}     base  The base branch, which the PR will be merged into.
- * @param {Branch}     head  The head branch, which the PR will be based on.
- * @param {string}     title The title of the PR.
- * @param {string}     body  The body of the PR.
- * @param {string}     token The Github API token to use when creating the PR.
+ * @param {Repository} repo          The name of the repository that the PR will belong to.
+ * @param {Branch}     base          The base branch, which the PR will be merged into.
+ * @param {Branch}     head          The head branch, which the PR will be based on.
+ * @param {string}     title         The title of the PR.
+ * @param {string}     body          The body of the PR.
+ * @param {string}     token         The Github API token to use when creating the PR.
+ * @param {object}     options       Miscellaneous options to tweak PR creation.
+ * @param {boolean}    options.draft True if we should make a draft PR. Defaults to false.
  * @returns {PullsGetResponseData} The PR data.
  */
-const PullRequest_createPullRequest = (repo, base, head, title, body, token) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
+const PullRequest_createPullRequest = (repo, base, head, title, body, token, options) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     const response = yield clientForToken(token).pulls.create({
         base,
         body,
-        draft: true,
+        draft: (options === null || options === void 0 ? void 0 : options.draft) !== false,
         head,
         owner: organizationName(),
         repo,
@@ -62164,7 +62233,9 @@ const createEpicPullRequest = (epic, repositoryName) => Epic_awaiter(void 0, voi
         info(`Checking if the epic branch '${newBranchName}' already exists...`);
         if (isNil(branch)) {
             info(`The epic branch '${newBranchName}' does not exist yet: creating a new branch...`);
-            yield createBranch(repo.name, baseBranchName, newBranchName, `.meta/${epic.key}.md`, `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`, `[${epic.key}] [skip ci] Create pull request.`);
+            yield createBranch(repo.name, baseBranchName, newBranchName, {
+                [`.meta/${epic.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
+            }, `[${epic.key}] [skip ci] Create pull request.`);
         }
         info('Creating the epic pull request...');
         const prTitle = `[${epic.key}] [Epic] ${epic.fields.summary}`;
@@ -62216,6 +62287,7 @@ var Message_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 
 
 
@@ -62326,6 +62398,30 @@ const Message_sendUserMessage = (userId, message) => Message_awaiter(void 0, voi
         }
         throw err;
     }
+});
+/**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+const Message_reportError = (slackId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
+    yield Message_sendUserMessage(slackId, message);
+    error(message);
+    return undefined;
+});
+/**
+ * Sends an informational message to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+const Message_reportInfo = (slackId, message) => Message_awaiter(void 0, void 0, void 0, function* () {
+    yield Message_sendUserMessage(slackId, message);
+    info(message);
+    return undefined;
 });
 
 ;// CONCATENATED MODULE: ./src/services/Slack/index.ts
@@ -62475,30 +62571,6 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Gith
     return updatePullRequest(repoName, prNumber, { body, title });
 });
 /**
- * Sends an error to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the error message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportError = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
-    yield sendUserMessage(slackId, message);
-    error(message);
-    return undefined;
-});
-/**
- * Sends an informational message to the given Slack account, and logs it to Github actions.
- *
- * @param {string} slackId The Slack user ID of the person to send the message to.
- * @param {string} message The message to send.
- * @returns {void}
- */
-const reportInfo = (slackId, message) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
-    yield sendUserMessage(slackId, message);
-    info(message);
-    return undefined;
-});
-/**
  * Creates a release pull request for the given repository.
  *
  * @param {string} email         The email address of the user who requested the release be created.
@@ -62556,7 +62628,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
             ReleaseLabel,
         ]);
     }
-    return reportInfo(credentials.slack_id, `Here's your release PR: _<${pullRequestUrl(repo.name, pullRequest.number)}|${repo.name}#${pullRequest.number}>_`);
+    return reportInfo(credentials.slack_id, `Here's your release PR: *<${pullRequestUrl(repo.name, pullRequest.number)}|${repo.name}#${pullRequest.number}>*`);
 });
 /**
  * Creates a release tag for the given repository.

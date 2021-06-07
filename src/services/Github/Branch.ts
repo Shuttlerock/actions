@@ -83,8 +83,7 @@ export const getBranch = async (
  * @param {Repository} repo           The name of the repository that the branch will belong to.
  * @param {Branch}     baseBranchName The name of the base branch to branch off.
  * @param {Branch}     newBranchName  The name of the branch to create.
- * @param {string}     filePath       A path at which we will create a new file, to make sure the new branch differes from the base.
- * @param {string}     fileContent    The text that the file will contain.
+ * @param {object}     fileContents   A map of file paths to file contents, which will be committed to the branch.
  * @param {string}     commitMessage  The text to use as the commit message.
  * @returns {GitCreateRefResponseData} The new branch data.
  */
@@ -92,8 +91,7 @@ export const createBranch = async (
   repo: Repository,
   baseBranchName: Branch,
   newBranchName: Branch,
-  filePath: string,
-  fileContent: string,
+  fileContents: { [key: string]: string },
   commitMessage: string
 ): Promise<GitCreateRefResponseData> => {
   const baseBranch = await getBranch(repo, baseBranchName)
@@ -102,15 +100,19 @@ export const createBranch = async (
   }
 
   const prNumber = await getNextPullRequestNumber(repo)
-  const blob = await createGitBlob(repo, fileContent)
-  const treeData = [
-    {
-      path: filePath,
-      mode: TreeModes.ModeFile,
-      type: TreeTypes.Blob,
-      sha: blob.sha,
-    },
-  ]
+
+  const treeData = await Promise.all(
+    Object.entries(fileContents).map(async ([path, content]) => {
+      const blob = await createGitBlob(repo, content)
+      return {
+        path,
+        mode: TreeModes.ModeFile,
+        type: TreeTypes.Blob,
+        sha: blob.sha,
+      }
+    })
+  )
+
   const tree = await createGitTree(repo, treeData, baseBranch.commit.sha)
 
   const commit = await createGitCommit(

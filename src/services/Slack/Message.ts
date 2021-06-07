@@ -1,3 +1,4 @@
+import { error, info } from '@actions/core'
 import escapeRegExp from 'lodash/escapeRegExp'
 import isFunction from 'lodash/isFunction'
 import isNil from 'lodash/isNil'
@@ -119,4 +120,36 @@ export const sendUserMessage = async (
 
     throw err
   }
+}
+
+/**
+ * Sends an error to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the error message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+export const reportError = async (
+  slackId: string,
+  message: string
+): Promise<void> => {
+  await sendUserMessage(slackId, message)
+  error(message)
+  return undefined
+}
+
+/**
+ * Sends an informational message to the given Slack account, and logs it to Github actions.
+ *
+ * @param {string} slackId The Slack user ID of the person to send the message to.
+ * @param {string} message The message to send.
+ * @returns {void}
+ */
+export const reportInfo = async (
+  slackId: string,
+  message: string
+): Promise<void> => {
+  await sendUserMessage(slackId, message)
+  info(message)
+  return undefined
 }

@@ -7,6 +7,7 @@ import {
   PullsGetResponseData,
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
+  ReposCompareCommitsResponseData,
   ReposCreateReleaseResponseData,
   ReposGetBranchResponseData,
   ReposGetResponseData,
@@ -64,6 +65,11 @@ export const mockGithubBranch = {
   name: 'my-branch',
   sha: 'branch-sha',
 } as unknown as ReposGetBranchResponseData
+
+export const mockGithubCompareCommits = {
+  commits: [mockGitCommit],
+  total_commits: 1,
+} as unknown as ReposCompareCommitsResponseData
 
 export const mockGithubPullRequestCreateResponse = {
   id: 1234,

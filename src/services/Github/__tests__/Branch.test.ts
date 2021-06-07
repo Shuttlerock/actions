@@ -110,8 +110,10 @@ describe('Branch', () => {
         repo,
         'master',
         branch,
-        '.meta/ISSUE-236.md',
-        'https://example.atlassian.net/browse/ISSUE-236',
+        {
+          '.meta/ISSUE-236.md':
+            'https://example.atlassian.net/browse/ISSUE-236',
+        },
         '[ISSUE-236] [skip ci] Create pull request.'
       )
 
@@ -142,8 +144,10 @@ describe('Branch', () => {
           repo,
           'master',
           branch,
-          '.meta/ISSUE-236.md',
-          'https://example.atlassian.net/browse/ISSUE-236',
+          {
+            '.meta/ISSUE-236.md':
+              'https://example.atlassian.net/browse/ISSUE-236',
+          },
           '[ISSUE-236] [skip ci] Create pull request.'
         )
       ).rejects.toEqual(

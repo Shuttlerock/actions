@@ -25,9 +25,11 @@ import {
 } from '@sr-services/Github/Release'
 import * as Repository from '@sr-services/Github/Repository'
 import { githubWriteToken, organizationName } from '@sr-services/Inputs'
+import * as Slack from '@sr-services/Slack'
 import {
   mockCredentials,
   mockGitCommit,
+  mockGithubCompareCommits,
   mockGithubBranch,
   mockGithubPullRequest,
   mockGithubRelease,
@@ -68,7 +70,11 @@ jest.mock('@sr-services/Github/Repository', () => ({
   repositoryUrl: jest.fn(),
 }))
 
-jest.mock('@sr-services/Slack', () => ({ sendUserMessage: jest.fn() }))
+jest.mock('@sr-services/Slack', () => ({
+  reportError: jest.fn(),
+  reportInfo: jest.fn(),
+  sendUserMessage: jest.fn(),
+}))
 
 describe('Release', () => {
   describe('createReleasePullRequest', () => {
@@ -84,6 +90,8 @@ describe('Release', () => {
     let infoSpy: jest.SpyInstance
     let listPullsSpy: jest.SpyInstance
     let pullRequestUrlSpy: jest.SpyInstance
+    let reportErrorSpy: jest.SpyInstance
+    let reportInfoSpy: jest.SpyInstance
     let repositoryUrlSpy: jest.SpyInstance
     let setLabelsSpy: jest.SpyInstance
     let updatePullRequestSpy: jest.SpyInstance
@@ -92,12 +100,7 @@ describe('Release', () => {
       assignOwnersSpy = jest.spyOn(PullRequest, 'assignOwners')
       compareCommitsSpy = jest
         .spyOn(Repository, 'compareCommits')
-        .mockReturnValue(
-          Promise.resolve({
-            commits: [mockGitCommit],
-            total_commits: 1,
-          } as unknown as ReposCompareCommitsResponseData)
-        )
+        .mockReturnValue(Promise.resolve(mockGithubCompareCommits))
       createGitBranchSpy = jest.spyOn(Git, 'createGitBranch')
       createPullRequestSpy = jest.spyOn(PullRequest, 'createPullRequest')
       deleteBranchSpy = jest.spyOn(Branch, 'deleteBranch')
@@ -120,6 +123,8 @@ describe('Release', () => {
         } as unknown as OctokitResponse<PullsListResponseData>)
       )
       pullRequestUrlSpy = jest.spyOn(PullRequest, 'pullRequestUrl')
+      reportErrorSpy = jest.spyOn(Slack, 'reportError')
+      reportInfoSpy = jest.spyOn(Slack, 'reportInfo')
       repositoryUrlSpy = jest.spyOn(Repository, 'repositoryUrl')
       setLabelsSpy = jest.spyOn(Label, 'setLabels')
       updatePullRequestSpy = jest
@@ -140,6 +145,8 @@ describe('Release', () => {
       infoSpy.mockRestore()
       listPullsSpy.mockRestore()
       pullRequestUrlSpy.mockRestore()
+      reportErrorSpy.mockRestore()
+      reportInfoSpy.mockRestore()
       repositoryUrlSpy.mockRestore()
       setLabelsSpy.mockRestore()
       updatePullRequestSpy.mockRestore()
@@ -149,7 +156,10 @@ describe('Release', () => {
       getBranchSpy.mockReturnValue(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
       const message = `Branch '${DevelopBranchName}' could not be found for repository webhooks - giving up`
-      expect(errorSpy).toHaveBeenLastCalledWith(message)
+      expect(reportErrorSpy).toHaveBeenLastCalledWith(
+        mockCredentials.slack_id,
+        message
+      )
     })
 
     it(`reports an error if the ${MasterBranchName} branch cannot be found`, async () => {
@@ -158,7 +168,10 @@ describe('Release', () => {
         .mockReturnValueOnce(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
       const message = `Branch '${MasterBranchName}' could not be found for repository webhooks - giving up`
-      expect(errorSpy).toHaveBeenLastCalledWith(message)
+      expect(reportErrorSpy).toHaveBeenLastCalledWith(
+        mockCredentials.slack_id,
+        message
+      )
     })
 
     it(`does nothing if the ${MasterBranchName} branch already has the latest release`, async () => {
@@ -169,7 +182,10 @@ describe('Release', () => {
       compareCommitsSpy.mockReturnValue(response)
       await createReleasePullRequest(email, mockGithubRepository)
       const message = `Branch '${MasterBranchName}' already contains the latest release - nothing to do`
-      expect(infoSpy).toHaveBeenLastCalledWith(message)
+      expect(reportInfoSpy).toHaveBeenLastCalledWith(
+        mockCredentials.slack_id,
+        message
+      )
     })
 
     it('returns an existing pull request if one exists', async () => {
@@ -189,7 +205,10 @@ describe('Release', () => {
       createPullRequestSpy.mockReturnValue(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
       const message = `An unknown error occurred while creating a release pull request for repository '${mockGithubRepository.name}'`
-      expect(errorSpy).toHaveBeenLastCalledWith(message)
+      expect(reportErrorSpy).toHaveBeenLastCalledWith(
+        mockCredentials.slack_id,
+        message
+      )
     })
 
     it('creates a release pull request', async () => {
