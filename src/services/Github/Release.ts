@@ -181,7 +181,7 @@ const getReleasePullRequest = async (
   body: string
 ): Promise<PullsGetResponseData | undefined> => {
   info('Searching for an existing release pull request...')
-  const response = await readClient.pulls.list({
+  const response = await readClient().pulls.list({
     base: MasterBranchName,
     direction: 'desc',
     head: `${organizationName()}:${ReleaseBranchName}`,
@@ -330,7 +330,7 @@ export const createReleaseTag = async (
   releaseNotes: string
 ): Promise<ReposCreateReleaseResponseData> => {
   const name = `${tagName} (${releaseName})`
-  const response = await client.repos.createRelease({
+  const response = await client().repos.createRelease({
     body: releaseNotes,
     draft: false,
     name,

@@ -67,7 +67,7 @@ export const createGitBlob = async (
   repo: Repository,
   content: string
 ): Promise<GitCreateBlobResponseData> => {
-  const response = await client.git.createBlob({
+  const response = await client().git.createBlob({
     owner: organizationName(),
     repo,
     content,
@@ -91,7 +91,7 @@ export const createGitCommit = async (
   tree: Sha,
   parent: Sha
 ): Promise<GitCreateCommitResponseData> => {
-  const response = await client.git.createCommit({
+  const response = await client().git.createCommit({
     owner: organizationName(),
     repo,
     message,
@@ -115,7 +115,7 @@ export const createGitBranch = async (
   branch: Branch,
   sha: Sha
 ): Promise<GitCreateRefResponseData> => {
-  const response = await client.git.createRef({
+  const response = await client().git.createRef({
     owner: organizationName(),
     repo,
     ref: `refs/heads/${branch}`,
@@ -138,7 +138,7 @@ export const createGitTree = async (
   tree: Tree[],
   baseTree: Sha
 ): Promise<GitCreateTreeResponseData> => {
-  const response = await client.git.createTree({
+  const response = await client().git.createTree({
     owner: organizationName(),
     repo,
     tree,
@@ -159,7 +159,7 @@ export const getCommit = async (
   repo: Repository,
   sha: Sha
 ): Promise<GitGetCommitResponseData> => {
-  const response = await readClient.git.getCommit({
+  const response = await readClient().git.getCommit({
     owner: organizationName(),
     repo,
     commit_sha: sha,

@@ -30,7 +30,7 @@ export const deleteBranch = async (
   branch: Branch
 ): Promise<void> => {
   try {
-    const response = await client.git.deleteRef({
+    const response = await client().git.deleteRef({
       owner: organizationName(),
       repo,
       ref: `heads/${branch}`,
@@ -60,7 +60,7 @@ export const getBranch = async (
   branch: Branch
 ): Promise<ReposGetBranchResponseData | undefined> => {
   try {
-    const response = await readClient.repos.getBranch({
+    const response = await readClient().repos.getBranch({
       owner: organizationName(),
       repo,
       branch,
