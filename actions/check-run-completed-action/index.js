@@ -60216,8 +60216,8 @@ var dist_node = __nccwpck_require__(5375);
 ;// CONCATENATED MODULE: ./src/services/Github/Client.ts
 
 
-const Client_client = new dist_node/* Octokit */.v({ auth: Inputs_githubWriteToken() });
-const Client_readClient = new dist_node/* Octokit */.v({ auth: githubReadToken() });
+const Client_client = () => new dist_node/* Octokit */.v({ auth: Inputs_githubWriteToken() });
+const Client_readClient = () => new dist_node/* Octokit */.v({ auth: githubReadToken() });
 const Client_clientForToken = (token) => {
     return new Octokit({ auth: token });
 };
@@ -60252,7 +60252,7 @@ const Git_TreeTypes = {
  * @returns {GitCreateBlobResponseData} The blob data.
  */
 const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.git.createBlob({
+    const response = yield client().git.createBlob({
         owner: organizationName(),
         repo,
         content,
@@ -60269,7 +60269,7 @@ const Git_createGitBlob = (repo, content) => Git_awaiter(void 0, void 0, void 0,
  * @returns {GitCreateCommitResponseData} The commit data.
  */
 const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.git.createCommit({
+    const response = yield client().git.createCommit({
         owner: organizationName(),
         repo,
         message,
@@ -60287,7 +60287,7 @@ const Git_createGitCommit = (repo, message, tree, parent) => Git_awaiter(void 0,
  * @returns {GitCreateRefResponseData} The branch data.
  */
 const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.git.createRef({
+    const response = yield client().git.createRef({
         owner: organizationName(),
         repo,
         ref: `refs/heads/${branch}`,
@@ -60304,7 +60304,7 @@ const Git_createGitBranch = (repo, branch, sha) => Git_awaiter(void 0, void 0, v
  * @returns {GitCreateTreeResponseData} The branch data.
  */
 const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.git.createTree({
+    const response = yield client().git.createTree({
         owner: organizationName(),
         repo,
         tree,
@@ -60320,7 +60320,7 @@ const Git_createGitTree = (repo, tree, baseTree) => Git_awaiter(void 0, void 0, 
  * @returns {GitGetCommitResponseData} The commit data.
  */
 const getCommit = (repo, sha) => Git_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_readClient.git.getCommit({
+    const response = yield Client_readClient().git.getCommit({
         owner: Inputs_organizationName(),
         repo,
         commit_sha: sha,
@@ -60349,7 +60349,7 @@ var Repository_awaiter = (undefined && undefined.__awaiter) || function (thisArg
  * @returns {ReposCompareCommitsResponseData} The diff data.
  */
 const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield readClient.repos.compareCommits({
+    const response = yield readClient().repos.compareCommits({
         owner: organizationName(),
         repo,
         base,
@@ -60364,7 +60364,7 @@ const Repository_compareCommits = (repo, base, head) => Repository_awaiter(void 
  * @returns {number}   The number of the next PR.
  */
 const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield readClient.pulls.list({
+    const response = yield readClient().pulls.list({
         direction: 'desc',
         owner: organizationName(),
         page: 1,
@@ -60385,7 +60385,7 @@ const Repository_getNextPullRequestNumber = (repo) => Repository_awaiter(void 0,
  * @returns {ReposGetResponseData} The repository data.
  */
 const Repository_getRepository = (repo) => Repository_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield readClient.repos.get({
+    const response = yield readClient().repos.get({
         owner: organizationName(),
         repo,
     });
@@ -60423,7 +60423,7 @@ var Branch_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _a
  */
 const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield client.git.deleteRef({
+        const response = yield client().git.deleteRef({
             owner: organizationName(),
             repo,
             ref: `heads/${branch}`,
@@ -60447,7 +60447,7 @@ const Branch_deleteBranch = (repo, branch) => Branch_awaiter(void 0, void 0, voi
  */
 const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield readClient.repos.getBranch({
+        const response = yield readClient().repos.getBranch({
             owner: organizationName(),
             repo,
             branch,
@@ -60517,7 +60517,7 @@ var PullRequest_awaiter = (undefined && undefined.__awaiter) || function (thisAr
  * @returns {IssuesAddAssigneesResponseData} The PR data.
  */
 const PullRequest_assignOwners = (repo, number, usernames) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.issues.addAssignees({
+    const response = yield client().issues.addAssignees({
         assignees: usernames,
         issue_number: number,
         owner: organizationName(),
@@ -60581,7 +60581,7 @@ const PullRequest_getIssueKey = (pr) => {
  */
 const PullRequest_getPullRequest = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield Client_readClient.pulls.get({
+        const response = yield Client_readClient().pulls.get({
             owner: Inputs_organizationName(),
             pull_number: number,
             repo,
@@ -60611,7 +60611,7 @@ const assignReviewers = (repo, number, usernames) => PullRequest_awaiter(void 0,
     }
     // We can't assign the PR owner as a reviewer.
     const reviewers = usernames.filter((username) => username !== pullRequest.user.login);
-    const response = yield client.pulls.requestReviewers({
+    const response = yield client().pulls.requestReviewers({
         reviewers,
         pull_number: number,
         owner: organizationName(),
@@ -60636,7 +60636,7 @@ const PullRequest_extractPullRequestNumber = (message) => parseInt(message.repla
  * @returns {PullsListCommitsResponseData} The pull request data.
  */
 const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield readClient.pulls.listCommits({
+    const response = yield readClient().pulls.listCommits({
         owner: organizationName(),
         pull_number: number,
         repo,
@@ -60661,7 +60661,7 @@ const PullRequest_pullRequestUrl = (repo, number) => `https://github.com/${organ
  * @returns {PullsCreateReviewResponseData} The review data.
  */
 const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.pulls.createReview({
+    const response = yield client().pulls.createReview({
         body,
         event,
         owner: organizationName(),
@@ -60679,7 +60679,7 @@ const reviewPullRequest = (repo, number, event, body) => PullRequest_awaiter(voi
  * @returns {PullsGetResponseData} The updated pull request data.
  */
 const PullRequest_updatePullRequest = (repo, number, attributes) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield client.pulls.update(Object.assign(Object.assign({}, attributes), { owner: organizationName(), pull_number: number, repo }));
+    const response = yield client().pulls.update(Object.assign(Object.assign({}, attributes), { owner: organizationName(), pull_number: number, repo }));
     return response.data;
 });
 
@@ -60717,7 +60717,7 @@ const mutuallyExclusiveLabels = [
  * @returns {IssuesSetLabelsResponseData} The PR data.
  */
 const Label_setLabels = (repo, number, labels) => Label_awaiter(void 0, void 0, void 0, function* () {
-    const response = yield Client_client.issues.setLabels({
+    const response = yield Client_client().issues.setLabels({
         issue_number: number,
         labels,
         owner: Inputs_organizationName(),
@@ -62551,7 +62551,7 @@ const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, vo
  */
 const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
     info('Searching for an existing release pull request...');
-    const response = yield readClient.pulls.list({
+    const response = yield readClient().pulls.list({
         base: MasterBranchName,
         direction: 'desc',
         head: `${organizationName()}:${ReleaseBranchName}`,
@@ -62642,7 +62642,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
  */
 const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
     const name = `${tagName} (${releaseName})`;
-    const response = yield client.repos.createRelease({
+    const response = yield client().repos.createRelease({
         body: releaseNotes,
         draft: false,
         name,

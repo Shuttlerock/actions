@@ -5,12 +5,12 @@ import {
 } from '@octokit/types'
 
 import { InProgressLabel, PleaseReviewLabel } from '@sr-services/Constants'
-import * as Client from '@sr-services/Github/Client'
 import { Repository } from '@sr-services/Github/Git'
 import { addLabels, setLabels } from '@sr-services/Github/Label'
 import * as PullRequest from '@sr-services/Github/PullRequest'
 import { organizationName } from '@sr-services/Inputs'
 import {
+  mockGithubClient,
   mockGithubPullRequest,
   mockIssuesSetLabelsResponseData,
 } from '@sr-tests/Mocks'
@@ -20,6 +20,10 @@ jest.mock('@sr-services/Github/PullRequest', () => ({
 }))
 
 const repo = 'my-repo'
+
+jest.mock('@sr-services/Github/Client', () => ({
+  client: () => mockGithubClient,
+}))
 
 describe('PullRequest', () => {
   describe('addLabels', () => {
@@ -33,7 +37,7 @@ describe('PullRequest', () => {
           Promise.resolve(mockGithubPullRequest)
         )
       githubSetLabelsSpy = jest
-        .spyOn(Client.client.issues, 'setLabels')
+        .spyOn(mockGithubClient.issues, 'setLabels')
         .mockImplementation(
           (_args?: {
             issue_number: number
@@ -82,7 +86,7 @@ describe('PullRequest', () => {
   describe('setLabels', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.client.issues, 'setLabels')
+        .spyOn(mockGithubClient.issues, 'setLabels')
         .mockImplementation(
           (_args?: {
             issue_number: number

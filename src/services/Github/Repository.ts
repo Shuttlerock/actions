@@ -20,7 +20,7 @@ export const compareCommits = async (
   base: Sha,
   head: Sha
 ): Promise<ReposCompareCommitsResponseData> => {
-  const response = await readClient.repos.compareCommits({
+  const response = await readClient().repos.compareCommits({
     owner: organizationName(),
     repo,
     base,
@@ -39,7 +39,7 @@ export const compareCommits = async (
 export const getNextPullRequestNumber = async (
   repo: Repository
 ): Promise<number> => {
-  const response = await readClient.pulls.list({
+  const response = await readClient().pulls.list({
     direction: 'desc',
     owner: organizationName(),
     page: 1,
@@ -65,7 +65,7 @@ export const getNextPullRequestNumber = async (
 export const getRepository = async (
   repo: Repository
 ): Promise<ReposGetResponseData> => {
-  const response = await readClient.repos.get({
+  const response = await readClient().repos.get({
     owner: organizationName(),
     repo,
   })

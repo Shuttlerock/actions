@@ -7,7 +7,6 @@ import {
   OctokitResponse,
 } from '@octokit/types'
 
-import { client, readClient } from '@sr-services/Github/Client'
 import {
   Branch,
   createGitBlob,
@@ -22,14 +21,20 @@ import {
   TreeTypes,
 } from '@sr-services/Github/Git'
 import { organizationName } from '@sr-services/Inputs'
+import { mockGithubClient, mockReadClient } from '@sr-tests/Mocks'
 
 const repo = 'my-repo'
+
+jest.mock('@sr-services/Github/Client', () => ({
+  client: () => mockGithubClient,
+  readClient: () => mockReadClient,
+}))
 
 describe('Git', () => {
   describe('createGitBlob', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.git, 'createBlob')
+        .spyOn(mockGithubClient.git, 'createBlob')
         .mockImplementation(
           (_args?: { owner: string; repo: Repository; content: string }) =>
             Promise.resolve({
@@ -50,7 +55,7 @@ describe('Git', () => {
   describe('createGitCommit', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.git, 'createCommit')
+        .spyOn(mockGithubClient.git, 'createCommit')
         .mockImplementation(
           (_args?: {
             owner: string
@@ -84,7 +89,7 @@ describe('Git', () => {
   describe('createGitBranch', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.git, 'createRef')
+        .spyOn(mockGithubClient.git, 'createRef')
         .mockImplementation(
           (_args?: {
             owner: string
@@ -111,7 +116,7 @@ describe('Git', () => {
   describe('createGitTree', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.git, 'createTree')
+        .spyOn(mockGithubClient.git, 'createTree')
         .mockImplementation(
           (_args?: {
             owner: string
@@ -146,7 +151,7 @@ describe('Git', () => {
   describe('getCommit', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(readClient.git, 'getCommit')
+        .spyOn(mockReadClient.git, 'getCommit')
         .mockImplementation(
           (_args?: { owner: string; repo: Repository; commit_sha: string }) =>
             Promise.resolve({
