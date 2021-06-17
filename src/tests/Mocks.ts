@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import {
   IssuesAddAssigneesResponseData,
   IssuesAddLabelsResponseData,
@@ -65,6 +66,10 @@ export const mockGithubBranch = {
   name: 'my-branch',
   sha: 'branch-sha',
 } as unknown as ReposGetBranchResponseData
+
+export const mockGithubClient = new Octokit({ auth: 'my-token' })
+
+export const mockReadClient = new Octokit({ auth: 'my-token' })
 
 export const mockGithubCompareCommits = {
   commits: [mockGitCommit],

@@ -5,7 +5,6 @@ import {
   ReposGetResponseData,
 } from '@octokit/types'
 
-import { readClient } from '@sr-services/Github/Client'
 import { Repository, Sha } from '@sr-services/Github/Git'
 import {
   compareCommits,
@@ -14,15 +13,23 @@ import {
   repositoryUrl,
 } from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
-import { mockGitCommit, mockGithubRepository } from '@sr-tests/Mocks'
+import {
+  mockGitCommit,
+  mockGithubRepository,
+  mockReadClient,
+} from '@sr-tests/Mocks'
 
 const repo = mockGithubRepository.name
+
+jest.mock('@sr-services/Github/Client', () => ({
+  readClient: () => mockReadClient,
+}))
 
 describe('Repository', () => {
   describe('compareCommits', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(readClient.repos, 'compareCommits')
+        .spyOn(mockReadClient.repos, 'compareCommits')
         .mockImplementation(
           (_args?: { base: Sha; head: Sha; owner: string; repo: Repository }) =>
             Promise.resolve({
@@ -46,7 +53,7 @@ describe('Repository', () => {
   describe('getNextPullRequestNumber', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(readClient.pulls, 'list')
+        .spyOn(mockReadClient.pulls, 'list')
         .mockImplementation(
           (_args?: {
             direction?: string
@@ -82,7 +89,7 @@ describe('Repository', () => {
   describe('getRepository', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(readClient.repos, 'get')
+        .spyOn(mockReadClient.repos, 'get')
         .mockImplementation((_args?: { owner: string; repo: Repository }) =>
           Promise.resolve({
             data: mockGithubRepository,

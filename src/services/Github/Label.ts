@@ -42,7 +42,7 @@ export const setLabels = async (
   number: number,
   labels?: string[]
 ): Promise<IssuesSetLabelsResponseData> => {
-  const response = await client.issues.setLabels({
+  const response = await client().issues.setLabels({
     issue_number: number,
     labels,
     owner: organizationName(),
