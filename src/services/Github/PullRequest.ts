@@ -29,7 +29,7 @@ export const assignOwners = async (
   number: number,
   usernames: string[]
 ): Promise<IssuesAddAssigneesResponseData> => {
-  const response = await client.issues.addAssignees({
+  const response = await client().issues.addAssignees({
     assignees: usernames,
     issue_number: number,
     owner: organizationName(),
@@ -113,7 +113,7 @@ export const getPullRequest = async (
   number: number
 ): Promise<PullsGetResponseData | undefined> => {
   try {
-    const response = await readClient.pulls.get({
+    const response = await readClient().pulls.get({
       owner: organizationName(),
       pull_number: number,
       repo,
@@ -156,7 +156,7 @@ export const assignReviewers = async (
     (username: string) => username !== pullRequest.user.login
   )
 
-  const response = await client.pulls.requestReviewers({
+  const response = await client().pulls.requestReviewers({
     reviewers,
     pull_number: number,
     owner: organizationName(),
@@ -188,7 +188,7 @@ export const listPullRequestCommits = async (
   repo: Repository,
   number: number
 ): Promise<PullsListCommitsResponseData | undefined> => {
-  const response = await readClient.pulls.listCommits({
+  const response = await readClient().pulls.listCommits({
     owner: organizationName(),
     pull_number: number,
     repo,
@@ -222,7 +222,7 @@ export const reviewPullRequest = async (
   event: 'APPROVE' | 'COMMENT' | 'REQUEST_CHANGES',
   body: string
 ): Promise<PullsCreateReviewResponseData> => {
-  const response = await client.pulls.createReview({
+  const response = await client().pulls.createReview({
     body,
     event,
     owner: organizationName(),
@@ -246,7 +246,7 @@ export const updatePullRequest = async (
   number: number,
   attributes: { [key: string]: string }
 ): Promise<PullsGetResponseData> => {
-  const response = await client.pulls.update({
+  const response = await client().pulls.update({
     ...attributes,
     owner: organizationName(),
     pull_number: number,

@@ -15,7 +15,6 @@ import {
 } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Branch from '@sr-services/Github/Branch'
-import { client, readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Label from '@sr-services/Github/Label'
 import * as PullRequest from '@sr-services/Github/PullRequest'
@@ -29,11 +28,13 @@ import * as Slack from '@sr-services/Slack'
 import {
   mockCredentials,
   mockGitCommit,
+  mockGithubClient,
   mockGithubCompareCommits,
   mockGithubBranch,
   mockGithubPullRequest,
   mockGithubRelease,
   mockGithubRepository,
+  mockReadClient,
 } from '@sr-tests/Mocks'
 
 const email = 'user@example.com'
@@ -41,6 +42,11 @@ const email = 'user@example.com'
 jest.mock('@sr-services/Github/Branch', () => ({
   deleteBranch: jest.fn(),
   getBranch: jest.fn(),
+}))
+
+jest.mock('@sr-services/Github/Client', () => ({
+  client: () => mockGithubClient,
+  readClient: () => mockReadClient,
 }))
 
 jest.mock('@sr-services/Credentials', () => ({
@@ -117,7 +123,7 @@ describe('Release', () => {
       infoSpy = jest
         .spyOn(core, 'info')
         .mockImplementation((_message: string | Error) => undefined)
-      listPullsSpy = jest.spyOn(readClient.pulls, 'list').mockReturnValue(
+      listPullsSpy = jest.spyOn(mockReadClient.pulls, 'list').mockReturnValue(
         Promise.resolve({
           data: [mockGithubPullRequest],
         } as unknown as OctokitResponse<PullsListResponseData>)
@@ -289,11 +295,13 @@ describe('Release', () => {
   describe('createReleaseTag', () => {
     it('calls the Github API', async () => {
       const repo = 'my-repo'
-      const spy = jest.spyOn(client.repos, 'createRelease').mockReturnValue(
-        Promise.resolve({
-          data: mockGithubRelease,
-        } as unknown as OctokitResponse<ReposCreateReleaseResponseData>)
-      )
+      const spy = jest
+        .spyOn(mockGithubClient.repos, 'createRelease')
+        .mockReturnValue(
+          Promise.resolve({
+            data: mockGithubRelease,
+          } as unknown as OctokitResponse<ReposCreateReleaseResponseData>)
+        )
       const result = await createReleaseTag(
         repo,
         mockGithubRelease.tag_name,

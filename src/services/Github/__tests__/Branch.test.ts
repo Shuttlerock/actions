@@ -8,14 +8,22 @@ import {
 } from '@octokit/types'
 
 import * as Branch from '@sr-services/Github/Branch'
-import { client, readClient } from '@sr-services/Github/Client'
 import * as Git from '@sr-services/Github/Git'
 import * as Repository from '@sr-services/Github/Repository'
 import { organizationName } from '@sr-services/Inputs'
-import { mockGithubBranch } from '@sr-tests/Mocks'
+import {
+  mockGithubBranch,
+  mockGithubClient,
+  mockReadClient,
+} from '@sr-tests/Mocks'
 
 const repo = 'my-repo'
 const branch = 'my-branch'
+
+jest.mock('@sr-services/Github/Client', () => ({
+  client: () => mockGithubClient,
+  readClient: () => mockReadClient,
+}))
 
 describe('Branch', () => {
   describe('getBranch', () => {
@@ -32,7 +40,7 @@ describe('Branch', () => {
 
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(readClient.repos, 'getBranch')
+        .spyOn(mockReadClient.repos, 'getBranch')
         .mockImplementation((_args?: GetBranchParams) =>
           Promise.resolve({
             data: mockGithubBranch,
@@ -46,7 +54,7 @@ describe('Branch', () => {
 
     it("returns undefined if the branch can't be found", async () => {
       const spy = jest
-        .spyOn(readClient.repos, 'getBranch')
+        .spyOn(mockReadClient.repos, 'getBranch')
         .mockImplementation((_args?: GetBranchParams) => {
           throw new Error('Branch not found')
         })
@@ -171,7 +179,7 @@ describe('Branch', () => {
 
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(client.git, 'deleteRef')
+        .spyOn(mockGithubClient.git, 'deleteRef')
         .mockImplementation((_args?: DeleteBranchParams) =>
           Promise.resolve({ status: 204 } as unknown as OctokitResponse<void>)
         )
@@ -183,7 +191,7 @@ describe('Branch', () => {
 
     it("returns undefined if the branch can't be found", async () => {
       const spy = jest
-        .spyOn(client.git, 'deleteRef')
+        .spyOn(mockGithubClient.git, 'deleteRef')
         .mockImplementation((_args?: DeleteBranchParams) => {
           throw new Error('Branch not found')
         })

@@ -10,7 +10,6 @@ import {
 } from '@octokit/types'
 import Schema from '@octokit/webhooks-definitions/schema'
 
-import * as Client from '@sr-services/Github/Client'
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
   assignOwners,
@@ -27,12 +26,14 @@ import {
 import { organizationName } from '@sr-services/Inputs'
 import {
   mockGitCommit,
+  mockGithubClient,
   mockGithubPullRequest,
   mockGithubPullRequestCreateResponse,
   mockGithubPullRequestReviewResponse,
   mockGithubPullRequestUpdateResponse,
   mockIssuesAddAssigneesResponseData,
   mockPullsRequestReviewersResponseData,
+  mockReadClient,
 } from '@sr-tests/Mocks'
 
 interface GetPullParams {
@@ -49,11 +50,17 @@ const fetchPullParams = {
   repo,
 }
 
+jest.mock('@sr-services/Github/Client', () => ({
+  client: () => mockGithubClient,
+  clientForToken: () => mockGithubClient,
+  readClient: () => mockReadClient,
+}))
+
 describe('PullRequest', () => {
   describe('assignOwners', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.client.issues, 'addAssignees')
+        .spyOn(mockGithubClient.issues, 'addAssignees')
         .mockImplementation(
           (_args?: {
             assignees?: string[]
@@ -80,14 +87,14 @@ describe('PullRequest', () => {
   describe('assignReviewers', () => {
     it('calls the Github API', async () => {
       const getPullRequestSpy = jest
-        .spyOn(Client.readClient.pulls, 'get')
+        .spyOn(mockReadClient.pulls, 'get')
         .mockImplementation((_args?: GetPullParams) =>
           Promise.resolve({
             data: mockGithubPullRequest,
           } as OctokitResponse<PullsGetResponseData>)
         )
       const requestReviewersSpy = jest
-        .spyOn(Client.client.pulls, 'requestReviewers')
+        .spyOn(mockGithubClient.pulls, 'requestReviewers')
         .mockImplementation(
           (_args?: {
             reviewers?: string[]
@@ -137,11 +144,8 @@ describe('PullRequest', () => {
 
   describe('createPullRequest', () => {
     it('calls the Github API', async () => {
-      const clientSpy = jest
-        .spyOn(Client, 'clientForToken')
-        .mockImplementation((_token: string) => Client.client)
       const spy = jest
-        .spyOn(Client.client.pulls, 'create')
+        .spyOn(mockGithubClient.pulls, 'create')
         .mockImplementation(
           (_args?: {
             base: Branch
@@ -174,7 +178,6 @@ describe('PullRequest', () => {
         title: 'Add a Widget',
       })
       expect(result.id).toEqual(1234)
-      clientSpy.mockRestore()
       spy.mockRestore()
     })
   })
@@ -208,7 +211,7 @@ describe('PullRequest', () => {
   describe('getPullRequest', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.readClient.pulls, 'get')
+        .spyOn(mockReadClient.pulls, 'get')
         .mockImplementation((_args?: GetPullParams) =>
           Promise.resolve({
             data: mockGithubPullRequest,
@@ -222,7 +225,7 @@ describe('PullRequest', () => {
 
     it("returns undefined if the branch can't be found", async () => {
       const spy = jest
-        .spyOn(Client.readClient.pulls, 'get')
+        .spyOn(mockReadClient.pulls, 'get')
         .mockImplementation((_args?: GetPullParams) => {
           throw new Error('Pull request not found')
         })
@@ -236,7 +239,7 @@ describe('PullRequest', () => {
   describe('listPullRequestCommits', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.readClient.pulls, 'listCommits')
+        .spyOn(mockReadClient.pulls, 'listCommits')
         .mockReturnValue(
           Promise.resolve({
             data: [mockGitCommit],
@@ -263,7 +266,7 @@ describe('PullRequest', () => {
   describe('reviewPullRequest', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.client.pulls, 'createReview')
+        .spyOn(mockGithubClient.pulls, 'createReview')
         .mockReturnValue(
           Promise.resolve({
             data: mockGithubPullRequestReviewResponse,
@@ -285,7 +288,7 @@ describe('PullRequest', () => {
   describe('updatePullRequest', () => {
     it('calls the Github API', async () => {
       const spy = jest
-        .spyOn(Client.client.pulls, 'update')
+        .spyOn(mockGithubClient.pulls, 'update')
         .mockImplementation(
           (_args?: {
             owner: string
