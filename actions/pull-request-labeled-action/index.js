@@ -142,7 +142,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
@@ -228,6 +228,21 @@ function getInput(name, options) {
     return val.trim();
 }
 exports.getInput = getInput;
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    return inputs;
+}
+exports.getMultilineInput = getMultilineInput;
 /**
  * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
  * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
@@ -62701,7 +62716,7 @@ var pullRequestLabeled_awaiter = (undefined && undefined.__awaiter) || function 
  *
  * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
  */
-const pullRequestLabeled = (payload) => pullRequestLabeled_awaiter(void 0, void 0, void 0, function* () {
+const perform = (payload) => pullRequestLabeled_awaiter(void 0, void 0, void 0, function* () {
     const { label, pull_request: pullRequest, repository, sender } = payload;
     if (sender.login === Constants_GithubWriteUser) {
         (0,core.info)(`This label was added by @${Constants_GithubWriteUser} - nothing to do`);
@@ -62758,6 +62773,28 @@ const pullRequestLabeled = (payload) => pullRequestLabeled_awaiter(void 0, void 
         labels = [...labels, PleaseReviewLabel];
     }
     yield Label_addLabels(repository.name, pullRequest.number, labels);
+});
+/**
+ * Wrapper for the perform method, which allows us to catch fatal errors that we don't care about.
+ *
+ * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
+ */
+const pullRequestLabeled = (payload) => pullRequestLabeled_awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield perform(payload);
+    }
+    catch (err) {
+        if (err.message.match(/^Input required and not supplied: /)) {
+            // See https://shuttlerock.atlassian.net/browse/SECURITY-436
+            // Do nothing here - this seems to be a bug in Github Actions, and we don't
+            // want to cause a test suite failure for the sake of adding a label.
+            (0,core.error)('Missing Github secret:');
+            (0,core.error)(err.message);
+        }
+        else {
+            throw err;
+        }
+    }
 });
 
 ;// CONCATENATED MODULE: ./src/actions/pull-request-labeled-action/index.ts

@@ -1,4 +1,4 @@
-import { info } from '@actions/core'
+import { error, info } from '@actions/core'
 import Schema from '@octokit/webhooks-definitions/schema'
 import isNil from 'lodash/isNil'
 
@@ -25,7 +25,7 @@ import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack'
  *
  * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
  */
-export const pullRequestLabeled = async (
+const perform = async (
   payload: Schema.PullRequestLabeledEvent
 ): Promise<void> => {
   const { label, pull_request: pullRequest, repository, sender } = payload
@@ -104,4 +104,27 @@ export const pullRequestLabeled = async (
   }
 
   await addLabels(repository.name, pullRequest.number, labels)
+}
+
+/**
+ * Wrapper for the perform method, which allows us to catch fatal errors that we don't care about.
+ *
+ * @param {WebhookPayloadPullRequest} payload The JSON payload from Github sent when a pull request is labeled.
+ */
+export const pullRequestLabeled = async (
+  payload: Schema.PullRequestLabeledEvent
+): Promise<void> => {
+  try {
+    await perform(payload)
+  } catch (err) {
+    if (err.message.match(/^Input required and not supplied: /)) {
+      // See https://shuttlerock.atlassian.net/browse/SECURITY-436
+      // Do nothing here - this seems to be a bug in Github Actions, and we don't
+      // want to cause a test suite failure for the sake of adding a label.
+      error('Missing Github secret:')
+      error(err.message)
+    } else {
+      throw err
+    }
+  }
 }
