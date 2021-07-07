@@ -1,5 +1,6 @@
 import { error, info } from '@actions/core'
 import Schema from '@octokit/webhooks-definitions/schema'
+import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
 import {
@@ -18,6 +19,7 @@ import {
   assignReviewers,
   pullRequestUrl,
 } from '@sr-services/Github'
+import { githubWriteToken } from '@sr-services/Inputs'
 import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack'
 
 /**
@@ -28,6 +30,15 @@ import { sendErrorMessage, sendUserMessage } from '@sr-services/Slack'
 const perform = async (
   payload: Schema.PullRequestLabeledEvent
 ): Promise<void> => {
+  // Dependabot no longer gives us any inputs to work with. In this case we should just fail gracefully.
+  // @see https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+  if (isEmpty(githubWriteToken())) {
+    info(
+      'Organization name was not provided. Perhaps this is a dependabot PR? Giving up...'
+    )
+    return
+  }
+
   const { label, pull_request: pullRequest, repository, sender } = payload
 
   if (sender.login === GithubWriteUser) {
