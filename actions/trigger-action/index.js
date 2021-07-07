@@ -61516,13 +61516,13 @@ var isNil_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isNil);
 ;// CONCATENATED MODULE: ./src/services/Inputs.ts
 
 // The base URL to use when connecting to the internal credentials API.
-const credentialsApiPrefix = () => (0,core.getInput)('credentials-api-prefix', { required: true });
+const credentialsApiPrefix = () => (0,core.getInput)('credentials-api-prefix', { required: false });
 // The secret to use when connecting to the internal credentials API.
-const credentialsApiSecret = () => (0,core.getInput)('credentials-api-secret', { required: true });
+const credentialsApiSecret = () => (0,core.getInput)('credentials-api-secret', { required: false });
 // Token with read access to Github - provided by Github.
-const githubReadToken = () => (0,core.getInput)('repo-token', { required: true });
+const githubReadToken = () => (0,core.getInput)('repo-token', { required: false });
 // Token with write access to Github - set in organization secrets.
-const githubWriteToken = () => (0,core.getInput)('write-token', { required: true });
+const githubWriteToken = () => (0,core.getInput)('write-token', { required: false });
 // The email address to use when connecting to the Jira API.
 const jiraEmail = () => (0,core.getInput)('jira-email', { required: false });
 // The host to use when connecting to the Jira API.
@@ -61530,11 +61530,11 @@ const jiraHost = () => (0,core.getInput)('jira-host', { required: false });
 // The API token to use when connecting to the Jira API.
 const jiraToken = () => (0,core.getInput)('jira-token', { required: false });
 // The Github organization name.
-const Inputs_organizationName = () => (0,core.getInput)('organization-name', { required: true });
+const Inputs_organizationName = () => (0,core.getInput)('organization-name', { required: false });
 // ID of the Slack channel to post errors to, if we don't know where else to send them.
-const slackErrorChannelId = () => (0,core.getInput)('slack-error-channel-id', { required: true });
+const slackErrorChannelId = () => (0,core.getInput)('slack-error-channel-id', { required: false });
 // Token with write access to Slack.
-const slackToken = () => (0,core.getInput)('slack-token', { required: true });
+const slackToken = () => (0,core.getInput)('slack-token', { required: false });
 
 // EXTERNAL MODULE: ./node_modules/@slack/web-api/dist/index.js
 var dist = __nccwpck_require__(60431);
