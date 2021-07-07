@@ -1,5 +1,6 @@
 import { info } from '@actions/core'
 import Schema from '@octokit/webhooks-definitions/schema'
+import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
 import { PleaseReviewLabel } from '@sr-services/Constants'
@@ -10,6 +11,7 @@ import {
   assignReviewers,
   getIssueKey,
 } from '@sr-services/Github'
+import { githubWriteToken } from '@sr-services/Inputs'
 import { getReviewColumn, getIssue, setIssueStatus } from '@sr-services/Jira'
 
 /**
@@ -21,6 +23,15 @@ export const pullRequestReadyForReview = async (
   payload: Schema.PullRequestEvent
 ): Promise<void> => {
   const { pull_request: pullRequest, repository } = payload
+
+  // Dependabot no longer gives us any inputs to work with. In this case we should just fail gracefully.
+  // @see https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+  if (isEmpty(githubWriteToken())) {
+    info(
+      'Organization name was not provided. Perhaps this is a dependabot PR? Giving up...'
+    )
+    return
+  }
 
   info('Fetching repository details...')
   const repo = await fetchRepository(repository.name)
