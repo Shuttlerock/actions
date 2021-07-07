@@ -35363,7 +35363,7 @@ module.exports = isBuffer;
 
 /***/ }),
 
-/***/ 2384:
+/***/ 3912:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var baseKeys = __nccwpck_require__(7164),
@@ -39559,7 +39559,7 @@ module.exports = {
 
 
 var stringify = __nccwpck_require__(9954);
-var parse = __nccwpck_require__(3912);
+var parse = __nccwpck_require__(316);
 var formats = __nccwpck_require__(4907);
 
 module.exports = {
@@ -39571,7 +39571,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3912:
+/***/ 316:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -60106,6 +60106,9 @@ __nccwpck_require__.d(__webpack_exports__, {
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
+// EXTERNAL MODULE: ./node_modules/lodash/isEmpty.js
+var lodash_isEmpty = __nccwpck_require__(3912);
+var isEmpty_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isEmpty);
 // EXTERNAL MODULE: ./node_modules/lodash/isNil.js
 var lodash_isNil = __nccwpck_require__(4977);
 var isNil_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isNil);
@@ -61170,8 +61173,6 @@ const Project_getProject = (projectKey) => Project_awaiter(void 0, void 0, void 
     return data;
 });
 
-// EXTERNAL MODULE: ./node_modules/lodash/isEmpty.js
-var lodash_isEmpty = __nccwpck_require__(2384);
 // EXTERNAL MODULE: external "querystring"
 var external_querystring_ = __nccwpck_require__(1191);
 ;// CONCATENATED MODULE: ./src/services/Jira/Release.ts
@@ -62693,6 +62694,8 @@ var pullRequestReadyForReview_awaiter = (undefined && undefined.__awaiter) || fu
 
 
 
+
+
 /**
  * Runs whenever a pull request is marked as 'ready for review'.
  *
@@ -62700,6 +62703,12 @@ var pullRequestReadyForReview_awaiter = (undefined && undefined.__awaiter) || fu
  */
 const pullRequestReadyForReview = (payload) => pullRequestReadyForReview_awaiter(void 0, void 0, void 0, function* () {
     const { pull_request: pullRequest, repository } = payload;
+    // Dependabot no longer gives us any inputs to work with. In this case we should just fail gracefully.
+    // @see https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+    if (isEmpty_default()(Inputs_githubWriteToken())) {
+        (0,core.info)('Organization name was not provided. Perhaps this is a dependabot PR? Giving up...');
+        return;
+    }
     (0,core.info)('Fetching repository details...');
     const repo = yield Credentials_fetchRepository(repository.name);
     const reviewers = repo.reviewers.map((user) => user.github_username);
