@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.4.0",
-    "@actions/exec": "^1.0.4",
+    "@actions/exec": "^1.1.0",
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
     "@slack/web-api": "^6.2.4",
@@ -58,7 +58,7 @@
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.23",
     "@types/jira-client": "^6.13.1",
-    "@types/lodash": "^4.14.170",
+    "@types/lodash": "^4.14.171",
     "@types/mustache": "^4.1.1",
     "@types/node": "^15.12.2",
     "@types/node-fetch": "^2.5.10",
