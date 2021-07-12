@@ -554,6 +554,20 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@humanwhocodes/config-array@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.5.0.tgz#1407967d4c6eecd7388f83acf1eaf4d0c6e58ef9"
+  integrity sha512-FagtKFz74XrTl7y6HCzQpwDfXP0yhxe9lHLD1UZxjvZIcbyRz8zTFF/yYNfSfzU414eDwZ1SrO0Qvtyf+wFMQg==
+  dependencies:
+    "@humanwhocodes/object-schema" "^1.2.0"
+    debug "^4.1.1"
+    minimatch "^3.0.4"
+
+"@humanwhocodes/object-schema@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
+  integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -971,24 +985,24 @@
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-definitions/-/webhooks-definitions-3.67.3.tgz#d2a905a90b04af8111982d0c13658a49fc4eecb9"
   integrity sha512-do4Z1r2OVhuI0ihJhQ8Hg+yPWnBYEBNuFNCrvtPKoYT1w81jD7pBXgGe86lYuuNirkDHb0Nxt+zt4O5GiFJfgA==
 
-"@octokit/webhooks-methods@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-1.0.0.tgz#274799138725c89a3466e3af2026afe755f28c4b"
-  integrity sha512-pVceMQcj9SZ5p2RkemL0TuuPdGULNQj9F3Pq1cNM1xH+Kst1VNt0dj3PEGZRZV473njrDnYdi/OG4wWY9TLbbA==
+"@octokit/webhooks-methods@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-2.0.0.tgz#1108b9ea661ca6c81e4a8bfa63a09eb27d5bc2db"
+  integrity sha512-35cfQ4YWlnZnmZKmIxlGPUPLtbkF8lr/A/1Sk1eC0ddLMwQN06dOuLc+dI3YLQS+T+MoNt3DIQ0NynwgKPilig==
 
-"@octokit/webhooks-types@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.0.0.tgz#12f4ac6537ab10ff5e323fd25247f118a2322031"
-  integrity sha512-pRyAl18MRe+bFZyLW3lNIIj/DxLqclUakvkqYw/KjJxTg9+WNOUBKwSc+ZJETeCIxbTDUfbkTrrDXS2HaLa9Bw==
+"@octokit/webhooks-types@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.1.0.tgz#d27f8ef496e788d60dab8790155fdb204ca720e7"
+  integrity sha512-KQtzFYhhi3k3cGCeqo/PSEhmLZO/4DCtPSgeDG8M9De84fIvTvJbbt2ApeLgzNd6YNAbPjfbdxx8dRkc7jy5uA==
 
-"@octokit/webhooks@^9.8.0":
-  version "9.8.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.8.0.tgz#a1cac7acae43f43daabcf7cad077f22a532d85b9"
-  integrity sha512-zK7zRXDMU+8qsHP8TvNRRUOba/JXpp3Pf44liSoz3xbZUV98e4pxz2j4ZDuowpDYivI+a32w65NfWzZIHiunsQ==
+"@octokit/webhooks@^9.9.0":
+  version "9.9.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.9.0.tgz#13a9284fb649aa86c3204532406890defb12c90d"
+  integrity sha512-qoXPkYzttB/23zcsMI1PzAjgEkwtPyJrsln4L4O8mkdSqfNcXHfD8dZQVR5GUveDT0VwFAYuNaGv8CfyN1hPAg==
   dependencies:
     "@octokit/request-error" "^2.0.2"
-    "@octokit/webhooks-methods" "^1.0.0"
-    "@octokit/webhooks-types" "4.0.0"
+    "@octokit/webhooks-methods" "^2.0.0"
+    "@octokit/webhooks-types" "4.1.0"
     aggregate-error "^3.1.0"
 
 "@sinonjs/commons@^1.7.0":
@@ -2576,13 +2590,14 @@ eslint-visitor-keys@^2.0.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-2.0.0.tgz#21fdc8fbcd9c795cc0321f0563702095751511a8"
   integrity sha512-QudtT6av5WXels9WjIM7qz1XD1cWGvX4gGXvp/zBn9nXG02D0utdU3Em2m/QjTnrsk6bBjmCygl3rmj118msQQ==
 
-eslint@^7.28.0:
-  version "7.28.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.28.0.tgz#435aa17a0b82c13bb2be9d51408b617e49c1e820"
-  integrity sha512-UMfH0VSjP0G4p3EWirscJEQ/cHqnT/iuH6oNZOB94nBjWbMnhGEPxsZm1eyIW0C/9jLI0Fow4W5DXLjEI7mn1g==
+eslint@^7.30.0:
+  version "7.30.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.30.0.tgz#6d34ab51aaa56112fd97166226c9a97f505474f8"
+  integrity sha512-VLqz80i3as3NdloY44BQSJpFw534L9Oh+6zJOUaViV4JPd+DaHwutqP7tcpkW3YiXbK6s05RZl7yl7cQn+lijg==
   dependencies:
     "@babel/code-frame" "7.12.11"
     "@eslint/eslintrc" "^0.4.2"
+    "@humanwhocodes/config-array" "^0.5.0"
     ajv "^6.10.0"
     chalk "^4.0.0"
     cross-spawn "^7.0.2"

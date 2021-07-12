@@ -53,7 +53,7 @@
     "unique-names-generator": "^4.5.0"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^9.8.0",
+    "@octokit/webhooks": "^9.9.0",
     "@octokit/webhooks-definitions": "^3.67.2",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^26.0.24",
@@ -64,7 +64,7 @@
     "@types/node-fetch": "^2.5.10",
     "@typescript-eslint/parser": "^4.28.1",
     "@vercel/ncc": "0.28.5",
-    "eslint": "^7.28.0",
+    "eslint": "^7.30.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-alias": "^1.1.2",
