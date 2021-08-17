@@ -990,19 +990,19 @@
   resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-2.0.0.tgz#1108b9ea661ca6c81e4a8bfa63a09eb27d5bc2db"
   integrity sha512-35cfQ4YWlnZnmZKmIxlGPUPLtbkF8lr/A/1Sk1eC0ddLMwQN06dOuLc+dI3YLQS+T+MoNt3DIQ0NynwgKPilig==
 
-"@octokit/webhooks-types@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.1.0.tgz#d27f8ef496e788d60dab8790155fdb204ca720e7"
-  integrity sha512-KQtzFYhhi3k3cGCeqo/PSEhmLZO/4DCtPSgeDG8M9De84fIvTvJbbt2ApeLgzNd6YNAbPjfbdxx8dRkc7jy5uA==
+"@octokit/webhooks-types@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.3.0.tgz#a3810cedeeb48305fed4273e88387d0572c64fdc"
+  integrity sha512-Hp2o49WSiLHLwp8a9aQD9qK+uoa45Q/gnJG7a+EEZ4rLk5oDVCzlMbtsezxUPXG7/eLj05GciCzdzgJWANugEA==
 
-"@octokit/webhooks@^9.9.0":
-  version "9.9.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.9.0.tgz#13a9284fb649aa86c3204532406890defb12c90d"
-  integrity sha512-qoXPkYzttB/23zcsMI1PzAjgEkwtPyJrsln4L4O8mkdSqfNcXHfD8dZQVR5GUveDT0VwFAYuNaGv8CfyN1hPAg==
+"@octokit/webhooks@^9.12.0":
+  version "9.12.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.12.0.tgz#9d831e4ff5d69efabca09a1044bd832e907a0252"
+  integrity sha512-B/KK96mmmRju3lK8jRe78z2h4rSAAysT+rcT5Aw5aIXueOOHsFFgRNQF6GB+/0xwm9KkpMY96Z9vj2gwyOiatA==
   dependencies:
     "@octokit/request-error" "^2.0.2"
     "@octokit/webhooks-methods" "^2.0.0"
-    "@octokit/webhooks-types" "4.1.0"
+    "@octokit/webhooks-types" "4.3.0"
     aggregate-error "^3.1.0"
 
 "@sinonjs/commons@^1.7.0":
@@ -4297,10 +4297,10 @@ jest@^26.6.3:
     import-local "^3.0.2"
     jest-cli "^26.6.3"
 
-jira-client@^6.21.0:
-  version "6.21.1"
-  resolved "https://registry.yarnpkg.com/jira-client/-/jira-client-6.21.1.tgz#34ad42ada04432e1490f2058c901ddd7e6dd3452"
-  integrity sha512-I9HyNNEOA7ZMJO7uLSyEZKk4oXkYct+kspy9/tbBOOvK9xsZI034p1GxGdTpyV6LyRB/Rd5IRJCS4IpDp6EzZw==
+jira-client@^6.22.0:
+  version "6.22.0"
+  resolved "https://registry.yarnpkg.com/jira-client/-/jira-client-6.22.0.tgz#99d64ca6a7eb98074cbaf94c5b446e14d8b9d950"
+  integrity sha512-GpwCf66/d5oN9iTMarBxAe+BYXskg5Z8RY2lUagVvPh23kV2dj50pZ/u9KzKQMERRYvGgLAUmtRct4t0NH5bOA==
   dependencies:
     "@babel/runtime" "^7.6.0"
     request "^2.88.0"
@@ -4507,17 +4507,16 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
   integrity sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
 
-lint-staged@^11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-11.0.0.tgz#24d0a95aa316ba28e257f5c4613369a75a10c712"
-  integrity sha512-3rsRIoyaE8IphSUtO1RVTFl1e0SLBtxxUOPBtHxQgBHS5/i6nqvjcUfNioMa4BU9yGnPzbO+xkfLtXtxBpCzjw==
+lint-staged@^11.1.2:
+  version "11.1.2"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-11.1.2.tgz#4dd78782ae43ee6ebf2969cad9af67a46b33cd90"
+  integrity sha512-6lYpNoA9wGqkL6Hew/4n1H6lRqF3qCsujVT0Oq5Z4hiSAM7S6NksPJ3gnr7A7R52xCtiZMcEUNNQ6d6X5Bvh9w==
   dependencies:
     chalk "^4.1.1"
     cli-truncate "^2.1.0"
     commander "^7.2.0"
     cosmiconfig "^7.0.0"
     debug "^4.3.1"
-    dedent "^0.7.0"
     enquirer "^2.3.6"
     execa "^5.0.0"
     listr2 "^3.8.2"
