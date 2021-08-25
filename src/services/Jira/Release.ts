@@ -62,9 +62,7 @@ export const createJiraRelease = async (
     releaseDate: new Date(),
   }
   // The types for createVersion() are messed up, and expect a string.
-  const data = (await client.createVersion(
-    args as unknown as string
-  )) as JiraRelease
+  const data = (await client.createVersion(args)) as JiraRelease
   return data
 }
 
