@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 

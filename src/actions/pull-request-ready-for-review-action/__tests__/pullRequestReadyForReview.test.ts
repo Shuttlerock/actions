@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
 import { PleaseReviewLabel } from '@sr-services/Constants'

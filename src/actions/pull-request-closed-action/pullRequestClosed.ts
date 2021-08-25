@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isNil from 'lodash/isNil'
 
 import { ReleaseBranchName } from '@sr-services/Constants'
@@ -57,7 +57,7 @@ export const pullRequestClosed = async (
 
       // Discard the first line (the PR heading), because it is basically a duplicate of the release name.
       info(`Creating Github release ${releaseVersion} (${releaseName})...`)
-      const [, ...releaseNotes] = pullRequest.body.split('\n')
+      const [, ...releaseNotes] = (pullRequest.body || '').split('\n')
       await createReleaseTag(
         repository.name,
         releaseVersion, // v2021-01-12-0426

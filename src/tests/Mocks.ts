@@ -13,7 +13,7 @@ import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import { TransitionObject } from 'jira-client'
 
 import { Credentials, Repository } from '@sr-services/Credentials'

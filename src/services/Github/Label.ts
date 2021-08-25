@@ -3,7 +3,7 @@ import {
   IssuesAddLabelsResponseData,
   IssuesSetLabelsResponseData,
 } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isEqual from 'lodash/isEqual'
 import isNil from 'lodash/isNil'
 

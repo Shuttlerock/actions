@@ -73,6 +73,7 @@ module.exports = {
   },
   settings: {
     'import/resolver': {
+      typescript: {},
       alias: {
         map: [
           ['@sr-actions', './src/actions'],

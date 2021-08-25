@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { pullRequestConvertedToDraft } from '@sr-actions/pull-request-converted-to-draft-action/pullRequestConvertedToDraft'
 import { InProgressLabel } from '@sr-services/Constants'
