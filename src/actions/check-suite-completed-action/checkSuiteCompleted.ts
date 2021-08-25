@@ -1,6 +1,6 @@
 import { error, info } from '@actions/core'
 import { PullsGetResponseData } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 

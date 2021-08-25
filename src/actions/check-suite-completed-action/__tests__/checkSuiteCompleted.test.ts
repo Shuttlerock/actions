@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { GitGetCommitResponseData } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import rawPayload from '@sr-actions/check-suite-completed-action/__tests__/fixtures/check-suite-failure-payload.json'
 import { checkSuiteCompleted } from '@sr-actions/check-suite-completed-action/checkSuiteCompleted'

@@ -1,6 +1,6 @@
 import { error, info, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { rebase } from '@sr-services/Github/Rebase'
 

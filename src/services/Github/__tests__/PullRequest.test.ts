@@ -8,7 +8,7 @@ import {
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
 } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {

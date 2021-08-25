@@ -13,7 +13,7 @@ import { jiraHost, organizationName } from '@sr-services/Inputs'
 
 export interface PullRequestContent {
   title: string
-  body: string
+  body: string | null
 }
 
 /**
@@ -93,7 +93,7 @@ export const getIssueKey = (pr: PullRequestContent): string | undefined => {
     `${jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`,
     'm'
   )
-  matches = regex.exec(pr.body)
+  matches = regex.exec(pr.body || '')
   if (matches?.length === 2) {
     return matches[1]
   }

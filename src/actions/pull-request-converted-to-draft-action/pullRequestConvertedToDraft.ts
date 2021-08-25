@@ -1,5 +1,5 @@
 import { info } from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isNil from 'lodash/isNil'
 
 import { InProgressLabel } from '@sr-services/Constants'
