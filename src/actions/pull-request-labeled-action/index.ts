@@ -1,6 +1,6 @@
 import { error, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { pullRequestLabeled } from '@sr-actions/pull-request-labeled-action/pullRequestLabeled'
 

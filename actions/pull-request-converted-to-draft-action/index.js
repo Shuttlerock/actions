@@ -5,7 +5,7 @@
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.2.4","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
+module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.3.0","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
 
 /***/ }),
 
@@ -142,7 +142,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
@@ -320,19 +320,30 @@ exports.debug = debug;
 /**
  * Adds an error issue
  * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function error(message) {
-    command_1.issue('error', message instanceof Error ? message.toString() : message);
+function error(message, properties = {}) {
+    command_1.issueCommand('error', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
- * Adds an warning issue
+ * Adds a warning issue
  * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function warning(message) {
-    command_1.issue('warning', message instanceof Error ? message.toString() : message);
+function warning(message, properties = {}) {
+    command_1.issueCommand('warning', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
+/**
+ * Adds a notice issue
+ * @param message notice issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function notice(message, properties = {}) {
+    command_1.issueCommand('notice', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.notice = notice;
 /**
  * Writes info to log with console.log.
  * @param message info message
@@ -466,7 +477,7 @@ exports.issueCommand = issueCommand;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.toCommandValue = void 0;
+exports.toCommandProperties = exports.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -481,6 +492,25 @@ function toCommandValue(input) {
     return JSON.stringify(input);
 }
 exports.toCommandValue = toCommandValue;
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
+exports.toCommandProperties = toCommandProperties;
 //# sourceMappingURL=utils.js.map
 
 /***/ }),
@@ -4027,7 +4057,7 @@ class WebClient extends methods_1.Methods {
     /**
      * @param token - An API token to authenticate/authorize with Slack (usually start with `xoxp`, `xoxb`)
      */
-    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = undefined, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
+    constructor(token, { slackApiUrl = 'https://slack.com/api/', logger = undefined, logLevel = undefined, maxRequestConcurrency = 3, retryConfig = retry_policies_1.default.tenRetriesInAboutThirtyMinutes, agent = undefined, tls = undefined, timeout = 0, rejectRateLimitedCalls = false, headers = {}, teamId = undefined, } = {}) {
         super();
         this.token = token;
         this.slackApiUrl = slackApiUrl;
@@ -4048,6 +4078,7 @@ class WebClient extends methods_1.Methods {
             this.logger = logger_1.getLogger(WebClient.loggerName, logLevel !== null && logLevel !== void 0 ? logLevel : logger_1.LogLevel.INFO, logger);
         }
         this.axios = axios_1.default.create({
+            timeout,
             baseURL: slackApiUrl,
             headers: is_electron_1.default() ? headers : Object.assign({ 'User-Agent': instrument_1.getUserAgent() }, headers),
             httpAgent: agent,
@@ -4419,7 +4450,7 @@ function warnIfFallbackIsMissing(method, logger, options) {
     const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'chat.update'];
     const isTargetMethod = targetMethods.includes(method);
     const missingAttachmentFallbackDetected = (args) => Array.isArray(args.attachments)
-        && args.attachments.some(attachment => !attachment.fallback || attachment.fallback.trim() === 0);
+        && args.attachments.some((attachment) => { return (!attachment.fallback || attachment.fallback.trim() === 0); });
     const isEmptyText = (args) => args.text === undefined || args.text === null || args.text === '';
     const buildWarningMessage = (missing) => `The \`${missing}\` argument is missing in the request payload for a ${method} call - ` +
         `It's a best practice to always provide a \`${missing}\` argument when posting a message. ` +
@@ -4738,6 +4769,13 @@ class Methods extends eventemitter3_1.EventEmitter {
                 },
                 uninstall: bindApiCall(this, 'admin.apps.uninstall'),
             },
+            auth: {
+                policy: {
+                    assignEntities: bindApiCall(this, 'admin.auth.policy.assignEntities'),
+                    getEntities: bindApiCall(this, 'admin.auth.policy.getEntities'),
+                    removeEntities: bindApiCall(this, 'admin.auth.policy.removeEntities'),
+                },
+            },
             barriers: {
                 create: bindApiCall(this, 'admin.barriers.create'),
                 delete: bindApiCall(this, 'admin.barriers.delete'),
@@ -4877,16 +4915,21 @@ class Methods extends eventemitter3_1.EventEmitter {
             update: bindApiCall(this, 'chat.update'),
         };
         this.conversations = {
+            acceptSharedInvite: bindApiCall(this, 'conversations.acceptSharedInvite'),
+            approveSharedInvite: bindApiCall(this, 'conversations.approveSharedInvite'),
             archive: bindApiCall(this, 'conversations.archive'),
             close: bindApiCall(this, 'conversations.close'),
             create: bindApiCall(this, 'conversations.create'),
+            declineSharedInvite: bindApiCall(this, 'conversations.declineSharedInvite'),
             history: bindApiCall(this, 'conversations.history'),
             info: bindApiCall(this, 'conversations.info'),
             invite: bindApiCall(this, 'conversations.invite'),
+            inviteShared: bindApiCall(this, 'conversations.inviteShared'),
             join: bindApiCall(this, 'conversations.join'),
             kick: bindApiCall(this, 'conversations.kick'),
             leave: bindApiCall(this, 'conversations.leave'),
             list: bindApiCall(this, 'conversations.list'),
+            listConnectInvites: bindApiCall(this, 'conversations.listConnectInvites'),
             mark: bindApiCall(this, 'conversations.mark'),
             members: bindApiCall(this, 'conversations.members'),
             open: bindApiCall(this, 'conversations.open'),
@@ -4935,6 +4978,7 @@ class Methods extends eventemitter3_1.EventEmitter {
             access: bindApiCall(this, 'oauth.access'),
             v2: {
                 access: bindApiCall(this, 'oauth.v2.access'),
+                exchange: bindApiCall(this, 'oauth.v2.exchange'),
             },
         };
         this.pins = {
@@ -5083,6 +5127,7 @@ exports.cursorPaginationEnabledMethods = new Set();
 exports.cursorPaginationEnabledMethods.add('admin.apps.approved.list');
 exports.cursorPaginationEnabledMethods.add('admin.apps.requests.list');
 exports.cursorPaginationEnabledMethods.add('admin.apps.restricted.list');
+exports.cursorPaginationEnabledMethods.add('admin.auth.policy.getEntities');
 exports.cursorPaginationEnabledMethods.add('admin.barriers.list');
 exports.cursorPaginationEnabledMethods.add('admin.conversations.ekm.listOriginalConnectedChannelInfo');
 exports.cursorPaginationEnabledMethods.add('admin.conversations.getTeams');
@@ -5102,6 +5147,7 @@ exports.cursorPaginationEnabledMethods.add('channels.list');
 exports.cursorPaginationEnabledMethods.add('chat.scheduledMessages.list');
 exports.cursorPaginationEnabledMethods.add('conversations.history');
 exports.cursorPaginationEnabledMethods.add('conversations.list');
+exports.cursorPaginationEnabledMethods.add('conversations.listConnectInvites');
 exports.cursorPaginationEnabledMethods.add('conversations.members');
 exports.cursorPaginationEnabledMethods.add('conversations.replies');
 exports.cursorPaginationEnabledMethods.add('files.info');
@@ -27472,6 +27518,25 @@ var JiraApi = /*#__PURE__*/function () {
         intermediatePath: '/secure',
         encode: true
       }), {
+        json: false,
+        encoding: null
+      }));
+    }
+    /**
+     * @name deleteAttachment
+     * @function
+     * Remove the attachment
+     * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-attachments/#api-rest-api-3-attachment-id-delete)
+     * @param {string} attachmentId - the attachment id
+     */
+
+  }, {
+    key: "deleteAttachment",
+    value: function deleteAttachment(attachmentId) {
+      return this.doRequest(this.makeRequestHeader(this.makeUri({
+        pathname: "/attachment/".concat(attachmentId)
+      }), {
+        method: 'DELETE',
         json: false,
         encoding: null
       }));
@@ -59867,7 +59932,7 @@ module.exports = JSON.parse('["ac","com.ac","edu.ac","gov.ac","net.ac","mil.ac",
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("assert");;
+module.exports = require("assert");
 
 /***/ }),
 
@@ -59875,7 +59940,7 @@ module.exports = require("assert");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("async_hooks");;
+module.exports = require("async_hooks");
 
 /***/ }),
 
@@ -59883,7 +59948,7 @@ module.exports = require("async_hooks");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("buffer");;
+module.exports = require("buffer");
 
 /***/ }),
 
@@ -59891,7 +59956,7 @@ module.exports = require("buffer");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("crypto");;
+module.exports = require("crypto");
 
 /***/ }),
 
@@ -59899,7 +59964,7 @@ module.exports = require("crypto");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("events");;
+module.exports = require("events");
 
 /***/ }),
 
@@ -59907,7 +59972,7 @@ module.exports = require("events");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("fs");;
+module.exports = require("fs");
 
 /***/ }),
 
@@ -59915,7 +59980,7 @@ module.exports = require("fs");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http");;
+module.exports = require("http");
 
 /***/ }),
 
@@ -59923,7 +59988,7 @@ module.exports = require("http");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("https");;
+module.exports = require("https");
 
 /***/ }),
 
@@ -59931,7 +59996,7 @@ module.exports = require("https");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("net");;
+module.exports = require("net");
 
 /***/ }),
 
@@ -59939,7 +60004,7 @@ module.exports = require("net");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("os");;
+module.exports = require("os");
 
 /***/ }),
 
@@ -59947,7 +60012,7 @@ module.exports = require("os");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("path");;
+module.exports = require("path");
 
 /***/ }),
 
@@ -59955,7 +60020,7 @@ module.exports = require("path");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("punycode");;
+module.exports = require("punycode");
 
 /***/ }),
 
@@ -59963,7 +60028,7 @@ module.exports = require("punycode");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("querystring");;
+module.exports = require("querystring");
 
 /***/ }),
 
@@ -59971,7 +60036,7 @@ module.exports = require("querystring");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream");;
+module.exports = require("stream");
 
 /***/ }),
 
@@ -59979,7 +60044,7 @@ module.exports = require("stream");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("tls");;
+module.exports = require("tls");
 
 /***/ }),
 
@@ -59987,7 +60052,7 @@ module.exports = require("tls");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("tty");;
+module.exports = require("tty");
 
 /***/ }),
 
@@ -59995,7 +60060,7 @@ module.exports = require("tty");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("url");;
+module.exports = require("url");
 
 /***/ }),
 
@@ -60003,7 +60068,7 @@ module.exports = require("url");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util");;
+module.exports = require("util");
 
 /***/ }),
 
@@ -60011,7 +60076,7 @@ module.exports = require("util");;
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("zlib");;
+module.exports = require("zlib");
 
 /***/ })
 
@@ -60102,7 +60167,9 @@ module.exports = require("zlib");;
 /******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
@@ -60129,6 +60196,7 @@ const Constants_EpicLabel = 'epic';
 const HasConflictsLabel = 'has-conflicts';
 const HasFailuresLabel = 'has-failures';
 const HasIssuesLabel = 'has-issues';
+const InfraChangeLabel = 'infra-change';
 const Constants_InProgressLabel = 'in-progress';
 const PassedReviewLabel = 'passed-review';
 const PleaseReviewLabel = 'please-review';
@@ -60526,7 +60594,7 @@ const PullRequest_getIssueKey = (pr) => {
     const regex = new RegExp(
     // eslint-disable-next-line no-useless-escape
     `${Inputs_jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`, 'm');
-    matches = regex.exec(pr.body);
+    matches = regex.exec(pr.body || '');
     if ((matches === null || matches === void 0 ? void 0 : matches.length) === 2) {
         return matches[1];
     }
@@ -60597,6 +60665,21 @@ const PullRequest_extractPullRequestNumber = (message) => parseInt(message.repla
  */
 const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     const response = yield readClient().pulls.listCommits({
+        owner: organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Lists the files in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose files we want to fetch.
+ * @returns {PullsListFilesResponseData} The pull request data.
+ */
+const listPullRequestFiles = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
+    const response = yield readClient().pulls.listFiles({
         owner: organizationName(),
         pull_number: number,
         repo,

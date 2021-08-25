@@ -1,4 +1,4 @@
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import rawPayload from '@sr-actions/pull-request-labeled-action/__tests__/fixtures/pull-request-labeled.json'
 import { pullRequestLabeled } from '@sr-actions/pull-request-labeled-action/pullRequestLabeled'

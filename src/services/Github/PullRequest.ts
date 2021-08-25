@@ -3,6 +3,7 @@ import {
   PullsCreateReviewResponseData,
   PullsGetResponseData,
   PullsListCommitsResponseData,
+  PullsListFilesResponseData,
   PullsRequestReviewersResponseData,
 } from '@octokit/types'
 import isNil from 'lodash/isNil'
@@ -13,7 +14,7 @@ import { jiraHost, organizationName } from '@sr-services/Inputs'
 
 export interface PullRequestContent {
   title: string
-  body: string
+  body: string | null
 }
 
 /**
@@ -93,7 +94,7 @@ export const getIssueKey = (pr: PullRequestContent): string | undefined => {
     `${jiraHost().replace(/\./g, '\\.')}/browse/([A-Z]+-[\\d]+)\\)`,
     'm'
   )
-  matches = regex.exec(pr.body)
+  matches = regex.exec(pr.body || '')
   if (matches?.length === 2) {
     return matches[1]
   }
@@ -189,6 +190,26 @@ export const listPullRequestCommits = async (
   number: number
 ): Promise<PullsListCommitsResponseData | undefined> => {
   const response = await readClient().pulls.listCommits({
+    owner: organizationName(),
+    pull_number: number,
+    repo,
+  })
+
+  return response.data
+}
+
+/**
+ * Lists the files in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose files we want to fetch.
+ * @returns {PullsListFilesResponseData} The pull request data.
+ */
+export const listPullRequestFiles = async (
+  repo: Repository,
+  number: number
+): Promise<PullsListFilesResponseData | undefined> => {
+  const response = await readClient().pulls.listFiles({
     owner: organizationName(),
     pull_number: number,
     repo,

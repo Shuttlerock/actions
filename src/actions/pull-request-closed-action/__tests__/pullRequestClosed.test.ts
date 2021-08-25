@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { pullRequestClosed } from '@sr-actions/pull-request-closed-action/pullRequestClosed'
 import { ReleaseBranchName } from '@sr-services/Constants'

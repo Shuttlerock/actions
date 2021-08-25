@@ -5,10 +5,11 @@ import {
   PullsCreateReviewResponseData,
   PullsGetResponseData,
   PullsListCommitsResponseData,
+  PullsListFilesResponseData,
   PullsRequestReviewersResponseData,
   PullsUpdateResponseData,
 } from '@octokit/types'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 
 import { Branch, Repository } from '@sr-services/Github/Git'
 import {
@@ -19,6 +20,7 @@ import {
   getIssueKey,
   getPullRequest,
   listPullRequestCommits,
+  listPullRequestFiles,
   pullRequestUrl,
   reviewPullRequest,
   updatePullRequest,
@@ -26,6 +28,7 @@ import {
 import { organizationName } from '@sr-services/Inputs'
 import {
   mockGitCommit,
+  mockGitFile,
   mockGithubClient,
   mockGithubPullRequest,
   mockGithubPullRequestCreateResponse,
@@ -252,6 +255,24 @@ describe('PullRequest', () => {
         repo,
       })
       expect((result || [])[0].author.login).toEqual('dperrett')
+      spy.mockRestore()
+    })
+  })
+
+  describe('listPullRequestFiles', () => {
+    it('calls the Github API', async () => {
+      const spy = jest.spyOn(mockReadClient.pulls, 'listFiles').mockReturnValue(
+        Promise.resolve({
+          data: [mockGitFile],
+        } as unknown as OctokitResponse<PullsListFilesResponseData>)
+      )
+      const result = await listPullRequestFiles(repo, 123)
+      expect(spy).toHaveBeenCalledWith({
+        owner: organizationName(),
+        pull_number: 123,
+        repo,
+      })
+      expect((result || [])[0].filename).toEqual('main.tf')
       spy.mockRestore()
     })
   })

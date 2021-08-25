@@ -1,15 +1,17 @@
 import { info } from '@actions/core'
-import Schema from '@octokit/webhooks-definitions/schema'
+import Schema from '@octokit/webhooks-types'
 import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
+import { extname } from 'path'
 
-import { PleaseReviewLabel } from '@sr-services/Constants'
+import { InfraChangeLabel, PleaseReviewLabel } from '@sr-services/Constants'
 import { fetchRepository, User } from '@sr-services/Credentials'
 import {
   addLabels,
   assignOwners,
   assignReviewers,
   getIssueKey,
+  listPullRequestFiles,
 } from '@sr-services/Github'
 import { githubWriteToken } from '@sr-services/Inputs'
 import { getReviewColumn, getIssue, setIssueStatus } from '@sr-services/Jira'
@@ -49,7 +51,20 @@ export const pullRequestReadyForReview = async (
   }
 
   info(`Adding the '${PleaseReviewLabel}' label...`)
-  await addLabels(repository.name, pullRequest.number, [PleaseReviewLabel])
+  const labels = [PleaseReviewLabel]
+
+  // Check the file extensions, and add labels accordingly.
+  const files = await listPullRequestFiles(repository.name, pullRequest.number)
+  if (files) {
+    const extensions = files.map(file => extname(file.filename))
+    if (extensions.includes('.tf')) {
+      info(`Adding the '${InfraChangeLabel}' label...`)
+      labels.push(InfraChangeLabel)
+    }
+  }
+
+  info('Updating labels...')
+  await addLabels(repository.name, pullRequest.number, labels)
 
   // Used for log messages.
   const prName = `${repository.name}#${pullRequest.number}`
