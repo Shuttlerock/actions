@@ -60192,6 +60192,8 @@ var isEmpty_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isEmpty);
 // EXTERNAL MODULE: ./node_modules/lodash/isNil.js
 var lodash_isNil = __nccwpck_require__(4977);
 var isNil_default = /*#__PURE__*/__nccwpck_require__.n(lodash_isNil);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(5622);
 ;// CONCATENATED MODULE: ./src/services/Constants.ts
 // Labels.
 const DependenciesLabel = 'dependencies';
@@ -60199,6 +60201,7 @@ const Constants_EpicLabel = 'epic';
 const HasConflictsLabel = 'has-conflicts';
 const HasFailuresLabel = 'has-failures';
 const HasIssuesLabel = 'has-issues';
+const InfraChangeLabel = 'infra-change';
 const Constants_InProgressLabel = 'in-progress';
 const PassedReviewLabel = 'passed-review';
 const PleaseReviewLabel = 'please-review';
@@ -60733,6 +60736,21 @@ const PullRequest_extractPullRequestNumber = (message) => parseInt(message.repla
 const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     const response = yield readClient().pulls.listCommits({
         owner: organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Lists the files in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose files we want to fetch.
+ * @returns {PullsListFilesResponseData} The pull request data.
+ */
+const listPullRequestFiles = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
+    const response = yield Client_readClient().pulls.listFiles({
+        owner: Inputs_organizationName(),
         pull_number: number,
         repo,
     });
@@ -62776,6 +62794,7 @@ var pullRequestReadyForReview_awaiter = (undefined && undefined.__awaiter) || fu
 
 
 
+
 /**
  * Runs whenever a pull request is marked as 'ready for review'.
  *
@@ -62802,7 +62821,18 @@ const pullRequestReadyForReview = (payload) => pullRequestReadyForReview_awaiter
         yield PullRequest_assignOwners(repository.name, pullRequest.number, owners);
     }
     (0,core.info)(`Adding the '${PleaseReviewLabel}' label...`);
-    yield Label_addLabels(repository.name, pullRequest.number, [PleaseReviewLabel]);
+    const labels = [PleaseReviewLabel];
+    // Check the file extensions, and add labels accordingly.
+    const files = yield listPullRequestFiles(repository.name, pullRequest.number);
+    if (files) {
+        const extensions = files.map(file => (0,external_path_.extname)(file.filename));
+        if (extensions.includes('.tf')) {
+            (0,core.info)(`Adding the '${InfraChangeLabel}' label...`);
+            labels.push(InfraChangeLabel);
+        }
+    }
+    (0,core.info)('Updating labels...');
+    yield Label_addLabels(repository.name, pullRequest.number, labels);
     // Used for log messages.
     const prName = `${repository.name}#${pullRequest.number}`;
     (0,core.info)(`Getting the Jira key from the pull request ${prName}...`);

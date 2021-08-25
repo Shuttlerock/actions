@@ -2,11 +2,12 @@ import * as core from '@actions/core'
 import Schema from '@octokit/webhooks-types'
 
 import { pullRequestReadyForReview } from '@sr-actions/pull-request-ready-for-review-action/pullRequestReadyForReview'
-import { PleaseReviewLabel } from '@sr-services/Constants'
+import { InfraChangeLabel, PleaseReviewLabel } from '@sr-services/Constants'
 import * as Credentials from '@sr-services/Credentials'
 import * as Github from '@sr-services/Github'
 import * as Jira from '@sr-services/Jira'
 import {
+  mockGitFile,
   mockGithubPullRequestPayload,
   mockIssuesAddAssigneesResponseData,
   mockIssuesAddLabelsResponseData,
@@ -26,6 +27,7 @@ jest.mock('@sr-services/Github', () => ({
   getIssueKey: jest.fn(),
   assignOwners: jest.fn(),
   assignReviewers: jest.fn(),
+  listPullRequestFiles: jest.fn(),
 }))
 
 describe('pull-request-ready-for-review-action', () => {
@@ -43,6 +45,7 @@ describe('pull-request-ready-for-review-action', () => {
     let getIssueSpy: jest.SpyInstance
     let getReviewColumnSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
+    let listPullRequestFilesSpy: jest.SpyInstance
     let setIssueStatusSpy: jest.SpyInstance
 
     beforeEach(() => {
@@ -68,6 +71,9 @@ describe('pull-request-ready-for-review-action', () => {
         .spyOn(Jira, 'getReviewColumn')
         .mockReturnValue(Promise.resolve(Jira.JiraStatusTechReview))
       infoSpy = jest.spyOn(core, 'info').mockReturnValue(undefined)
+      listPullRequestFilesSpy = jest
+        .spyOn(Github, 'listPullRequestFiles')
+        .mockReturnValue(Promise.resolve([mockGitFile]))
       setIssueStatusSpy = jest
         .spyOn(Jira, 'setIssueStatus')
         .mockReturnValue(Promise.resolve(undefined))
@@ -82,6 +88,7 @@ describe('pull-request-ready-for-review-action', () => {
       getIssueKeySpy.mockRestore()
       getReviewColumnSpy.mockRestore()
       infoSpy.mockRestore()
+      listPullRequestFilesSpy.mockRestore()
       setIssueStatusSpy.mockRestore()
     })
 
@@ -93,12 +100,12 @@ describe('pull-request-ready-for-review-action', () => {
       )
     })
 
-    it(`adds the '${PleaseReviewLabel}' label`, async () => {
+    it(`adds the '${PleaseReviewLabel}' and '${InfraChangeLabel}' labels`, async () => {
       await pullRequestReadyForReview(payload)
       expect(addLabelsSpy).toHaveBeenCalledWith(
         payload.repository.name,
         payload.pull_request.number,
-        [PleaseReviewLabel]
+        [PleaseReviewLabel, InfraChangeLabel]
       )
     })
 

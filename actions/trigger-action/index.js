@@ -62131,6 +62131,7 @@ const EpicLabel = 'epic';
 const HasConflictsLabel = 'has-conflicts';
 const HasFailuresLabel = 'has-failures';
 const HasIssuesLabel = 'has-issues';
+const InfraChangeLabel = 'infra-change';
 const InProgressLabel = 'in-progress';
 const PassedReviewLabel = 'passed-review';
 const PleaseReviewLabel = 'please-review';
@@ -62293,6 +62294,21 @@ const extractPullRequestNumber = (message) => parseInt(message.replace(/^.*\[#(\
  */
 const PullRequest_listPullRequestCommits = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
     const response = yield readClient().pulls.listCommits({
+        owner: organizationName(),
+        pull_number: number,
+        repo,
+    });
+    return response.data;
+});
+/**
+ * Lists the files in the pull request with the given number.
+ *
+ * @param {Repository} repo   The name of the repository that the PR belongs to.
+ * @param {number}     number The pull request number whose files we want to fetch.
+ * @returns {PullsListFilesResponseData} The pull request data.
+ */
+const listPullRequestFiles = (repo, number) => PullRequest_awaiter(void 0, void 0, void 0, function* () {
+    const response = yield readClient().pulls.listFiles({
         owner: organizationName(),
         pull_number: number,
         repo,
