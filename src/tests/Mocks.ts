@@ -80,7 +80,7 @@ export const mockGithubBranch = {
   commit: {
     sha: 'branch-sha',
   },
-  name: 'my-branch',
+  name: 'master',
   sha: 'branch-sha',
 } as unknown as ReposGetBranchResponseData
 

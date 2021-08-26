@@ -60527,6 +60527,9 @@ var Branch_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _a
 
 
 
+
+
+
 /**
  * Deletes the given branch via the Github API.
  *
@@ -60574,6 +60577,32 @@ const Branch_getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0
         throw err;
     }
     return undefined;
+});
+/**
+ * Looks for an appropriately named 'master' or 'main' branch for the given repository.
+ *
+ * @param {Repository} repoName The name of the repository whose master branch we want to find.
+ * @returns {ReposGetBranchResponseData | void} The pull request, if it exists.
+ */
+const Branch_getMasterBranch = (repoName) => Branch_awaiter(void 0, void 0, void 0, function* () {
+    info(`Looking for a '${MasterBranchName}' branch...`);
+    let master;
+    try {
+        master = yield Branch_getBranch(repoName, MasterBranchName);
+    }
+    catch (_a) { }
+    if (isNil(master)) {
+        // More recent projects use 'main' rather than 'master'.
+        info(`Branch '${MasterBranchName}' could not be found for repository ${repoName} - trying ${MainBranchName}...`);
+        try {
+            master = yield Branch_getBranch(repoName, MainBranchName);
+        }
+        catch (_b) { }
+    }
+    if (isNil(master)) {
+        return undefined;
+    }
+    return master;
 });
 /**
  * Creates a branch vis the Github API.
@@ -61368,8 +61397,12 @@ const findJiraRelease = (projectKey, name) => Release_awaiter(void 0, void 0, vo
 const createRelease = (repoName, prNumber, releaseVersion, releaseName) => Release_awaiter(void 0, void 0, void 0, function* () {
     // Used for log messages.
     const prName = `${repoName}#${prNumber}`;
-    info(`Fetching the release pull request ${prName}`);
-    const pullRequest = yield getPullRequest(repoName, prNumber);
+    info(`Fetching the release pull request '${prName}'`);
+    let pullRequest;
+    try {
+        pullRequest = yield getPullRequest(repoName, prNumber);
+    }
+    catch (_a) { }
     if (isNil(pullRequest)) {
         error(`Could not fetch the release pull request ${prName}`);
         return;
@@ -62721,30 +62754,15 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
         const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    info(`Looking for a '${MasterBranchName}' branch...`);
-    let masterBranch = MasterBranchName;
-    let master;
-    try {
-        master = yield getBranch(repo.name, MasterBranchName);
-    }
-    catch (_a) { }
+    const master = yield getMasterBranch(repo.name);
     if (isNil(master)) {
-        // More recent projects use 'main' rather than 'master'.
-        info(`Branch '${MasterBranchName}' could not be found for repository ${repo.name} - trying ${MainBranchName}...`);
-        masterBranch = MainBranchName;
-        try {
-            master = yield getBranch(repo.name, MainBranchName);
-        }
-        catch (_b) { }
-    }
-    if (isNil(master)) {
-        const message = `Branch '${MainBranchName}' could not be found for repository ${repo.name} - giving up`;
+        const message = `Master branch could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    info(`Checking if '${DevelopBranchName}' is ahead of '${masterBranch}' (${master.commit.sha}..${develop.commit.sha})`);
+    info(`Checking if '${DevelopBranchName}' is ahead of '${master.name}' (${master.commit.sha}..${develop.commit.sha})`);
     const diff = yield compareCommits(repo.name, master.commit.sha, develop.commit.sha);
     if (diff.total_commits === 0) {
-        const message = `Branch '${masterBranch}' already contains the latest release - nothing to do`;
+        const message = `Branch '${master.name}' already contains the latest release - nothing to do`;
         return reportInfo(credentials.slack_id, message);
     }
     info(`Found ${diff.total_commits} commits to release`);
@@ -62752,7 +62770,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
     const releaseDate = dateFormat(new Date(), 'yyyy-mm-dd-hhss');
     const releaseName = generateReleaseName();
     const description = yield getReleaseNotes(repo.name, releaseDate, releaseName, diff.commits);
-    const pullRequest = yield getReleasePullRequest(repo.name, masterBranch, releaseDate, releaseName, description);
+    const pullRequest = yield getReleasePullRequest(repo.name, master.name, releaseDate, releaseName, description);
     if (isNil(pullRequest)) {
         const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
         return reportError(credentials.slack_id, message);
@@ -62790,6 +62808,11 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
  */
 const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
     const name = `${tagName} (${releaseName})`;
+    const master = yield getMasterBranch(repo);
+    if (isNil(master)) {
+        error(`Master branch could not be found for repository ${repo} - giving up release tagging`);
+        return undefined;
+    }
     const response = yield client().repos.createRelease({
         body: releaseNotes,
         draft: false,
@@ -62797,7 +62820,7 @@ const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Re
         owner: organizationName(),
         repo,
         tag_name: tagName,
-        target_commitish: MasterBranchName,
+        target_commitish: master.name,
     });
     return response.data;
 });

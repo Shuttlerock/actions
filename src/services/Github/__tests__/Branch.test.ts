@@ -18,7 +18,7 @@ import {
 } from '@sr-tests/Mocks'
 
 const repo = 'my-repo'
-const branch = 'my-branch'
+const branch = 'master'
 
 jest.mock('@sr-services/Github/Client', () => ({
   client: () => mockGithubClient,

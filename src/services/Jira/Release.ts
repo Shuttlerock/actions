@@ -109,8 +109,11 @@ export const createRelease = async (
   // Used for log messages.
   const prName = `${repoName}#${prNumber}`
 
-  info(`Fetching the release pull request ${prName}`)
-  const pullRequest = await getPullRequest(repoName, prNumber)
+  info(`Fetching the release pull request '${prName}'`)
+  let pullRequest
+  try {
+    pullRequest = await getPullRequest(repoName, prNumber)
+  } catch {}
   if (isNil(pullRequest)) {
     error(`Could not fetch the release pull request ${prName}`)
     return
