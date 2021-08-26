@@ -9,6 +9,7 @@ import {
 import {
   DevelopBranchName,
   InProgressLabel,
+  MainBranchName,
   MasterBranchName,
   ReleaseBranchName,
   ReleaseLabel,
@@ -172,8 +173,9 @@ describe('Release', () => {
       getBranchSpy
         .mockReturnValueOnce(Promise.resolve(mockGithubBranch))
         .mockReturnValueOnce(Promise.resolve(undefined))
+        .mockReturnValueOnce(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
-      const message = `Branch '${MasterBranchName}' could not be found for repository webhooks - giving up`
+      const message = `Branch '${MainBranchName}' could not be found for repository webhooks - giving up`
       expect(reportErrorSpy).toHaveBeenLastCalledWith(
         mockCredentials.slack_id,
         message
