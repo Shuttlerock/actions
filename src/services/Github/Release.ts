@@ -12,6 +12,7 @@ import isNil from 'lodash/isNil'
 import {
   DevelopBranchName,
   InProgressLabel,
+  MainBranchName,
   MasterBranchName,
   ReleaseBranchName,
   ReleaseLabel,
@@ -229,6 +230,7 @@ export const createReleasePullRequest = async (
   info(`Fetching credentials for user '${email}'...`)
   const credentials = await fetchCredentials(email)
 
+  info(`Sending a message to Slack user '${credentials.slack_id}'...`)
   await sendUserMessage(
     credentials.slack_id,
     `Creating a release for *<${repositoryUrl(
@@ -236,20 +238,36 @@ export const createReleasePullRequest = async (
     )}|${organizationName()}/${repo.name}>*...`
   )
 
+  info(`Looking for a '${DevelopBranchName}' branch...`)
   const develop = await getBranch(repo.name, DevelopBranchName)
   if (isNil(develop)) {
     const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`
     return reportError(credentials.slack_id, message)
   }
 
-  const master = await getBranch(repo.name, MasterBranchName)
+  info(`Looking for a '${MasterBranchName}' branch...`)
+  let masterBranch = MasterBranchName
+  let master
+  try {
+    master = await getBranch(repo.name, MasterBranchName)
+  } catch {}
   if (isNil(master)) {
-    const message = `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - giving up`
+    // More recent projects use 'main' rather than 'master'.
+    info(
+      `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - trying ${MainBranchName}...`
+    )
+    masterBranch = MainBranchName
+    try {
+      master = await getBranch(repo.name, MainBranchName)
+    } catch {}
+  }
+  if (isNil(master)) {
+    const message = `Branch '${MainBranchName}' could not be found for repository ${repo.name} - giving up`
     return reportError(credentials.slack_id, message)
   }
 
   info(
-    `Checking if '${DevelopBranchName}' is ahead of '${MasterBranchName}' (${master.commit.sha}..${develop.commit.sha})`
+    `Checking if '${DevelopBranchName}' is ahead of '${masterBranch}' (${master.commit.sha}..${develop.commit.sha})`
   )
   const diff = await compareCommits(
     repo.name,
@@ -257,7 +275,7 @@ export const createReleasePullRequest = async (
     develop.commit.sha
   )
   if (diff.total_commits === 0) {
-    const message = `Branch '${MasterBranchName}' already contains the latest release - nothing to do`
+    const message = `Branch '${masterBranch}' already contains the latest release - nothing to do`
     return reportInfo(credentials.slack_id, message)
   }
   info(`Found ${diff.total_commits} commits to release`)

@@ -60213,6 +60213,7 @@ const UnderDiscussionLabel = 'under-discussion';
 const Constants_GithubWriteUser = 'sr-devops';
 // Standard branch names.
 const Constants_DevelopBranchName = 'develop';
+const Constants_MainBranchName = 'main';
 const Constants_MasterBranchName = 'master';
 const Constants_ReleaseBranchName = `${Constants_GithubWriteUser}/release-candidate`;
 const TemplateUpdateBranchName = `${Constants_GithubWriteUser}/update-templates`;
@@ -62693,21 +62694,38 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
     info(`Creating a release pull request for repository ${repo.name}`);
     info(`Fetching credentials for user '${email}'...`);
     const credentials = yield fetchCredentials(email);
+    info(`Sending a message to Slack user '${credentials.slack_id}'...`);
     yield sendUserMessage(credentials.slack_id, `Creating a release for *<${repositoryUrl(repo.name)}|${organizationName()}/${repo.name}>*...`);
+    info(`Looking for a '${DevelopBranchName}' branch...`);
     const develop = yield getBranch(repo.name, DevelopBranchName);
     if (isNil(develop)) {
         const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    const master = yield getBranch(repo.name, MasterBranchName);
+    info(`Looking for a '${MasterBranchName}' branch...`);
+    let masterBranch = MasterBranchName;
+    let master;
+    try {
+        master = yield getBranch(repo.name, MasterBranchName);
+    }
+    catch (_a) { }
     if (isNil(master)) {
-        const message = `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - giving up`;
+        // More recent projects use 'main' rather than 'master'.
+        info(`Branch '${MasterBranchName}' could not be found for repository ${repo.name} - trying ${MainBranchName}...`);
+        masterBranch = MainBranchName;
+        try {
+            master = yield getBranch(repo.name, MainBranchName);
+        }
+        catch (_b) { }
+    }
+    if (isNil(master)) {
+        const message = `Branch '${MainBranchName}' could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    info(`Checking if '${DevelopBranchName}' is ahead of '${MasterBranchName}' (${master.commit.sha}..${develop.commit.sha})`);
+    info(`Checking if '${DevelopBranchName}' is ahead of '${masterBranch}' (${master.commit.sha}..${develop.commit.sha})`);
     const diff = yield compareCommits(repo.name, master.commit.sha, develop.commit.sha);
     if (diff.total_commits === 0) {
-        const message = `Branch '${MasterBranchName}' already contains the latest release - nothing to do`;
+        const message = `Branch '${masterBranch}' already contains the latest release - nothing to do`;
         return reportInfo(credentials.slack_id, message);
     }
     info(`Found ${diff.total_commits} commits to release`);

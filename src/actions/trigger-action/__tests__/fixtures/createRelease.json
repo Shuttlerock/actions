@@ -3,6 +3,6 @@
   "inputs": {
     "email": "dave@shuttlerock.com",
     "event": "createRelease",
-    "param": "nolan"
+    "param": "data-infrastructure"
   }
 }
