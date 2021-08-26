@@ -61843,6 +61843,32 @@ const Credentials_fetchRepository = (name) => Credentials_awaiter(void 0, void 0
 // EXTERNAL MODULE: ./node_modules/lodash/isUndefined.js
 var isUndefined = __nccwpck_require__(2825);
 var isUndefined_default = /*#__PURE__*/__nccwpck_require__.n(isUndefined);
+;// CONCATENATED MODULE: ./src/services/Constants.ts
+// Labels.
+const DependenciesLabel = 'dependencies';
+const EpicLabel = 'epic';
+const HasConflictsLabel = 'has-conflicts';
+const HasFailuresLabel = 'has-failures';
+const HasIssuesLabel = 'has-issues';
+const InfraChangeLabel = 'infra-change';
+const InProgressLabel = 'in-progress';
+const PassedReviewLabel = 'passed-review';
+const PleaseReviewLabel = 'please-review';
+const PriorityHighLabel = 'p1';
+const PriorityLowLabel = 'p3';
+const PriorityMediumLabel = 'p2';
+const ReleaseLabel = 'release';
+const SecurityLabel = 'security';
+const UnderDiscussionLabel = 'under-discussion';
+// The Github user our actions use.
+const GithubWriteUser = 'sr-devops';
+// Standard branch names.
+const DevelopBranchName = 'develop';
+const MainBranchName = 'main';
+const MasterBranchName = 'master';
+const ReleaseBranchName = `${GithubWriteUser}/release-candidate`;
+const TemplateUpdateBranchName = `${GithubWriteUser}/update-templates`;
+
 // EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
 var dist_node = __nccwpck_require__(55375);
 ;// CONCATENATED MODULE: ./src/services/Github/Client.ts
@@ -62046,6 +62072,9 @@ var Branch_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _a
 
 
 
+
+
+
 /**
  * Deletes the given branch via the Github API.
  *
@@ -62095,6 +62124,32 @@ const getBranch = (repo, branch) => Branch_awaiter(void 0, void 0, void 0, funct
     return undefined;
 });
 /**
+ * Looks for an appropriately named 'master' or 'main' branch for the given repository.
+ *
+ * @param {Repository} repoName The name of the repository whose master branch we want to find.
+ * @returns {ReposGetBranchResponseData | void} The pull request, if it exists.
+ */
+const Branch_getMasterBranch = (repoName) => Branch_awaiter(void 0, void 0, void 0, function* () {
+    (0,core.info)(`Looking for a '${MasterBranchName}' branch...`);
+    let master;
+    try {
+        master = yield getBranch(repoName, MasterBranchName);
+    }
+    catch (_a) { }
+    if (isNil_default()(master)) {
+        // More recent projects use 'main' rather than 'master'.
+        (0,core.info)(`Branch '${MasterBranchName}' could not be found for repository ${repoName} - trying ${MainBranchName}...`);
+        try {
+            master = yield getBranch(repoName, MainBranchName);
+        }
+        catch (_b) { }
+    }
+    if (isNil_default()(master)) {
+        return undefined;
+    }
+    return master;
+});
+/**
  * Creates a branch vis the Github API.
  *
  * @param {Repository} repo           The name of the repository that the branch will belong to.
@@ -62123,32 +62178,6 @@ const createBranch = (repo, baseBranchName, newBranchName, fileContents, commitM
     const commit = yield createGitCommit(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
     return createGitBranch(repo, newBranchName, commit.sha);
 });
-
-;// CONCATENATED MODULE: ./src/services/Constants.ts
-// Labels.
-const DependenciesLabel = 'dependencies';
-const EpicLabel = 'epic';
-const HasConflictsLabel = 'has-conflicts';
-const HasFailuresLabel = 'has-failures';
-const HasIssuesLabel = 'has-issues';
-const InfraChangeLabel = 'infra-change';
-const InProgressLabel = 'in-progress';
-const PassedReviewLabel = 'passed-review';
-const PleaseReviewLabel = 'please-review';
-const PriorityHighLabel = 'p1';
-const PriorityLowLabel = 'p3';
-const PriorityMediumLabel = 'p2';
-const ReleaseLabel = 'release';
-const SecurityLabel = 'security';
-const UnderDiscussionLabel = 'under-discussion';
-// The Github user our actions use.
-const GithubWriteUser = 'sr-devops';
-// Standard branch names.
-const DevelopBranchName = 'develop';
-const MainBranchName = 'main';
-const Constants_MasterBranchName = 'master';
-const ReleaseBranchName = `${GithubWriteUser}/release-candidate`;
-const TemplateUpdateBranchName = `${GithubWriteUser}/update-templates`;
 
 // EXTERNAL MODULE: ./node_modules/lodash/isEqual.js
 var isEqual = __nccwpck_require__(20052);
@@ -62916,8 +62945,12 @@ const findJiraRelease = (projectKey, name) => Release_awaiter(void 0, void 0, vo
 const createRelease = (repoName, prNumber, releaseVersion, releaseName) => Release_awaiter(void 0, void 0, void 0, function* () {
     // Used for log messages.
     const prName = `${repoName}#${prNumber}`;
-    info(`Fetching the release pull request ${prName}`);
-    const pullRequest = yield getPullRequest(repoName, prNumber);
+    info(`Fetching the release pull request '${prName}'`);
+    let pullRequest;
+    try {
+        pullRequest = yield getPullRequest(repoName, prNumber);
+    }
+    catch (_a) { }
     if (isNil(pullRequest)) {
         error(`Could not fetch the release pull request ${prName}`);
         return;
@@ -64109,30 +64142,15 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
         const message = `Branch '${DevelopBranchName}' could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    (0,core.info)(`Looking for a '${Constants_MasterBranchName}' branch...`);
-    let masterBranch = Constants_MasterBranchName;
-    let master;
-    try {
-        master = yield getBranch(repo.name, Constants_MasterBranchName);
-    }
-    catch (_a) { }
+    const master = yield Branch_getMasterBranch(repo.name);
     if (isNil_default()(master)) {
-        // More recent projects use 'main' rather than 'master'.
-        (0,core.info)(`Branch '${Constants_MasterBranchName}' could not be found for repository ${repo.name} - trying ${MainBranchName}...`);
-        masterBranch = MainBranchName;
-        try {
-            master = yield getBranch(repo.name, MainBranchName);
-        }
-        catch (_b) { }
-    }
-    if (isNil_default()(master)) {
-        const message = `Branch '${MainBranchName}' could not be found for repository ${repo.name} - giving up`;
+        const message = `Master branch could not be found for repository ${repo.name} - giving up`;
         return reportError(credentials.slack_id, message);
     }
-    (0,core.info)(`Checking if '${DevelopBranchName}' is ahead of '${masterBranch}' (${master.commit.sha}..${develop.commit.sha})`);
+    (0,core.info)(`Checking if '${DevelopBranchName}' is ahead of '${master.name}' (${master.commit.sha}..${develop.commit.sha})`);
     const diff = yield compareCommits(repo.name, master.commit.sha, develop.commit.sha);
     if (diff.total_commits === 0) {
-        const message = `Branch '${masterBranch}' already contains the latest release - nothing to do`;
+        const message = `Branch '${master.name}' already contains the latest release - nothing to do`;
         return reportInfo(credentials.slack_id, message);
     }
     (0,core.info)(`Found ${diff.total_commits} commits to release`);
@@ -64140,7 +64158,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
     const releaseDate = dateformat_default()(new Date(), 'yyyy-mm-dd-hhss');
     const releaseName = generateReleaseName();
     const description = yield getReleaseNotes(repo.name, releaseDate, releaseName, diff.commits);
-    const pullRequest = yield getReleasePullRequest(repo.name, masterBranch, releaseDate, releaseName, description);
+    const pullRequest = yield getReleasePullRequest(repo.name, master.name, releaseDate, releaseName, description);
     if (isNil_default()(pullRequest)) {
         const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
         return reportError(credentials.slack_id, message);
@@ -64178,6 +64196,11 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
  */
 const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
     const name = `${tagName} (${releaseName})`;
+    const master = yield getMasterBranch(repo);
+    if (isNil(master)) {
+        error(`Master branch could not be found for repository ${repo} - giving up release tagging`);
+        return undefined;
+    }
     const response = yield client().repos.createRelease({
         body: releaseNotes,
         draft: false,
@@ -64185,7 +64208,7 @@ const createReleaseTag = (repo, tagName, releaseName, releaseNotes) => Github_Re
         owner: organizationName(),
         repo,
         tag_name: tagName,
-        target_commitish: MasterBranchName,
+        target_commitish: master.name,
     });
     return response.data;
 });
