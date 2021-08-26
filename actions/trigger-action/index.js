@@ -64061,16 +64061,17 @@ const ensureReleasebranch = (repoName, sha) => Github_Release_awaiter(void 0, vo
 /**
  * Looks for an existing open pull request for a release.
  *
- * @param {Repository} repoName    The name of the repository that the PR will belong to.
- * @param {string}     releaseDate The name of the release (basically a formatted datetime).
- * @param {string}     releaseName The name of the release.
- * @param {string}     body        The pull request release notes.
+ * @param {Repository} repoName     The name of the repository that the PR will belong to.
+ * @param {string}     masterBranch The name of the branch to merge releases into.
+ * @param {string}     releaseDate  The name of the release (basically a formatted datetime).
+ * @param {string}     releaseName  The name of the release.
+ * @param {string}     body         The pull request release notes.
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
-const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
+const getReleasePullRequest = (repoName, masterBranch, releaseDate, releaseName, body) => Github_Release_awaiter(void 0, void 0, void 0, function* () {
     (0,core.info)('Searching for an existing release pull request...');
     const response = yield Client_readClient().pulls.list({
-        base: Constants_MasterBranchName,
+        base: masterBranch,
         direction: 'desc',
         head: `${Inputs_organizationName()}:${ReleaseBranchName}`,
         owner: Inputs_organizationName(),
@@ -64083,7 +64084,7 @@ const getReleasePullRequest = (repoName, releaseDate, releaseName, body) => Gith
     const title = `Release Candidate ${releaseDate} (${releaseName})`;
     if (response.data.length === 0) {
         (0,core.info)('No existing release pull request was found - creating it...');
-        return createPullRequest(repoName, Constants_MasterBranchName, ReleaseBranchName, title, body, githubWriteToken());
+        return createPullRequest(repoName, masterBranch, ReleaseBranchName, title, body, githubWriteToken());
     }
     const prNumber = response.data[0].number;
     (0,core.info)(`An existing release pull request was found (${repoName}#${prNumber}) - updating the release notes...`);
@@ -64139,7 +64140,7 @@ const createReleasePullRequest = (email, repo) => Github_Release_awaiter(void 0,
     const releaseDate = dateformat_default()(new Date(), 'yyyy-mm-dd-hhss');
     const releaseName = generateReleaseName();
     const description = yield getReleaseNotes(repo.name, releaseDate, releaseName, diff.commits);
-    const pullRequest = yield getReleasePullRequest(repo.name, releaseDate, releaseName, description);
+    const pullRequest = yield getReleasePullRequest(repo.name, masterBranch, releaseDate, releaseName, description);
     if (isNil_default()(pullRequest)) {
         const message = `An unknown error occurred while creating a release pull request for repository '${repo.name}'`;
         return reportError(credentials.slack_id, message);
