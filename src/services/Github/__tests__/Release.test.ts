@@ -2,14 +2,13 @@ import * as core from '@actions/core'
 import {
   OctokitResponse,
   PullsListResponseData,
-  ReposCreateReleaseResponseData,
   ReposCompareCommitsResponseData,
+  ReposCreateReleaseResponseData,
 } from '@octokit/types'
 
 import {
   DevelopBranchName,
   InProgressLabel,
-  MainBranchName,
   MasterBranchName,
   ReleaseBranchName,
   ReleaseLabel,
@@ -43,6 +42,7 @@ const email = 'user@example.com'
 jest.mock('@sr-services/Github/Branch', () => ({
   deleteBranch: jest.fn(),
   getBranch: jest.fn(),
+  getMasterBranch: jest.fn(),
 }))
 
 jest.mock('@sr-services/Github/Client', () => ({
@@ -93,6 +93,7 @@ describe('Release', () => {
     let errorSpy: jest.SpyInstance
     let fetchCredentialsSpy: jest.SpyInstance
     let getBranchSpy: jest.SpyInstance
+    let getMasterBranchSpy: jest.SpyInstance
     let getPullRequestSpy: jest.SpyInstance
     let infoSpy: jest.SpyInstance
     let listPullsSpy: jest.SpyInstance
@@ -119,6 +120,9 @@ describe('Release', () => {
         .mockReturnValue(Promise.resolve(mockCredentials))
       getBranchSpy = jest
         .spyOn(Branch, 'getBranch')
+        .mockReturnValue(Promise.resolve(mockGithubBranch))
+      getMasterBranchSpy = jest
+        .spyOn(Branch, 'getMasterBranch')
         .mockReturnValue(Promise.resolve(mockGithubBranch))
       getPullRequestSpy = jest.spyOn(PullRequest, 'getPullRequest')
       infoSpy = jest
@@ -148,6 +152,7 @@ describe('Release', () => {
       errorSpy.mockRestore()
       fetchCredentialsSpy.mockRestore()
       getBranchSpy.mockRestore()
+      getMasterBranchSpy.mockRestore()
       getPullRequestSpy.mockRestore()
       infoSpy.mockRestore()
       listPullsSpy.mockRestore()
@@ -173,9 +178,10 @@ describe('Release', () => {
       getBranchSpy
         .mockReturnValueOnce(Promise.resolve(mockGithubBranch))
         .mockReturnValueOnce(Promise.resolve(undefined))
-        .mockReturnValueOnce(Promise.resolve(undefined))
+      getMasterBranchSpy.mockReturnValue(Promise.resolve(undefined))
       await createReleasePullRequest(email, mockGithubRepository)
-      const message = `Branch '${MainBranchName}' could not be found for repository webhooks - giving up`
+      const message =
+        'Master branch could not be found for repository webhooks - giving up'
       expect(reportErrorSpy).toHaveBeenLastCalledWith(
         mockCredentials.slack_id,
         message
@@ -295,9 +301,21 @@ describe('Release', () => {
   })
 
   describe('createReleaseTag', () => {
+    let getMasterBranchSpy: jest.SpyInstance
+
+    beforeEach(() => {
+      getMasterBranchSpy = jest
+        .spyOn(Branch, 'getMasterBranch')
+        .mockReturnValue(Promise.resolve(mockGithubBranch))
+    })
+
+    afterEach(() => {
+      getMasterBranchSpy.mockRestore()
+    })
+
     it('calls the Github API', async () => {
       const repo = 'my-repo'
-      const spy = jest
+      const createReleaseSpy = jest
         .spyOn(mockGithubClient.repos, 'createRelease')
         .mockReturnValue(
           Promise.resolve({
@@ -310,7 +328,7 @@ describe('Release', () => {
         'Energetic Eagle',
         'My release notes'
       )
-      expect(spy).toHaveBeenCalledWith({
+      expect(createReleaseSpy).toHaveBeenCalledWith({
         body: 'My release notes',
         draft: false,
         name: mockGithubRelease.name,
@@ -319,8 +337,8 @@ describe('Release', () => {
         tag_name: mockGithubRelease.tag_name,
         target_commitish: MasterBranchName,
       })
-      expect(result.name).toEqual(mockGithubRelease.name)
-      spy.mockRestore()
+      expect(result?.name).toEqual(mockGithubRelease.name)
+      createReleaseSpy.mockRestore()
     })
   })
 })

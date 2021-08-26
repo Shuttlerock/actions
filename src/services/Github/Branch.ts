@@ -1,9 +1,12 @@
+import { info } from '@actions/core'
 import {
   GitCreateRefResponseData,
   ReposGetBranchResponseData,
 } from '@octokit/types'
+import isNil from 'lodash/isNil'
 import isUndefined from 'lodash/isUndefined'
 
+import { MainBranchName, MasterBranchName } from '@sr-services/Constants'
 import { client, readClient } from '@sr-services/Github/Client'
 import {
   Branch,
@@ -75,6 +78,38 @@ export const getBranch = async (
   }
 
   return undefined
+}
+
+/**
+ * Looks for an appropriately named 'master' or 'main' branch for the given repository.
+ *
+ * @param {Repository} repoName The name of the repository whose master branch we want to find.
+ * @returns {ReposGetBranchResponseData | void} The pull request, if it exists.
+ */
+export const getMasterBranch = async (
+  repoName: Repository
+): Promise<ReposGetBranchResponseData | undefined> => {
+  info(`Looking for a '${MasterBranchName}' branch...`)
+  let master
+  try {
+    master = await getBranch(repoName, MasterBranchName)
+  } catch {}
+
+  if (isNil(master)) {
+    // More recent projects use 'main' rather than 'master'.
+    info(
+      `Branch '${MasterBranchName}' could not be found for repository ${repoName} - trying ${MainBranchName}...`
+    )
+    try {
+      master = await getBranch(repoName, MainBranchName)
+    } catch {}
+  }
+
+  if (isNil(master)) {
+    return undefined
+  }
+
+  return master
 }
 
 /**

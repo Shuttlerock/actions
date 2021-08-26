@@ -12,13 +12,15 @@ import isNil from 'lodash/isNil'
 import {
   DevelopBranchName,
   InProgressLabel,
-  MainBranchName,
-  MasterBranchName,
   ReleaseBranchName,
   ReleaseLabel,
 } from '@sr-services/Constants'
 import { fetchCredentials } from '@sr-services/Credentials'
-import { deleteBranch, getBranch } from '@sr-services/Github/Branch'
+import {
+  deleteBranch,
+  getBranch,
+  getMasterBranch,
+} from '@sr-services/Github/Branch'
 import { client, readClient } from '@sr-services/Github/Client'
 import {
   createGitBranch,
@@ -247,29 +249,14 @@ export const createReleasePullRequest = async (
     return reportError(credentials.slack_id, message)
   }
 
-  info(`Looking for a '${MasterBranchName}' branch...`)
-  let masterBranch = MasterBranchName
-  let master
-  try {
-    master = await getBranch(repo.name, MasterBranchName)
-  } catch {}
+  const master = await getMasterBranch(repo.name)
   if (isNil(master)) {
-    // More recent projects use 'main' rather than 'master'.
-    info(
-      `Branch '${MasterBranchName}' could not be found for repository ${repo.name} - trying ${MainBranchName}...`
-    )
-    masterBranch = MainBranchName
-    try {
-      master = await getBranch(repo.name, MainBranchName)
-    } catch {}
-  }
-  if (isNil(master)) {
-    const message = `Branch '${MainBranchName}' could not be found for repository ${repo.name} - giving up`
+    const message = `Master branch could not be found for repository ${repo.name} - giving up`
     return reportError(credentials.slack_id, message)
   }
 
   info(
-    `Checking if '${DevelopBranchName}' is ahead of '${masterBranch}' (${master.commit.sha}..${develop.commit.sha})`
+    `Checking if '${DevelopBranchName}' is ahead of '${master.name}' (${master.commit.sha}..${develop.commit.sha})`
   )
   const diff = await compareCommits(
     repo.name,
@@ -277,7 +264,7 @@ export const createReleasePullRequest = async (
     develop.commit.sha
   )
   if (diff.total_commits === 0) {
-    const message = `Branch '${masterBranch}' already contains the latest release - nothing to do`
+    const message = `Branch '${master.name}' already contains the latest release - nothing to do`
     return reportInfo(credentials.slack_id, message)
   }
   info(`Found ${diff.total_commits} commits to release`)
@@ -293,7 +280,7 @@ export const createReleasePullRequest = async (
   )
   const pullRequest = await getReleasePullRequest(
     repo.name,
-    masterBranch,
+    master.name,
     releaseDate,
     releaseName,
     description
@@ -349,8 +336,16 @@ export const createReleaseTag = async (
   tagName: string,
   releaseName: string,
   releaseNotes: string
-): Promise<ReposCreateReleaseResponseData> => {
+): Promise<ReposCreateReleaseResponseData | undefined> => {
   const name = `${tagName} (${releaseName})`
+  const master = await getMasterBranch(repo)
+  if (isNil(master)) {
+    error(
+      `Master branch could not be found for repository ${repo} - giving up release tagging`
+    )
+    return undefined
+  }
+
   const response = await client().repos.createRelease({
     body: releaseNotes,
     draft: false,
@@ -358,7 +353,7 @@ export const createReleaseTag = async (
     owner: organizationName(),
     repo,
     tag_name: tagName,
-    target_commitish: MasterBranchName,
+    target_commitish: master.name,
   })
 
   return response.data
