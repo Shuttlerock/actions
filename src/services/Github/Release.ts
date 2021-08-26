@@ -169,21 +169,23 @@ const ensureReleasebranch = async (
 /**
  * Looks for an existing open pull request for a release.
  *
- * @param {Repository} repoName    The name of the repository that the PR will belong to.
- * @param {string}     releaseDate The name of the release (basically a formatted datetime).
- * @param {string}     releaseName The name of the release.
- * @param {string}     body        The pull request release notes.
+ * @param {Repository} repoName     The name of the repository that the PR will belong to.
+ * @param {string}     masterBranch The name of the branch to merge releases into.
+ * @param {string}     releaseDate  The name of the release (basically a formatted datetime).
+ * @param {string}     releaseName  The name of the release.
+ * @param {string}     body         The pull request release notes.
  * @returns {PullsGetResponseData | void} The pull request, if it exists.
  */
 const getReleasePullRequest = async (
   repoName: Repository,
+  masterBranch: string,
   releaseDate: string,
   releaseName: string,
   body: string
 ): Promise<PullsGetResponseData | undefined> => {
   info('Searching for an existing release pull request...')
   const response = await readClient().pulls.list({
-    base: MasterBranchName,
+    base: masterBranch,
     direction: 'desc',
     head: `${organizationName()}:${ReleaseBranchName}`,
     owner: organizationName(),
@@ -200,7 +202,7 @@ const getReleasePullRequest = async (
     info('No existing release pull request was found - creating it...')
     return createPullRequest(
       repoName,
-      MasterBranchName,
+      masterBranch,
       ReleaseBranchName,
       title,
       body,
@@ -291,6 +293,7 @@ export const createReleasePullRequest = async (
   )
   const pullRequest = await getReleasePullRequest(
     repo.name,
+    masterBranch,
     releaseDate,
     releaseName,
     description
