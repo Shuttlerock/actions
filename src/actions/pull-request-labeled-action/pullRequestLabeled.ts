@@ -128,12 +128,12 @@ export const pullRequestLabeled = async (
   try {
     await perform(payload)
   } catch (err) {
-    if (err.message.match(/^Input required and not supplied: /)) {
+    if (/^Input required and not supplied: /.exec((err as Error).message)) {
       // See https://shuttlerock.atlassian.net/browse/SECURITY-436
       // Do nothing here - this seems to be a bug in Github Actions, and we don't
       // want to cause a test suite failure for the sake of adding a label.
       error('Missing Github secret:')
-      error(err.message)
+      error((err as Error).message)
     } else {
       throw err
     }

@@ -45,7 +45,7 @@ export const deleteBranch = async (
       )
     }
   } catch (err) {
-    if (err.message !== 'Branch not found') {
+    if ((err as Error).message !== 'Branch not found') {
       throw err
     }
   }
@@ -70,7 +70,7 @@ export const getBranch = async (
     })
     return response.data
   } catch (err) {
-    if (err.message === 'Branch not found') {
+    if ((err as Error).message === 'Branch not found') {
       return undefined
     }
 

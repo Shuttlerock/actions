@@ -13,6 +13,10 @@ interface User {
   emailAddress: string
 }
 
+interface HttpError {
+  statusCode: number
+}
+
 type FieldNames = { [name: string]: string }
 
 export interface Issue {
@@ -181,7 +185,7 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
 
     return populateExplicitFields(issue)
   } catch (err) {
-    if (err.statusCode === 404) {
+    if ((err as HttpError).statusCode === 404) {
       return undefined
     }
 
