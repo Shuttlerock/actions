@@ -114,7 +114,7 @@ export const sendUserMessage = async (
       unfurl_media: false,
     })
   } catch (err) {
-    if (err.message.match(/channel_not_found/)) {
+    if (/channel_not_found/.exec((err as Error).message)) {
       return
     }
 

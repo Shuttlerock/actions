@@ -60,7 +60,10 @@ export const createPullRequestForJiraIssue = async (
 
   const jiraUrl = issueUrl(issue.key)
   // If no repository is supplied then it will default to the Jira issue repository.
-  const repository = repositoryName || issue.fields.repository
+  const repository =
+    repositoryName ||
+    issue.fields.repository ||
+    (issue.fields?.components || [])[0]?.name
   info(`The Jira URL is ${jiraUrl}`)
 
   info('Finding out who the pull request should belong to...')

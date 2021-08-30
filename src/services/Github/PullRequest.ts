@@ -122,7 +122,7 @@ export const getPullRequest = async (
 
     return response.data
   } catch (err) {
-    if (err.message === 'Pull request not found') {
+    if ((err as Error).message === 'Pull request not found') {
       return undefined
     }
 

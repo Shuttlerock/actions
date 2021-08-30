@@ -13,11 +13,18 @@ interface User {
   emailAddress: string
 }
 
+interface HttpError {
+  statusCode: number
+}
+
 type FieldNames = { [name: string]: string }
+
+type Component = { name: string }
 
 export interface Issue {
   fields: {
     assignee?: User
+    components?: Component[]
     description?: string
     issuetype: {
       name: string
@@ -85,6 +92,7 @@ export const JiraLabelSkipPR = 'Skip_PR'
 // Jira issue field names.
 export const JiraFieldRepository = 'Repository'
 export const JiraFieldStoryPointEstimate = 'Story point estimate'
+export const JiraFieldStoryPoints = 'Story Points' // Some projects use this instead of 'Story point estimate'.
 
 /**
  * Returns the field ID for the given human-readable field name.
@@ -126,16 +134,21 @@ const populateExplicitFields = (issue: Issue) => {
 
   // Find the story points, and include it explicitly. This is a bit ugly due to the way
   // Jira includes custom fields.
-  fieldId = idForFieldName(issue, JiraFieldStoryPointEstimate)
-  if (fieldId) {
-    Object.assign(issue.fields, {
-      storyPointEstimate: (
-        issue.fields as unknown as {
-          [customField: string]: number
+  ;[JiraFieldStoryPointEstimate, JiraFieldStoryPoints].forEach(
+    (fieldName: string) => {
+      fieldId = idForFieldName(issue, fieldName)
+      if (fieldId) {
+        const storyPointEstimate = (
+          issue.fields as unknown as {
+            [customField: string]: number
+          }
+        )[fieldId]
+        if (storyPointEstimate) {
+          Object.assign(issue.fields, { storyPointEstimate })
         }
-      )[fieldId],
-    })
-  }
+      }
+    }
+  )
 
   return issue
 }
@@ -181,7 +194,7 @@ export const getIssue = async (key: string): Promise<Issue | undefined> => {
 
     return populateExplicitFields(issue)
   } catch (err) {
-    if (err.statusCode === 404) {
+    if ((err as HttpError).statusCode === 404) {
       return undefined
     }
 
