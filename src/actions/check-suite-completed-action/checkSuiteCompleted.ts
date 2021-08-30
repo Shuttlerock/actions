@@ -152,7 +152,7 @@ export const checkSuiteCompleted = async (
         await sendUserMessage(credentials.slack_id, message)
       }
     } catch (err) {
-      error(err)
+      error((err as Error).message)
     }
   }
 }

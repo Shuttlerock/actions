@@ -5,7 +5,7 @@
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.3.0","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
+module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.4.0","description":"Official library for using the Slack Platform\'s Web API","author":"Slack Technologies, Inc.","license":"MIT","keywords":["slack","web-api","bot","client","http","api","proxy","rate-limiting","pagination"],"main":"dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">= 12.13.0","npm":">= 6.12.0"},"repository":"slackapi/node-slack-sdk","homepage":"https://slack.dev/node-slack-sdk/web-api","publishConfig":{"access":"public"},"bugs":{"url":"https://github.com/slackapi/node-slack-sdk/issues"},"scripts":{"prepare":"npm run build","build":"npm run build:clean && tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"tslint --project .","test":"npm run build && npm run test:mocha && npm run test:types","test:mocha":"nyc mocha --config .mocharc.json src/*.spec.js","test:types":"tsd","coverage":"codecov -F webapi --root=$PWD","ref-docs:model":"api-extractor run","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"dependencies":{"@slack/logger":"^3.0.0","@slack/types":"^2.0.0","@types/is-stream":"^1.1.0","@types/node":">=12.0.0","axios":"^0.21.1","eventemitter3":"^3.1.0","form-data":"^2.5.0","is-stream":"^1.1.0","p-queue":"^6.6.1","p-retry":"^4.0.0","is-electron":"^2.2.0"},"devDependencies":{"@aoberoi/capture-console":"^1.1.0","@microsoft/api-extractor":"^7.3.4","@types/chai":"^4.1.7","@types/mocha":"^5.2.6","busboy":"^0.3.0","chai":"^4.2.0","codecov":"^3.2.0","mocha":"^6.0.2","nock":"^10.0.6","nyc":"^14.1.1","shelljs":"^0.8.3","shx":"^0.3.2","sinon":"^7.2.7","source-map-support":"^0.5.10","ts-node":"^9.0.0","tsd":"^0.13.1","tslint":"^5.13.1","tslint-config-airbnb":"^5.11.1","typescript":"^4.1"},"tsd":{"directory":"test/types"}}');
 
 /***/ }),
 
@@ -4248,11 +4248,12 @@ class WebClient extends methods_1.Methods {
                         await helpers_1.delay(retrySec * 1000);
                         // resume the request queue and throw a non-abort error to signal a retry
                         this.requestQueue.start();
-                        throw Error('A rate limit was exceeded.');
+                        // TODO: We may want to have more detailed info such as team_id, params except tokens, and so on.
+                        throw Error(`A rate limit was exceeded (url: ${url}, retry-after: ${retrySec})`);
                     }
                     else {
                         // TODO: turn this into some CodedError
-                        throw new p_retry_1.AbortError(new Error('Retry header did not contain a valid timeout.'));
+                        throw new p_retry_1.AbortError(new Error(`Retry header did not contain a valid timeout (url: ${url})`));
                     }
                 }
                 // Slack's Web API doesn't use meaningful status codes besides 429 and 200
@@ -4979,6 +4980,12 @@ class Methods extends eventemitter3_1.EventEmitter {
             v2: {
                 access: bindApiCall(this, 'oauth.v2.access'),
                 exchange: bindApiCall(this, 'oauth.v2.exchange'),
+            },
+        };
+        this.openid = {
+            connect: {
+                token: bindApiCall(this, 'openid.connect.token'),
+                userInfo: bindApiCall(this, 'openid.connect.userInfo'),
             },
         };
         this.pins = {
@@ -62557,7 +62564,7 @@ const Message_sendUserMessage = (userId, message) => Message_awaiter(void 0, voi
         });
     }
     catch (err) {
-        if (err.message.match(/channel_not_found/)) {
+        if (/channel_not_found/.exec(err.message)) {
             return;
         }
         throw err;
@@ -62931,7 +62938,7 @@ const pullRequestLabeled = (payload) => pullRequestLabeled_awaiter(void 0, void 
         yield perform(payload);
     }
     catch (err) {
-        if (err.message.match(/^Input required and not supplied: /)) {
+        if (/^Input required and not supplied: /.exec(err.message)) {
             // See https://shuttlerock.atlassian.net/browse/SECURITY-436
             // Do nothing here - this seems to be a bug in Github Actions, and we don't
             // want to cause a test suite failure for the sake of adding a label.
