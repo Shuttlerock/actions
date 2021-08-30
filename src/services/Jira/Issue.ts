@@ -19,9 +19,12 @@ interface HttpError {
 
 type FieldNames = { [name: string]: string }
 
+type Component = { name: string }
+
 export interface Issue {
   fields: {
     assignee?: User
+    components?: Component[]
     description?: string
     issuetype: {
       name: string

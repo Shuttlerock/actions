@@ -64326,7 +64326,7 @@ var createPullRequestForJiraIssue_awaiter = (undefined && undefined.__awaiter) |
  * @param {string} userCommand The command given by the user of the Jira issue we will base the pull request on.
  */
 const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestForJiraIssue_awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const [issueKey, repositoryName] = userCommand.trim().split(/\s+/);
     (0,core.info)(`Creating a pull request for issue ${issueKey} / ${email}`);
     (0,core.info)('Fetching the Jira issue details...');
@@ -64340,7 +64340,9 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
     }
     const jiraUrl = issueUrl(issue.key);
     // If no repository is supplied then it will default to the Jira issue repository.
-    const repository = repositoryName || issue.fields.repository;
+    const repository = repositoryName ||
+        issue.fields.repository ||
+        ((_b = (((_a = issue.fields) === null || _a === void 0 ? void 0 : _a.components) || [])[0]) === null || _b === void 0 ? void 0 : _b.name);
     (0,core.info)(`The Jira URL is ${jiraUrl}`);
     (0,core.info)('Finding out who the pull request should belong to...');
     if (isNil_default()(issue.fields.assignee)) {
@@ -64396,8 +64398,8 @@ const createPullRequestForJiraIssue = (email, userCommand) => createPullRequestF
         // Decide if this is an epic.
         const epic = yield getEpic(issue.key);
         if (epic &&
-            !((_a = epic.fields.labels) === null || _a === void 0 ? void 0 : _a.includes(JiraLabelSkipPR)) &&
-            !((_b = issue.fields.labels) === null || _b === void 0 ? void 0 : _b.includes(JiraLabelSkipPR))) {
+            !((_c = epic.fields.labels) === null || _c === void 0 ? void 0 : _c.includes(JiraLabelSkipPR)) &&
+            !((_d = issue.fields.labels) === null || _d === void 0 ? void 0 : _d.includes(JiraLabelSkipPR))) {
             (0,core.info)(`Issue ${issue.key} belongs to epic ${epic.key} - creating an Epic pull request.`);
             const epicPr = yield createEpicPullRequest(epic, repository);
             baseBranchName = epicPr.head.ref;
