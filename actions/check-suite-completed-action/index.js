@@ -60963,6 +60963,7 @@ const JiraLabelSkipPR = 'Skip_PR';
 // Jira issue field names.
 const JiraFieldRepository = 'Repository';
 const JiraFieldStoryPointEstimate = 'Story point estimate';
+const JiraFieldStoryPoints = 'Story Points'; // Some projects use this instead of 'Story point estimate'.
 /**
  * Returns the field ID for the given human-readable field name.
  *
@@ -60994,12 +60995,16 @@ const populateExplicitFields = (issue) => {
     }
     // Find the story points, and include it explicitly. This is a bit ugly due to the way
     // Jira includes custom fields.
-    fieldId = idForFieldName(issue, JiraFieldStoryPointEstimate);
-    if (fieldId) {
-        Object.assign(issue.fields, {
-            storyPointEstimate: issue.fields[fieldId],
-        });
-    }
+    ;
+    [JiraFieldStoryPointEstimate, JiraFieldStoryPoints].forEach((fieldName) => {
+        fieldId = idForFieldName(issue, fieldName);
+        if (fieldId) {
+            const storyPointEstimate = issue.fields[fieldId];
+            if (storyPointEstimate) {
+                Object.assign(issue.fields, { storyPointEstimate });
+            }
+        }
+    });
     return issue;
 };
 /**
