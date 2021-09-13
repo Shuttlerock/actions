@@ -53,7 +53,7 @@
     "unique-names-generator": "^4.6.0"
   },
   "devDependencies": {
-    "@octokit/webhooks": "^9.12.0",
+    "@octokit/webhooks": "^9.14.1",
     "@octokit/webhooks-types": "^4.3.1",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^27.0.1",
@@ -69,7 +69,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^2.4.0",
-    "eslint-plugin-github": "^4.2.0",
+    "eslint-plugin-github": "^4.3.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jest": "^24.4.0",
     "eslint-plugin-jsdoc": "^36.0.8",
