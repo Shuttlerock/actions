@@ -1147,10 +1147,10 @@
     jest-diff "^27.0.0"
     pretty-format "^27.0.0"
 
-"@types/jira-client@^6.21.2":
-  version "6.21.2"
-  resolved "https://registry.yarnpkg.com/@types/jira-client/-/jira-client-6.21.2.tgz#c7c06f15ae7e4792a3e568a9c1b871fa884443c9"
-  integrity sha512-kQSyhPus5ywkw9xS5APPZERGcNrS87j8/m1KtfWtpPmHNjQyKIf30ojOdRoZFOKalYebPcsJ1PNBx3pOGQZm2A==
+"@types/jira-client@^6.21.3":
+  version "6.21.3"
+  resolved "https://registry.yarnpkg.com/@types/jira-client/-/jira-client-6.21.3.tgz#a822f76354bdfaa908ad173a62e6f70bf14df7a5"
+  integrity sha512-j5jVMlTI1kwkFT/Sxoi3eLUhNg6X7EqH0TRthrpwlwjdIr81ehigXVJ7FMUH8/xY4I2TNwVQL0MqlemZonbNpA==
   dependencies:
     "@types/node" "*"
     "@types/request" "*"
