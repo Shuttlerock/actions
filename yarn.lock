@@ -1051,19 +1051,19 @@
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.0.0.tgz#7b938ab576cd1d6c9ff9ad67a96f8058d101af10"
   integrity sha512-Nu4jWC39mDY5egAX4oElwOypdu8Cx9tmR7bo3ghaHYaC7mkKM1+b+soanW5s2ssu4yOLxMdFExMh6wlR34B6CA==
 
-"@slack/web-api@^6.4.0":
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.4.0.tgz#fe8212e4aca50c4cbafe4dac3f4b81c84c527423"
-  integrity sha512-Hi0pq60d/zCqn1UQvuSyrMcoLGNbKUBL/Tmk1b1RPTZdVYiRK8zp337glvhxTBwiaGOu+58uO5yflpK1AAuoRw==
+"@slack/web-api@^6.5.1":
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.5.1.tgz#21a4f055cd7facf8d769cf62c61a40e37a3eb87c"
+  integrity sha512-W1PDIdHz/GtDpC8afpPUsXMfAQ+sZGwmfxx+Ug83uhRD8zECrypGTmIyCqrCSWzf2qVKT9XvMftZX3m0AmPY8A==
   dependencies:
     "@slack/logger" "^3.0.0"
     "@slack/types" "^2.0.0"
     "@types/is-stream" "^1.1.0"
     "@types/node" ">=12.0.0"
-    axios "^0.21.1"
+    axios "^0.24.0"
     eventemitter3 "^3.1.0"
     form-data "^2.5.0"
-    is-electron "^2.2.0"
+    is-electron "2.2.0"
     is-stream "^1.1.0"
     p-queue "^6.6.1"
     p-retry "^4.0.0"
@@ -1622,12 +1622,12 @@ axe-core@^4.0.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.0.2.tgz#c7cf7378378a51fcd272d3c09668002a4990b1cb"
   integrity sha512-arU1h31OGFu+LPrOLGZ7nB45v940NMDMEJeNmbutu57P+UFDVnkZg3e+J1I2HJRZ9hT7gO8J91dn/PMrAiKakA==
 
-axios@^0.21.1:
-  version "0.21.4"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
-  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
+axios@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
+  integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
   dependencies:
-    follow-redirects "^1.14.0"
+    follow-redirects "^1.14.4"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -3029,10 +3029,10 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.1.0.tgz#a5d06b4a8b01e3a63771daa5cb7a1903e2e57067"
   integrity sha512-tW+UkmtNg/jv9CSofAKvgVcO7c2URjhTdW1ZTkcAritblu8tajiYy7YisnIflEwtKssCtOxpnBRoCB7iap0/TA==
 
-follow-redirects@^1.14.0:
-  version "1.14.3"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.3.tgz#6ada78118d8d24caee595595accdc0ac6abd022e"
-  integrity sha512-3MkHxknWMUtb23apkgz/83fDoe+y+qr0TdgacGIA7bew+QLBo3vdgEN2xEsuXNivpFy4CyDhBBZnNZOtalmenw==
+follow-redirects@^1.14.4:
+  version "1.14.6"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.6.tgz#8cfb281bbc035b3c067d6cd975b0f6ade6e855cd"
+  integrity sha512-fhUl5EwSJbbl8AR+uYL2KQDxLkdSjZGR36xy46AO7cOMTrCMON6Sa28FmAnC2tRTDbd/Uuzz3aJBv7EBN7JH8A==
 
 for-in@^1.0.2:
   version "1.0.2"
@@ -3589,7 +3589,7 @@ is-docker@^2.0.0:
   resolved "https://registry.yarnpkg.com/is-docker/-/is-docker-2.1.1.tgz#4125a88e44e450d384e09047ede71adc2d144156"
   integrity sha512-ZOoqiXfEwtGknTiuDEy8pN2CfE3TxMHprvNer1mXiqwkOT77Rw3YVrUQ52EqAOU3QAWDQ+bQdx7HJzrv7LS2Hw==
 
-is-electron@^2.2.0:
+is-electron@2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/is-electron/-/is-electron-2.2.0.tgz#8943084f09e8b731b3a7a0298a7b5d56f6b7eef0"
   integrity sha512-SpMppC2XR3YdxSzczXReBjqs2zGscWQpBIKqwXYBFic0ERaxNVgwLCHwOLZeESfdJQjX0RDvrJ1lBXX2ij+G1Q==
