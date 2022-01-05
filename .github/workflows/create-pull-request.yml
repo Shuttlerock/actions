@@ -24,7 +24,8 @@ jobs:
         run:  mkdir -p .meta && date "+%Y-%m-%d %H:%M\n${{ github.event.inputs.title }}\nby @${{ github.actor }}" > .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body and escape line breaks
-        run: |
+        id:   pr_body
+        run:  |
           PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md)
           echo "::set-output name=content::$PR_BODY"
 
