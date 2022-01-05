@@ -27,13 +27,15 @@ jobs:
         run:  |
           mkdir -p .meta
           touch .meta/${{ env.NEXT_PR_NUM }}.md
-          echo "## ${{ github.event.inputs.title }}\n\n"                                     >> .meta/${{ env.NEXT_PR_NUM }}.md
-          echo "By [@${{ github.actor }}](${{ github.server_url }}/${{ github.actor }})\n\n" >> .meta/${{ env.NEXT_PR_NUM }}.md
-          date "+Created %Y-%m-%d %H:%M"                                                     >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "## ${{ github.event.inputs.title }}"                                     >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo ""                                                                        >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "By [@${{ github.actor }}](${{ github.server_url }}/${{ github.actor }})" >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo ""                                                                        >> .meta/${{ env.NEXT_PR_NUM }}.md
+          date "+Created %Y-%m-%d %H:%M"                                                 >> .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body
         run:  |
-          PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md)
+          PR_BODY=$(cat .github/PULL_REQUEST_TEMPLATE.md)
           echo "PR_BODY<<EOF" >> $GITHUB_ENV
           echo "$PR_BODY" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
