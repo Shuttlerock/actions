@@ -24,7 +24,11 @@ jobs:
         run:  mkdir -p .meta && date "+%Y-%m-%d %H:%M\n${{ github.event.inputs.title }}\nby @${{ github.actor }}" > .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body and escape line breaks
-        run: echo "PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md | sed ':a;N;$!ba;s/\n/\\n/g' )" >> $GITHUB_ENV
+        id:   pr_body
+        run: |
+          PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md)
+          echo $PR_BODY
+          echo "::set-output name=content::$PR_BODY"
 
       - name: Output the branch name
         run: echo "${{ env.NEW_BRANCH_NAME }}"
@@ -36,17 +40,19 @@ jobs:
         run: cat .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Output the body
-        run: echo "${{ env.PR_BODY }}"
+        run: echo "The body is: ${{ steps.pr_body.outputs.content }}"
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          committer:      GitHub <noreply@github.com>
-          branch:         ${{ env.NEW_BRANCH_NAME }}
-          delete-branch:  true
-          title:          '${{ github.event.inputs.title }}'
-          assignees:      ${{ github.actor }}
-          draft:          true
-          labels:         in-progress
-          body: |
-            ${{ env.PR_BODY }}
+
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     commit-message: 'build: ${{ github.event.inputs.title }}'
+      #     committer:      GitHub <noreply@github.com>
+      #     branch:         ${{ env.NEW_BRANCH_NAME }}
+      #     delete-branch:  true
+      #     title:          '${{ github.event.inputs.title }}'
+      #     assignees:      ${{ github.actor }}
+      #     draft:          true
+      #     labels:         in-progress
+      #     body: |
+      #       ${{ env.PR_BODY }}
