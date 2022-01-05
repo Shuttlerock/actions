@@ -1,0 +1,8 @@
+{
+  "ref": "develop",
+  "inputs": {
+    "owner": "recurser",
+    "repository": "string-is",
+    "title": "Make an interesting thing"
+  }
+}
