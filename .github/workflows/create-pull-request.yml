@@ -24,7 +24,7 @@ jobs:
           echo "$( echo ${GITHUB_REPOSITORY})"
           echo "${{ env.GITHUB_REPOSITORY }}"
           cat $GITHUB_ENV
-          echo "$(echo -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' 'https://api.github.com/repos/ ${GITHUB_REPOSITORY} /pulls?state=all&amp;sort=created&amp;direction=desc&amp;per_page=1')"
+          echo "$(echo -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' 'https://api.github.com/repos/${env:GITHUB_REPOSITORY}/pulls?state=all&amp;sort=created&amp;direction=desc&amp;per_page=1')"
 
       - name: Figure out the next pull request number
         run:  |
@@ -34,7 +34,7 @@ jobs:
         run:  mkdir -p .meta && date "+%Y-%m-%d %H:%M\n${{ github.event.inputs.title }}\nby @${{ github.actor }}" > .meta/${{ env.NEXT_PR_NUM }}.md && git add .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body
-        run: echo "PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md | tr '\n' '' )" >> $GITHUB_ENV
+        run: echo "PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md | tr '\n' ' ' )" >> $GITHUB_ENV
 
       - name: Output the branch name
         run: echo "${{ env.NEW_BRANCH_NAME }}"
