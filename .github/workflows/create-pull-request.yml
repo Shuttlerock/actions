@@ -24,7 +24,7 @@ jobs:
         run:  mkdir -p .meta && date "+%Y-%m-%d %H:%M\n${{ github.event.inputs.title }}\nby @${{ github.actor }}" > .meta/${{ env.NEXT_PR_NUM }}.md && git add .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body
-        run: echo "PR_BODY=\"$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md | sed -e 's/\"//g')\"" >> $GITHUB_ENV
+        run: echo "PR_BODY=\"$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md | tr '\n' ' ' )\"" >> $GITHUB_ENV
 
       - name: Output the branch name
         run: echo "${{ env.NEW_BRANCH_NAME }}"
