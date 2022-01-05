@@ -39,7 +39,7 @@ jobs:
         run: cat .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Output the body
-        run: echo "${{ env.PR_BODY }}"
+        run: echo "The body is: ${{ steps.pr_body.outputs.content }}"
 
       # - name: Create Pull Request
       #   uses: peter-evans/create-pull-request@v3
