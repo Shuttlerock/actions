@@ -26,8 +26,9 @@ jobs:
       - name: Generate the PR body and escape line breaks
         id:   pr_body
         run:  |
-          PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md)
-          echo "::set-output name=content::$PR_BODY"
+          echo 'PR_BODY<<EOF' >> $GITHUB_ENV
+          echo $(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md) >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: Output the branch name
         run: echo "${{ env.NEW_BRANCH_NAME }}"
