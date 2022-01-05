@@ -1,4 +1,4 @@
-name: Create Pull Request Test
+name: Create Pull Request
 
 on:
   workflow_dispatch:
@@ -20,28 +20,19 @@ jobs:
         run:  |
           echo "NEXT_PR_NUM=$(curl -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' 'https://api.github.com/repos/${{ github.repository }}/pulls?state=all&amp;sort=created&amp;direction=desc&amp;per_page=1' | grep '\"number\":' | tr -dc '0-9' | awk '{ print $1 + 1 }')" >> $GITHUB_ENV
 
-      - name: Make a .meta file so that we have a change to base the pull request on
-        run:  mkdir -p .meta && date "+%Y-%m-%d %H:%M\n${{ github.event.inputs.title }}\nby @${{ github.actor }}" > .meta/${{ env.NEXT_PR_NUM }}.md
+      - name: Make a .meta/*.md file so that we have a change to base the pull request on
+        run:  |
+          mkdir -p .meta
+          date "+%Y-%m-%d %H:%M"                   > .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "${{ github.event.inputs.title }}" >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "by @${{ github.actor }}"          >> .meta/${{ env.NEXT_PR_NUM }}.md
 
-      - name: Generate the PR body and escape line breaks
-        id:   pr_body
+      - name: Generate the PR body
         run:  |
           PR_BODY=$(sed '1s/.*/## ${{ github.event.inputs.title }}/' .github/PULL_REQUEST_TEMPLATE.md)
           echo "PR_BODY<<EOF" >> $GITHUB_ENV
           echo "$PR_BODY" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-      - name: Output the branch name
-        run: echo "${{ env.NEW_BRANCH_NAME }}"
-
-      - name: Output the PR number
-        run: echo "${{ env.NEXT_PR_NUM }}"
-
-      - name: Output the meta file
-        run: cat .meta/${{ env.NEXT_PR_NUM }}.md
-
-      - name: Output the body
-        run: echo "${{ env.PR_BODY }}"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
