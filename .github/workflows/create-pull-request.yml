@@ -3,6 +3,9 @@ name: Create Pull Request
 on:
   workflow_dispatch:
     inputs:
+      personal_token:
+        description: 'A repo-scoped personal access token to create the pull request with'
+        required:    true
       title:
         description: 'The title of the pull request'
         required:    true
@@ -38,13 +41,14 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
+          assignees:      ${{ github.actor }}
+          branch:         ${{ env.NEW_BRANCH_NAME }}
           commit-message: 'build: ${{ github.event.inputs.title }} [skip ci]'
           committer:      GitHub <noreply@github.com>
-          branch:         ${{ env.NEW_BRANCH_NAME }}
           delete-branch:  true
-          title:          '${{ github.event.inputs.title }}'
-          assignees:      ${{ github.actor }}
           draft:          true
           labels:         in-progress
+          title:          '${{ github.event.inputs.title }}'
+          token:          ${{ github.event.inputs.personal_token }}
           body: |
             ${{ env.PR_BODY }}
