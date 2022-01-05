@@ -1,4 +1,4 @@
-name: Release
+name: Create Pull Request Test
 
 on:
   workflow_dispatch:
