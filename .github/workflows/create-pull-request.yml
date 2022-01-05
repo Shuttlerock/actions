@@ -23,9 +23,10 @@ jobs:
       - name: Make a .meta/*.md file so that we have a change to base the pull request on
         run:  |
           mkdir -p .meta
-          date "+%Y-%m-%d %H:%M"                   > .meta/${{ env.NEXT_PR_NUM }}.md
-          echo "${{ github.event.inputs.title }}" >> .meta/${{ env.NEXT_PR_NUM }}.md
-          echo "by @${{ github.actor }}"          >> .meta/${{ env.NEXT_PR_NUM }}.md
+          touch .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "## ${{ github.event.inputs.title }}"                                     >> .meta/${{ env.NEXT_PR_NUM }}.md
+          echo "by [@${{ github.actor }}](${{ github.server_url }}/${{ github.actor }})" >> .meta/${{ env.NEXT_PR_NUM }}.md
+          date "created +%Y-%m-%d %H:%M"                                                 >> .meta/${{ env.NEXT_PR_NUM }}.md
 
       - name: Generate the PR body
         run:  |
