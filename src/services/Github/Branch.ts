@@ -68,6 +68,13 @@ export const getBranch = async (
       repo,
       branch,
     })
+
+    // Github started silently returning the default branch ('develop' in our
+    // case) if we request 'master' and it doesn't exist. Make sure they gave
+    // us what we actually asked for.
+    if (response.data?.name !== branch) {
+      return undefined
+    }
     return response.data
   } catch (err) {
     if ((err as Error).message === 'Branch not found') {
