@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/actions
   docker:
-    - image: circleci/node:12.13-browsers
+    - image: cimg/node:12.15.0-browsers
       auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
