@@ -4,7 +4,7 @@
   "private": true,
   "description": "TypeScript template action",
   "engines": {
-    "node": ">=12.13.0"
+    "node": ">=16.13.0"
   },
   "main": "build/index.js",
   "scripts": {
