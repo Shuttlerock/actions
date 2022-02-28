@@ -41,9 +41,7 @@ export const deleteBranch = async (
 
     if (response.status !== 204) {
       throw new Error(
-        `Couldn't delete branch '${branch}' - Github returned status ${
-          response.status as string
-        }`
+        `Couldn't delete branch '${branch}' - Github returned status ${response.status.toString()}`
       )
     }
   } catch (err) {
