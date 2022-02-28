@@ -79099,7 +79099,10 @@ const createBranch = (repo, baseBranchName, newBranchName, fileContents, commitM
         };
     })));
     const tree = yield (0, Git_1.createGitTree)(repo, treeData, baseBranch.commit.sha);
-    const commit = yield (0, Git_1.createGitCommit)(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
+    // Keep the 'angular commit format' prefix at the beginning of the commit
+    // message, if we have one.
+    const [_, prefix, message] = commitMessage.split(/^([a-z]+: )?(.*)$/);
+    const commit = yield (0, Git_1.createGitCommit)(repo, `${prefix}[#${prNumber}] ${message}`, tree.sha, baseBranch.commit.sha);
     return (0, Git_1.createGitBranch)(repo, newBranchName, commit.sha);
 });
 exports.createBranch = createBranch;
@@ -81256,7 +81259,7 @@ const createPullRequestForJiraIssue = (email, userCommand) => __awaiter(void 0, 
             (0, core_1.info)(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
             yield (0, Github_1.createBranch)(repo.name, baseBranchName, newBranchName, {
                 [`.meta/${issue.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
-            }, `[${issue.key}] [skip ci] [skip netlify] build: create pull request`);
+            }, `build: [${issue.key}] [skip ci] [skip netlify] create pull request`);
         }
         (0, core_1.info)('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
