@@ -77859,7 +77859,10 @@ const createBranch = (repo, baseBranchName, newBranchName, fileContents, commitM
         };
     })));
     const tree = yield (0, Git_1.createGitTree)(repo, treeData, baseBranch.commit.sha);
-    const commit = yield (0, Git_1.createGitCommit)(repo, `[#${prNumber}] ${commitMessage}`, tree.sha, baseBranch.commit.sha);
+    // Keep the 'angular commit format' prefix at the beginning of the commit
+    // message, if we have one.
+    const [_, prefix, message] = commitMessage.split(/^([a-z]+: )?(.*)$/);
+    const commit = yield (0, Git_1.createGitCommit)(repo, `${prefix}[#${prNumber}] ${message}`, tree.sha, baseBranch.commit.sha);
     return (0, Git_1.createGitBranch)(repo, newBranchName, commit.sha);
 });
 exports.createBranch = createBranch;

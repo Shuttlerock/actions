@@ -157,9 +157,13 @@ export const createBranch = async (
 
   const tree = await createGitTree(repo, treeData, baseBranch.commit.sha)
 
+  // Keep the 'angular commit format' prefix at the beginning of the commit
+  // message, if we have one.
+  const [_, prefix, message] = commitMessage.split(/^([a-z]+: )?(.*)$/)
+
   const commit = await createGitCommit(
     repo,
-    `[#${prNumber}] ${commitMessage}`,
+    `${prefix}[#${prNumber}] ${message}`,
     tree.sha,
     baseBranch.commit.sha
   )
