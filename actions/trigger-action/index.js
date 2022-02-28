@@ -81263,7 +81263,7 @@ const createPullRequestForJiraIssue = (email, userCommand) => __awaiter(void 0, 
             (0, core_1.info)(`The branch '${newBranchName}' does not exist yet: creating a new branch...`);
             yield (0, Github_1.createBranch)(repo.name, baseBranchName, newBranchName, {
                 [`.meta/${issue.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
-            }, `build: [${issue.key}] [skip ci] [skip netlify] create pull request`);
+            }, `[${issue.key}] [skip ci] [skip netlify] build: create pull request`);
         }
         (0, core_1.info)('Creating the pull request...');
         const prTitle = `[${issue.key}] ${issue.fields.summary}`;
