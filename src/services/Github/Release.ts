@@ -5,7 +5,6 @@ import {
   ReposGetBranchResponseData,
   ReposGetResponseData,
 } from '@octokit/types'
-import dateFormat from 'dateformat'
 import isEmpty from 'lodash/isEmpty'
 import isNil from 'lodash/isNil'
 
@@ -270,7 +269,13 @@ export const createReleasePullRequest = async (
   info(`Found ${diff.total_commits} commits to release`)
 
   await ensureReleasebranch(repo.name, develop.commit.sha)
-  const releaseDate = dateFormat(new Date(), 'yyyy-mm-dd-hhss')
+  const releaseDate = new Date()
+    .toISOString()
+    .replace(/T/, ' ')
+    .replace(/\..+/, '')
+    .replace(/[ ]/g, '-')
+    .replace(/:\d{2}$/, '')
+    .replace(':', '')
   const releaseName = generateReleaseName()
   const description = await getReleaseNotes(
     repo.name,

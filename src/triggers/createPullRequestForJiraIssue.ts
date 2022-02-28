@@ -157,7 +157,7 @@ export const createPullRequestForJiraIssue = async (
         {
           [`.meta/${issue.key}.md`]: `${jiraUrl}\n\nCreated at ${new Date().toISOString()}`,
         },
-        `[${issue.key}] [skip ci] [skip netlify] Create pull request.`
+        `build: [${issue.key}] [skip ci] [skip netlify] create pull request`
       )
     }
 
