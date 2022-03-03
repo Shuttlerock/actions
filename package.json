@@ -56,7 +56,7 @@
     "@octokit/webhooks-types": "^5.4.0",
     "@types/dateformat": "^3.0.1",
     "@types/jest": "^27.0.1",
-    "@types/jira-client": "^6.21.3",
+    "@types/jira-client": "^7.1.4",
     "@types/lodash": "^4.14.179",
     "@types/mustache": "^4.1.2",
     "@types/node": "^16.10.2",
