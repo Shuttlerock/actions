@@ -44,7 +44,7 @@
     "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
     "@octokit/rest": "^18.0.9",
-    "@slack/web-api": "^6.5.1",
+    "@slack/web-api": "^6.7.1",
     "jira-client": "^8.0.0",
     "lodash": "^4.17.21",
     "mustache": "^4.2.0",
@@ -59,7 +59,7 @@
     "@types/jira-client": "^7.1.4",
     "@types/lodash": "^4.14.179",
     "@types/mustache": "^4.1.2",
-    "@types/node": "^16.10.2",
+    "@types/node": "^17.0.24",
     "@types/node-fetch": "^2.6.1",
     "@typescript-eslint/parser": "^5.18.0",
     "@vercel/ncc": "0.33.3",
@@ -83,6 +83,6 @@
     "prettier": "2.5.1",
     "ts-jest": "^26.5.6",
     "tscpaths": "^0.0.9",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.3"
   }
 }
