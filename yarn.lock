@@ -4764,10 +4764,10 @@ jest@^26.6.3:
     import-local "^3.0.2"
     jest-cli "^26.6.3"
 
-jira-client@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/jira-client/-/jira-client-8.0.0.tgz#ce00c964f2aeed1f4a0bf8ed28bc3fe6f045216e"
-  integrity sha512-vei9WuUboBAcQRxO6b5SwO5JXEyC1Y0ydiW4JiD7tPYc65wjXSbZvGDtQWsz7IOssFG/BQNAcJdiS79qVwnAJw==
+jira-client@^8.2.2:
+  version "8.2.2"
+  resolved "https://registry.yarnpkg.com/jira-client/-/jira-client-8.2.2.tgz#b1eb679cf5c78e6398af73260b2f6f8b782b15d2"
+  integrity sha512-zs4BKJQYcdCoXi3G0JI9NFqkt7olUNQZ6bzZwUmZ+at3rjjmiBPVNYQHBgkBEOpX8iN5dppU0oYRVtCYRjSwXQ==
   dependencies:
     "@babel/runtime" "^7.6.0"
     postman-request "^2.88.1-postman.30"
