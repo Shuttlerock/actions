@@ -59,7 +59,7 @@
     "@types/jira-client": "^7.1.4",
     "@types/lodash": "^4.14.199",
     "@types/mustache": "^4.2.1",
-    "@types/node": "^17.0.24",
+    "@types/node": "^20.9.0",
     "@types/node-fetch": "^2.6.1",
     "@typescript-eslint/parser": "^5.48.2",
     "@vercel/ncc": "0.33.4",
